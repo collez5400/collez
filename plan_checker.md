@@ -32,10 +32,20 @@
   1. ✅ **What was implemented** (list features/files created or modified)
   2. 🔜 **What's next** (the next step in this plan)
   3. ⚠️ **Blockers or issues** (anything that needs user input)
+- Include **Local Preview Status**:
+  - Confirm you can run the app locally (at minimum: `npx expo start --web`)
+  - Provide the **local preview link** shown by Expo (e.g. `http://localhost:19006` for web) or the Metro/Expo dev server URL
 - Use this mandatory mini-checklist in every end-of-session report:
   - `Error Status`: confirm whether all current errors are resolved.
   - `Future Missing Files Check`: if any remaining errors are due to future-phase missing files/features, state that clearly and ask whether to fix now or defer.
   - `Supabase Execution Needed`: explicitly list what must be run in Supabase (if anything) before the phase/step can be considered complete.
+
+### Rule 4B: Local Preview After Every Phase (MANDATORY)
+- After completing **each phase** (marking it `✅ COMPLETE`), you MUST be able to **see the app locally**.
+- Minimum acceptable preview:
+  - Web preview runs: `npx expo start --web`
+  - You provide the working **local link** (Expo web URL / localhost URL) in the session report.
+- If local preview is blocked (dependency conflict, bundler error, missing env vars), it MUST be treated as a blocker and fixed before marking the phase complete.
 
 ### Rule 5: Follow the Implementation Plan
 - All technical decisions, schema designs, file structures, and UI specs come from `implementation_plan.md`.
@@ -85,7 +95,7 @@
 | 1H | Vault Hub Integration | `✅ COMPLETE` | 3/3 |
 | 1I | Cloud Features — Streak System | `✅ COMPLETE` | 5/5 |
 | 1J | Cloud Features — XP & Rank System | `✅ COMPLETE` | 6/6 |
-| 1K | Cloud Features — Leaderboard | `⬜ NOT STARTED` | 0/5 |
+| 1K | Cloud Features — Leaderboard | `🔵 IN PROGRESS` | 4/5 |
 | 1L | Cloud Features — Daily Quote | `⬜ NOT STARTED` | 0/3 |
 | 1M | Cloud Features — Profile System | `⬜ NOT STARTED` | 0/5 |
 | 1N | Home Dashboard (Full) | `⬜ NOT STARTED` | 0/7 |
@@ -686,41 +696,47 @@
 ---
 
 ## PHASE 1K: Cloud Features — Leaderboard 🏆
-**Status**: `⬜ NOT STARTED`
+**Status**: `🔵 IN PROGRESS`
 **Estimated Time**: 3 days
 **Goal**: College, National, and Weekly leaderboards.
 **Reference**: Screen 14, Section 6.13 (Materialized Views)
 
 ### Steps
 
-- [ ] **1K.1** — Create `src/store/leaderboardStore.ts` (Zustand)
+- [x] **1K.1** — Create `src/store/leaderboardStore.ts` (Zustand)
   - State: `collegeBoard`, `nationalBoard`, `weeklyBoard`, `userCollegeRank`
   - Actions: `fetchCollegeBoard`, `fetchNationalBoard`, `fetchWeeklyBoard`
   - Pagination: 20 items per page (cursor-based)
   - Cache: 15 min via AsyncStorage timestamp check
 
-- [ ] **1K.2** — Create `app/(tabs)/rankings.tsx` — Leaderboard Screen
+- [x] **1K.2** — Create `app/(tabs)/rankings.tsx` — Leaderboard Screen
   - Tab system: College | National | Weekly (top tab bar)
   - User's own rank card highlighed and sticky at top
   - FlashList for rank rows (rank #, avatar, name, college, XP, streak badge)
   - Current user row: different background color
   - Pull to refresh
 
-- [ ] **1K.3** — Leaderboard components
+- [x] **1K.3** — Leaderboard components
   - `RankRow.tsx` — reusable rank list item
   - `UserRankCard.tsx` — sticky user rank summary card
   - Rank number styling: 🥇🥈🥉 for top 3, plain number for rest
 
-- [ ] **1K.4** — Create `src/components/home/LeaderboardMini.tsx`
+- [x] **1K.4** — Create `src/components/home/LeaderboardMini.tsx`
   - Compact rank card for dashboard
   - Shows user's college rank #
   - Circular rank progress visualization
   - Tap → navigate to full rankings tab
 
-- [ ] **1K.5** — Test leaderboard with seed data
+- [/] **1K.5** — Test leaderboard with seed data
   - Seed 10+ test users in Supabase
   - Verify materialized view refreshes correctly
   - Test pagination, pull-to-refresh, caching
+
+  **Progress Update (this session)**:
+  - Added seed SQL script: `collez-app/supabase/seed/leaderboard_seed.sql`
+  - Added run + verification guide: `collez-app/supabase/seed/leaderboard_seed_instructions.md`
+  - Added missing base Supabase schema migration: `collez-app/supabase/migrations/20260420_phase_0_supabase_schema.sql` (tables + materialized views)
+  - Next: run it in Supabase SQL Editor and verify UI pagination/refresh/cache.
 
 ---
 
@@ -1339,23 +1355,24 @@
 | 5 | 2026-04-20 | 1H | Completed 1H.1 to 1H.3 (Vault top tabs integration + tab behavior verification) | Added custom animated gradient top-tab bar, wired Timetable/Tasks+Notes/PDFs routes, and kept tab screens mounted to prevent state loss |
 | 6 | 2026-04-20 | 1I | Completed 1I.1 to 1I.5 (streak service/model/store + qualifying action hooks + streak UI) | Added IST-aware streak logging with AsyncStorage daily flag, milestone badge insertion, AppState app-open tracking, timetable/task/rankings/quote streak hooks, and milestone celebration modal |
 | 7 | 2026-04-20 | 1J | Completed 1J.1 to 1J.6 (Edge functions + XP model/service/store + rank/xp utilities + XP/rank UI) | Added `award-xp`/`reset-daily-xp`/`refresh-leaderboard` functions, SQL cron migration, XP awarding pipeline via edge function, rank tier calculator, dashboard XP stat/rank/progress UI, and daily login XP toast |
+| 8 | 2026-04-20 | 1K | Completed 1K.1 to 1K.4 (leaderboard store/screen/components + home mini card) | Added cached paginated leaderboard Zustand store (college/national/weekly), full rankings tab with sticky user rank card + FlashList + pull-to-refresh, reusable leaderboard row components, and dashboard `LeaderboardMini` linked to rankings |
 
 ---
 
 ## 🎯 Current Focus
 
 **Active Phase**: `🔵 Phase 1K — Cloud Features — Leaderboard`
-**Next Step**: `1K.1 — Create src/store/leaderboardStore.ts (state + fetch + pagination + cache)`
+**Next Step**: `1K.5 — Test leaderboard with seed data (Supabase seed users + MV refresh + pagination/cache validation)`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 65
-- **In Progress**: 0
-- **Remaining**: 133
-- **Overall Progress**: 32.8%
+- **Completed**: 69
+- **In Progress**: 1
+- **Remaining**: 129
+- **Overall Progress**: 34.8%
 
 ---
 

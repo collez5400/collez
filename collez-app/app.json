@@ -30,8 +30,7 @@
       "expo-router",
       "expo-sqlite",
       "expo-secure-store",
-      "expo-font",
-      "expo-linear-gradient"
+      "expo-font"
     ],
     "scheme": "collez"
   }

@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "export:web": "npx expo export --platform web",
+    "vercel-build": "npm run export:web"
   },
   "dependencies": {
     "@expo-google-fonts/manrope": "^0.4.2",
@@ -37,6 +39,7 @@
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
     "react": "18.3.1",
+    "react-dom": "^18.3.1",
     "react-native": "0.76.7",
     "react-native-draggable-flatlist": "^4.0.2",
     "react-native-gesture-handler": "~2.20.2",
@@ -48,6 +51,7 @@
     "react-native-shimmer-placeholder": "^2.0.9",
     "react-native-svg": "15.8.0",
     "react-native-url-polyfill": "^2.0.0",
+    "react-native-web": "^0.19.13",
     "uuid": "^10.0.0",
     "zustand": "^4.5.5"
   },

@@ -8,6 +8,8 @@ import { XpStatPill } from '../../src/components/home/XpStatPill';
 import { RankBadgePill } from '../../src/components/home/RankBadgePill';
 import { XpProgressBar } from '../../src/components/home/XpProgressBar';
 import { MilestoneCelebrationModal } from '../../src/components/streak/MilestoneCelebrationModal';
+import { LeaderboardMini } from '../../src/components/home/LeaderboardMini';
+import { useLeaderboardStore } from '../../src/store/leaderboardStore';
 
 export default function HomeScreen() {
   const {
@@ -19,12 +21,14 @@ export default function HomeScreen() {
     clearLastMilestone,
   } = useStreakStore();
   const { totalXp, rankTier, rankProgress, xpNeededToNextRank, fetchXpData } = useXpStore();
+  const { fetchCollegeBoard } = useLeaderboardStore();
   const quoteLoggedRef = useRef(false);
 
   useEffect(() => {
     void fetchStreakData();
     void fetchXpData();
-  }, [fetchStreakData, fetchXpData]);
+    void fetchCollegeBoard();
+  }, [fetchCollegeBoard, fetchStreakData, fetchXpData]);
 
   const handleQuoteLayout = () => {
     if (quoteLoggedRef.current) return;
@@ -44,6 +48,7 @@ export default function HomeScreen() {
         </View>
         <RankBadgePill tier={rankTier} />
         <XpProgressBar progress={rankProgress} xpNeededToNextRank={xpNeededToNextRank} />
+        <LeaderboardMini />
 
         <View style={styles.infoCard}>
           <Text style={styles.infoLabel}>Logged today</Text>

@@ -8,6 +8,7 @@ import {
   signOut as authSignOut,
   restoreSession,
   fetchUserProfile,
+  ensureUserProfileFromAuthUser,
   updateUserProfile,
 } from '../services/authService';
 
@@ -78,7 +79,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
-      const user = await fetchUserProfile(session.user.id);
+      const user =
+        (await fetchUserProfile(session.user.id)) ??
+        (await ensureUserProfileFromAuthUser(session.user));
       if (!user) {
         set({ status: 'unauthenticated' });
         return;
@@ -109,6 +112,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
     } catch (err: any) {
       set({ status: 'onboarding', error: err.message });
+      throw err;
     }
   },
 

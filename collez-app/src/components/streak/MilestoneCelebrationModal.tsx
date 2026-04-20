@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Modal, StyleSheet, Text, View } from 'react-native';
+import { Animated, Modal, Platform, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
 import { GradientButton } from '../shared/GradientButton';
@@ -18,14 +18,24 @@ export function MilestoneCelebrationModal({
 }: MilestoneCelebrationModalProps) {
   const scale = useRef(new Animated.Value(0.8)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const shouldUseNativeDriver = Platform.OS !== 'web';
 
   useEffect(() => {
     if (!visible) return;
     Animated.parallel([
-      Animated.spring(scale, { toValue: 1, friction: 7, tension: 70, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 1, duration: 220, useNativeDriver: true }),
+      Animated.spring(scale, {
+        toValue: 1,
+        friction: 7,
+        tension: 70,
+        useNativeDriver: shouldUseNativeDriver,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 220,
+        useNativeDriver: shouldUseNativeDriver,
+      }),
     ]).start();
-  }, [opacity, scale, visible]);
+  }, [opacity, scale, shouldUseNativeDriver, visible]);
 
   if (!milestone) return null;
 

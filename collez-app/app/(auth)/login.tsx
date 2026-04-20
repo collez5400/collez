@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { FontAwesome } from '@expo/vector-icons';
 import { GlassCard } from '../../src/components/shared/GlassCard';
 import { useAuthStore } from '../../src/store/authStore';
 import { Colors, Typography, Spacing, BorderRadius } from '../../src/config/theme';
@@ -50,15 +51,6 @@ function AmbientBlob({
         transform: [{ translateY }],
       }}
     />
-  );
-}
-
-// Google G Icon (SVG-safe with RN)
-function GoogleIcon() {
-  return (
-    <View style={styles.googleIconWrap}>
-      <Text style={styles.googleIconText}>G</Text>
-    </View>
   );
 }
 
@@ -133,10 +125,12 @@ export default function LoginScreen() {
             accessibilityLabel="Sign in with Google"
           >
             {status === 'loading' ? (
-              <ActivityIndicator color={Colors.background} />
+              <ActivityIndicator color="#5f6368" />
             ) : (
               <>
-                <GoogleIcon />
+                <View style={styles.googleIconWrap}>
+                  <FontAwesome name="google" size={18} color="#4285F4" />
+                </View>
                 <Text style={styles.googleBtnText}>Continue with Google</Text>
               </>
             )}
@@ -220,8 +214,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.onSurface,
+    backgroundColor: '#ffffff',
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: '#dadce0',
     paddingVertical: 14,
     paddingHorizontal: 24,
     width: '100%',
@@ -230,23 +226,19 @@ const styles = StyleSheet.create({
   },
   googleBtnText: {
     fontSize: Typography.size.md,
-    fontFamily: Typography.fontFamily.heading,
+    fontFamily: Typography.fontFamily.body,
     fontWeight: '600',
-    color: Colors.background,
+    color: '#3c4043',
   },
   googleIconWrap: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#4285F4',
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e8eaed',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  googleIconText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 12,
-    lineHeight: 14,
   },
   legal: {
     flexDirection: 'row',

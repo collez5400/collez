@@ -1,12 +1,29 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { User as SupabaseAuthUser } from '@supabase/supabase-js';
 import { supabase } from '../config/supabase';
 import { User } from '../models/user';
 
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const SESSION_KEY = 'collez_session';
 let isGoogleConfigured = false;
+
+function buildNewUserProfile(authUser: SupabaseAuthUser): Partial<User> {
+  return {
+    id: authUser.id,
+    email: authUser.email ?? '',
+    full_name: authUser.user_metadata?.full_name ?? '',
+    avatar_url: authUser.user_metadata?.avatar_url ?? null,
+    xp: 0,
+    daily_xp_earned: 0,
+    streak_count: 0,
+    longest_streak: 0,
+    is_coordinator: false,
+    is_banned: false,
+    onboarding_complete: false,
+  };
+}
 
 // Configure Google Sign-In once at app startup
 export function configureGoogleSignIn() {
@@ -84,19 +101,7 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
     }
 
     // New user - create a minimal profile record
-    const newUser: Partial<User> = {
-      id: data.user.id,
-      email: data.user.email ?? '',
-      full_name: data.user.user_metadata?.full_name ?? '',
-      avatar_url: data.user.user_metadata?.avatar_url ?? null,
-      xp: 0,
-      daily_xp_earned: 0,
-      streak_count: 0,
-      longest_streak: 0,
-      is_coordinator: false,
-      is_banned: false,
-      onboarding_complete: false,
-    };
+    const newUser = buildNewUserProfile(data.user);
 
     const { data: created, error: createError } = await supabase
       .from('users')
@@ -180,6 +185,30 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
     .single();
 
   if (error || !data) return null;
+  return data as User;
+}
+
+/** Ensure a profile exists for the authenticated user (especially needed on web OAuth). */
+export async function ensureUserProfileFromAuthUser(
+  authUser: SupabaseAuthUser
+): Promise<User | null> {
+  const existing = await fetchUserProfile(authUser.id);
+  if (existing) {
+    return existing;
+  }
+
+  const newUser = buildNewUserProfile(authUser);
+  const { data, error } = await supabase
+    .from('users')
+    // @ts-expect-error type shim limitations for Supabase
+    .insert(newUser)
+    .select()
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
   return data as User;
 }
 

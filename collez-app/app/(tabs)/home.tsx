@@ -2,7 +2,11 @@ import { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { useStreakStore } from '../../src/store/streakStore';
+import { useXpStore } from '../../src/store/xpStore';
 import { StreakStatPill } from '../../src/components/home/StreakStatPill';
+import { XpStatPill } from '../../src/components/home/XpStatPill';
+import { RankBadgePill } from '../../src/components/home/RankBadgePill';
+import { XpProgressBar } from '../../src/components/home/XpProgressBar';
 import { MilestoneCelebrationModal } from '../../src/components/streak/MilestoneCelebrationModal';
 
 export default function HomeScreen() {
@@ -14,11 +18,13 @@ export default function HomeScreen() {
     lastMilestone,
     clearLastMilestone,
   } = useStreakStore();
+  const { totalXp, rankTier, rankProgress, xpNeededToNextRank, fetchXpData } = useXpStore();
   const quoteLoggedRef = useRef(false);
 
   useEffect(() => {
     void fetchStreakData();
-  }, [fetchStreakData]);
+    void fetchXpData();
+  }, [fetchStreakData, fetchXpData]);
 
   const handleQuoteLayout = () => {
     if (quoteLoggedRef.current) return;
@@ -30,9 +36,14 @@ export default function HomeScreen() {
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>Home</Text>
-        <Text style={styles.subtitle}>Cloud streak integration is active for Phase 1I.</Text>
+        <Text style={styles.subtitle}>Cloud streak, XP, and rank integration are active.</Text>
 
-        <StreakStatPill streakCount={streakCount} />
+        <View style={styles.statsRow}>
+          <StreakStatPill streakCount={streakCount} />
+          <XpStatPill xp={totalXp} />
+        </View>
+        <RankBadgePill tier={rankTier} />
+        <XpProgressBar progress={rankProgress} xpNeededToNextRank={xpNeededToNextRank} />
 
         <View style={styles.infoCard}>
           <Text style={styles.infoLabel}>Logged today</Text>
@@ -75,6 +86,11 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    flexWrap: 'wrap',
   },
   infoCard: {
     backgroundColor: Colors.surface,

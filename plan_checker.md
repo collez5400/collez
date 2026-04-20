@@ -32,6 +32,10 @@
   1. ✅ **What was implemented** (list features/files created or modified)
   2. 🔜 **What's next** (the next step in this plan)
   3. ⚠️ **Blockers or issues** (anything that needs user input)
+- Use this mandatory mini-checklist in every end-of-session report:
+  - `Error Status`: confirm whether all current errors are resolved.
+  - `Future Missing Files Check`: if any remaining errors are due to future-phase missing files/features, state that clearly and ask whether to fix now or defer.
+  - `Supabase Execution Needed`: explicitly list what must be run in Supabase (if anything) before the phase/step can be considered complete.
 
 ### Rule 5: Follow the Implementation Plan
 - All technical decisions, schema designs, file structures, and UI specs come from `implementation_plan.md`.
@@ -59,6 +63,9 @@
 ### Rule 9: Commit and Push Upon Completion
 - Before replying that the implementation of a phase or part of the plan is completed, you MUST crosscheck it.
 - Ensure all files are modified correctly and there are no errors.
+- Before declaring any phase/step as implemented, resolve all current errors first.
+- If errors are caused by files/features planned for future phases and those files are not present yet, explicitly report that status and ask the user whether to fix now or defer to the planned phase.
+- If any code change requires execution inside Supabase (SQL migration, RPC/function deployment, cron setup, RLS/policy updates, etc.), explicitly inform the user what must be run in Supabase before claiming completion.
 - Once verified error-free, you must commit and push all the changes to the repository before marking the phase as `✅ COMPLETE`.
 
 ---
@@ -77,7 +84,7 @@
 | 1G | Local Features — PDF Vault | `✅ COMPLETE` | 6/6 |
 | 1H | Vault Hub Integration | `✅ COMPLETE` | 3/3 |
 | 1I | Cloud Features — Streak System | `✅ COMPLETE` | 5/5 |
-| 1J | Cloud Features — XP & Rank System | `⬜ NOT STARTED` | 0/6 |
+| 1J | Cloud Features — XP & Rank System | `✅ COMPLETE` | 6/6 |
 | 1K | Cloud Features — Leaderboard | `⬜ NOT STARTED` | 0/5 |
 | 1L | Cloud Features — Daily Quote | `⬜ NOT STARTED` | 0/3 |
 | 1M | Cloud Features — Profile System | `⬜ NOT STARTED` | 0/5 |
@@ -640,37 +647,37 @@
 ---
 
 ## PHASE 1J: Cloud Features — XP & Rank System ⚡
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 3 days
 **Goal**: Server-side XP system with rank tiers.
 **Reference**: Section 11 (XP + Rank Math), Section 8 (Sync Strategy for XP)
 
 ### Steps
 
-- [ ] **1J.1** — Create Supabase Edge Functions (Deno/TypeScript)
+- [x] **1J.1** — Create Supabase Edge Functions (Deno/TypeScript)
   - `award-xp`: validate source, check daily cap, insert xp_transaction, update user.xp + daily_xp_earned + college.total_xp
   - `reset-daily-xp` (pg_cron): reset `daily_xp_earned` at midnight IST
   - `refresh-leaderboard` (pg_cron): refresh materialized views every 15 min
 
-- [ ] **1J.2** — Create `src/services/xpService.ts`
+- [x] **1J.2** — Create `src/services/xpService.ts`
   - Call `award-xp` Edge Function (never direct Supabase insert)
   - Handle daily cap response from server
   - Update local store after server confirms XP
 
-- [ ] **1J.3** — Create `src/models/xp.ts`
+- [x] **1J.3** — Create `src/models/xp.ts`
   - `XpTransaction` interface
   - `XpSource` union type ('daily_login' | 'trivia' | 'treasure_hunt' | 'event' | 'weekly_streak' | 'bonus')
 
-- [ ] **1J.4** — Create `src/utils/rankCalculator.ts`
+- [x] **1J.4** — Create `src/utils/rankCalculator.ts`
   - `getRankTier(xp: number): RankTier` — all 9 tiers
   - `getRankMeta(tier: RankTier)` — name, color, icon, threshold
   - `xpToNextRank(xp: number): number` — XP remaining
 
-- [ ] **1J.5** — Create `src/utils/xpCalculator.ts`
+- [x] **1J.5** — Create `src/utils/xpCalculator.ts`
   - College score: `SUM(studentXP) / Math.sqrt(studentCount)`
   - Daily cap enforcement: `Math.min(earned, 100 - dailyEarned)`
 
-- [ ] **1J.6** — XP/Rank UI components
+- [x] **1J.6** — XP/Rank UI components
   - XP stat pill on dashboard (⚡ + Reanimated count-up)
   - Rank badge (BadgeIcon component + tier label)
   - XP progress bar to next rank (Reanimated width animation)
@@ -1331,23 +1338,24 @@
 | 4 | 2026-04-20 | 1G | Completed 1G.1 to 1G.6 (PDF model/store/screen + file and folder operations) | Added upload/copy flow, nested breadcrumb folders, move/rename/delete, search/sort, recent docs, storage usage UI |
 | 5 | 2026-04-20 | 1H | Completed 1H.1 to 1H.3 (Vault top tabs integration + tab behavior verification) | Added custom animated gradient top-tab bar, wired Timetable/Tasks+Notes/PDFs routes, and kept tab screens mounted to prevent state loss |
 | 6 | 2026-04-20 | 1I | Completed 1I.1 to 1I.5 (streak service/model/store + qualifying action hooks + streak UI) | Added IST-aware streak logging with AsyncStorage daily flag, milestone badge insertion, AppState app-open tracking, timetable/task/rankings/quote streak hooks, and milestone celebration modal |
+| 7 | 2026-04-20 | 1J | Completed 1J.1 to 1J.6 (Edge functions + XP model/service/store + rank/xp utilities + XP/rank UI) | Added `award-xp`/`reset-daily-xp`/`refresh-leaderboard` functions, SQL cron migration, XP awarding pipeline via edge function, rank tier calculator, dashboard XP stat/rank/progress UI, and daily login XP toast |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1J — Cloud Features — XP & Rank System`
-**Next Step**: `1J.1 — Create Supabase Edge Functions (award-xp, reset-daily-xp, refresh-leaderboard)`
+**Active Phase**: `🔵 Phase 1K — Cloud Features — Leaderboard`
+**Next Step**: `1K.1 — Create src/store/leaderboardStore.ts (state + fetch + pagination + cache)`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 59
+- **Completed**: 65
 - **In Progress**: 0
-- **Remaining**: 139
-- **Overall Progress**: 29.8%
+- **Remaining**: 133
+- **Overall Progress**: 32.8%
 
 ---
 

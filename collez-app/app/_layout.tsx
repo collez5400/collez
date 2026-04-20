@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Platform, ToastAndroid } from 'react-native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import {
@@ -17,6 +17,8 @@ import {
 import { initSQLite } from '../src/services/sqliteService';
 import { configureGoogleSignIn } from '../src/services/authService';
 import { useStreakStore } from '../src/store/streakStore';
+import { useXpStore } from '../src/store/xpStore';
+import { XP_VALUES } from '../src/config/constants';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -67,6 +69,17 @@ export default function RootLayout() {
       if (appOpenTimerRef.current) clearTimeout(appOpenTimerRef.current);
       appOpenTimerRef.current = setTimeout(() => {
         void useStreakStore.getState().logStreakAction('app_open');
+        void (async () => {
+          const result = await useXpStore.getState().awardXpForAction({
+            source: 'daily_login',
+            amount: XP_VALUES.DAILY_LOGIN,
+            description: 'Daily login reward',
+          });
+
+          if (result && result.awardedXp > 0 && Platform.OS === 'android') {
+            ToastAndroid.show(`+${result.awardedXp} XP`, ToastAndroid.SHORT);
+          }
+        })();
       }, 5000);
     };
 

@@ -3,6 +3,8 @@ export const XP_VALUES = {
   TRIVIA_CORRECT: 5,
   TASK_COMPLETE: 0, // tasks don't give XP, just maintain streak
   TREASURE_HUNT: 40,
+  WEEKLY_STREAK: 25,
+  EVENT_PARTICIPATION: 20,
   EVENT_BONUS: 50,
 };
 
@@ -14,12 +16,12 @@ export const RANK_TIERS = [
   { level: 1, name: 'Fresher', threshold: 0, icon: 'school' },
   { level: 2, name: 'Grinder', threshold: 100, icon: 'local-fire-department' },
   { level: 3, name: 'Scholar', threshold: 500, icon: 'menu-book' },
-  { level: 4, name: 'Strategist', threshold: 1000, icon: 'psychology' },
-  { level: 5, name: 'Specialist', threshold: 2500, icon: 'workspace-premium' },
-  { level: 6, name: 'Elite', threshold: 5000, icon: 'military-tech' },
-  { level: 7, name: 'Master', threshold: 10000, icon: 'diamond' },
-  { level: 8, name: 'Legend', threshold: 25000, icon: 'crown' },
-  { level: 9, name: 'National Icon', threshold: 50000, icon: 'public' },
+  { level: 4, name: 'Strategist', threshold: 1500, icon: 'psychology' },
+  { level: 5, name: 'Elite', threshold: 4000, icon: 'workspace-premium' },
+  { level: 6, name: 'Titan', threshold: 10000, icon: 'diamond' },
+  { level: 7, name: 'Campus Legend', threshold: 25000, icon: 'auto-awesome' },
+  { level: 8, name: 'State Hero', threshold: 60000, icon: 'military-tech' },
+  { level: 9, name: 'National Icon', threshold: 150000, icon: 'public' },
 ];
 
 export const STREAK_MILESTONES = [

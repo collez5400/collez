@@ -112,16 +112,6 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
       {/* Splash / redirect gate */}
       <Stack.Screen name="index" />
-
-      {/* Auth group: login + onboarding */}
-      <Stack.Screen name="(auth)" options={{ animation: 'slide_from_right' }} />
-
-      {/* Main app tabs */}
-      <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-
-      {/* Global profile route */}
-      <Stack.Screen name="profile/[id]" options={{ animation: 'slide_from_right' }} />
     </Stack>
   );
 }
-

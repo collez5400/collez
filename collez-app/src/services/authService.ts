@@ -1,28 +1,58 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { supabase } from '../config/supabase';
 import { User } from '../models/user';
 
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const SESSION_KEY = 'collez_session';
+let isGoogleConfigured = false;
 
 // Configure Google Sign-In once at app startup
 export function configureGoogleSignIn() {
+  if (Platform.OS === 'web') {
+    // Web uses OAuth redirect flow; native Google Sign-In SDK is not required.
+    return;
+  }
+
   if (!GOOGLE_WEB_CLIENT_ID || GOOGLE_WEB_CLIENT_ID.includes('your-google-web-client-id')) {
-    throw new Error(
-      'Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID. Add your real Google OAuth Web Client ID in .env.'
+    console.warn(
+      'Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID. Google sign-in will fail until this env var is set.'
     );
+    return;
   }
 
   GoogleSignin.configure({
     webClientId: GOOGLE_WEB_CLIENT_ID,
     scopes: ['profile', 'email'],
   });
+  isGoogleConfigured = true;
 }
 
 /** Sign in with Google and exchange the ID token with Supabase. */
 export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }> {
+  if (Platform.OS === 'web') {
+    const redirectTo =
+      typeof window !== 'undefined' ? window.location.origin : undefined;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    });
+
+    if (error) throw new Error(`Google web auth error: ${error.message}`);
+    return { user: null as unknown as User, isNew: false };
+  }
+
   try {
+    if (!isGoogleConfigured) {
+      configureGoogleSignIn();
+    }
+    if (!isGoogleConfigured) {
+      throw new Error(
+        'Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID. Add your real Google OAuth Web Client ID in .env.'
+      );
+    }
+
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const googleResponse = await GoogleSignin.signIn();
     const idToken =
@@ -97,6 +127,12 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
 
 /** Restore session from SecureStore on app launch. */
 export async function restoreSession() {
+  if (Platform.OS === 'web') {
+    const { data, error } = await supabase.auth.getSession();
+    if (error || !data.session) return null;
+    return data.session;
+  }
+
   const raw = await SecureStore.getItemAsync(SESSION_KEY);
   if (!raw) return null;
 
@@ -111,6 +147,11 @@ export async function restoreSession() {
 
 /** Sign out from both Google and Supabase. */
 export async function signOut() {
+  if (Platform.OS === 'web') {
+    await supabase.auth.signOut();
+    return;
+  }
+
   try {
     await GoogleSignin.signOut();
   } catch (_) {

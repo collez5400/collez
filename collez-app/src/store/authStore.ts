@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Session } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
 import { User } from '../models/user';
 import { supabase } from '../config/supabase';
 import {
@@ -40,6 +41,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signIn: async () => {
     set({ status: 'loading', error: null });
     try {
+      if (Platform.OS === 'web') {
+        await signInWithGoogle();
+        return;
+      }
+
       const { user, isNew } = await signInWithGoogle();
       const { data } = await supabase.auth.getSession();
 

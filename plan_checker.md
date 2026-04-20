@@ -74,7 +74,7 @@
 | 1D | Local Features — Timetable | `✅ COMPLETE` | 6/6 |
 | 1E | Local Features — Tasks | `✅ COMPLETE` | 6/6 |
 | 1F | Local Features — Notes | `✅ COMPLETE` | 6/6 |
-| 1G | Local Features — PDF Vault | `🔵 IN PROGRESS` | 0/6 |
+| 1G | Local Features — PDF Vault | `✅ COMPLETE` | 6/6 |
 | 1H | Vault Hub Integration | `⬜ NOT STARTED` | 0/3 |
 | 1I | Cloud Features — Streak System | `⬜ NOT STARTED` | 0/5 |
 | 1J | Cloud Features — XP & Rank System | `⬜ NOT STARTED` | 0/6 |
@@ -528,25 +528,25 @@
 ---
 
 ## PHASE 1G: Local Features — PDF Vault 📄
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 3 days
 **Goal**: Complete PDF management system.
 **Reference**: Section 3.4, Screen 13, SQLite Schema 7.6-7.7
 
 ### Steps
 
-- [ ] **1G.1** — Create `src/models/pdf.ts`
+- [x] **1G.1** — Create `src/models/pdf.ts`
   - `PdfFile` TypeScript interface matching SQLite schema
   - `PdfFolder` interface (with `parentFolderId` for nesting)
 
-- [ ] **1G.2** — Create `src/store/vaultStore.ts` (Zustand)
+- [x] **1G.2** — Create `src/store/vaultStore.ts` (Zustand)
   - State: `files`, `folders`, `recentFiles`, `currentFolderId`, `searchQuery`
   - Actions: `addFile`, `renameFile`, `moveFile`, `deleteFile`, `trackAccess`
   - Actions: `addFolder`, `renameFolder`, `deleteFolder`
   - Storage size calculation using `expo-file-system`
   - Persist metadata to expo-sqlite
 
-- [ ] **1G.3** — Create `app/(tabs)/vault/pdfs.tsx` — PDF Vault Screen
+- [x] **1G.3** — Create `app/(tabs)/vault/pdfs.tsx` — PDF Vault Screen
   - Header: "Vault" (gradient text via LinearGradient mask) + search bar
   - Storage usage progress bar (expo-file-system `getFreeDiskStorageAsync`)
   - Upload gradient card button
@@ -555,19 +555,19 @@
   - Recent Documents FlatList
   - FAB: Upload PDF
 
-- [ ] **1G.4** — Implement file operations
+- [x] **1G.4** — Implement file operations
   - File picker via `expo-document-picker` (PDF filter)
   - Copy file to app documents directory via `expo-file-system`
   - Open PDF via `expo-sharing` or `Linking.openURL`
   - Rename with Alert prompt
   - Delete with confirmation Alert
 
-- [ ] **1G.5** — Implement folder navigation
+- [x] **1G.5** — Implement folder navigation
   - Nested folder view (breadcrumb header)
   - Folder types: Semester, Subject, PYQ, Books, Notes, Important, Custom
   - Move files between folders via action sheet
 
-- [ ] **1G.6** — Vault polish
+- [x] **1G.6** — Vault polish
   - Filename search (live filter)
   - Storage display in MB/GB
   - Empty states (no files, no folders)
@@ -1328,23 +1328,24 @@
 | 1 | 2026-04-19 | Setup | Created plan_checker.md + Updated to React Native/Expo stack | Flutter replaced with Expo + Zustand + Expo Router |
 | 2 | 2026-04-20 | 1E | Completed 1E.1 to 1E.6 (Tasks model/store/screen/sheet/folders/polish) | Added archive tab, folder manager, task move, search + filters, progress circle |
 | 3 | 2026-04-20 | 1F | Completed 1F.1 to 1F.6 (Notes model/store/editor + tasks-notes integration) | Added note folders, search, sort by date/subject/pinned, archive flow, notes cards, note editor toolbar |
+| 4 | 2026-04-20 | 1G | Completed 1G.1 to 1G.6 (PDF model/store/screen + file and folder operations) | Added upload/copy flow, nested breadcrumb folders, move/rename/delete, search/sort, recent docs, storage usage UI |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1G — Local Features: PDF Vault`
-**Next Step**: `1G.1 — Create src/models/pdf.ts`
+**Active Phase**: `🔵 Phase 1H — Vault Hub Integration`
+**Next Step**: `1H.1 — Create app/(tabs)/vault/_layout.tsx — Top Tab Navigator`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 45
+- **Completed**: 51
 - **In Progress**: 0
-- **Remaining**: 153
-- **Overall Progress**: 22.7%
+- **Remaining**: 147
+- **Overall Progress**: 25.8%
 
 ---
 

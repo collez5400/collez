@@ -72,9 +72,6 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
     if (error) throw new Error(`Supabase auth error: ${error.message}`);
     if (!data.user) throw new Error('No user returned from Supabase auth.');
 
-    // Persist the session token
-    await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(data.session));
-
     // Check if user record exists in public.users
     const { data: profile } = await supabase
       .from('users')
@@ -127,22 +124,35 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
 
 /** Restore session from SecureStore on app launch. */
 export async function restoreSession() {
-  if (Platform.OS === 'web') {
-    const { data, error } = await supabase.auth.getSession();
-    if (error || !data.session) return null;
+  // Supabase already persists session via configured storage (AsyncStorage/web storage).
+  // Prefer this source to avoid stale-token drift with our legacy SecureStore copy.
+  const { data, error } = await supabase.auth.getSession();
+  if (!error && data.session) {
     return data.session;
   }
 
-  const raw = await SecureStore.getItemAsync(SESSION_KEY);
-  if (!raw) return null;
+  if (Platform.OS === 'web') {
+    return null;
+  }
 
-  const session = JSON.parse(raw);
-  const { data, error } = await supabase.auth.setSession(session);
-  if (error || !data.session) {
+  // Migration fallback for older app versions that wrote sessions to SecureStore.
+  const raw = await SecureStore.getItemAsync(SESSION_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const legacySession = JSON.parse(raw);
+    const { data: restored, error: restoreError } = await supabase.auth.setSession(legacySession);
+    await SecureStore.deleteItemAsync(SESSION_KEY);
+    if (restoreError || !restored.session) {
+      return null;
+    }
+    return restored.session;
+  } catch {
     await SecureStore.deleteItemAsync(SESSION_KEY);
     return null;
   }
-  return data.session;
 }
 
 /** Sign out from both Google and Supabase. */

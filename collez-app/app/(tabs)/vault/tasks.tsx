@@ -22,12 +22,17 @@ import AddTaskSheet from '../../../src/components/tasks/AddTaskSheet';
 import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import { GradientButton } from '../../../src/components/shared/GradientButton';
+import { useNoteStore } from '../../../src/store/noteStore';
+import { Note, NoteSortOption, NoteTab } from '../../../src/models/note';
+import NoteEditor from '../../../src/components/notes/NoteEditor';
 
 const CATEGORIES: (TaskCategory | 'all')[] = ['all', 'study', 'personal', 'college'];
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const RADIUS = 20;
 const STROKE_WIDTH = 6;
 const CIRCLE_LENGTH = 2 * Math.PI * RADIUS;
+const NOTE_TABS: NoteTab[] = ['all', 'pinned', 'subjects'];
+const NOTE_SORTS: NoteSortOption[] = ['date', 'subject', 'pinned'];
 
 const getCategoryColor = (category: TaskCategory) => {
   switch (category) {
@@ -222,16 +227,47 @@ export default function TasksScreen() {
     unarchiveTask,
     isLoading,
   } = useTaskStore();
+  const {
+    notes,
+    folders: noteFolders,
+    loadNotes,
+    loadFolders: loadNoteFolders,
+    addNote,
+    updateNote,
+    togglePin: toggleNotePin,
+    archiveNote,
+    unarchiveNote,
+    addFolder: addNoteFolder,
+    renameFolder: renameNoteFolder,
+    deleteFolder: deleteNoteFolder,
+    activeTab: activeNoteTab,
+    setActiveTab: setActiveNoteTab,
+    searchQuery: noteSearchQuery,
+    setSearchQuery: setNoteSearchQuery,
+    activeFolderId: activeNoteFolderId,
+    setActiveFolderId: setActiveNoteFolderId,
+    sortBy: noteSortBy,
+    setSortBy: setNoteSortBy,
+    showArchived: showArchivedNotes,
+    setShowArchived: setShowArchivedNotes,
+  } = useNoteStore();
 
+  const [contentMode, setContentMode] = useState<'tasks' | 'notes'>('tasks');
   const [isAddSheetVisible, setIsAddSheetVisible] = useState(false);
   const [isFolderModalVisible, setIsFolderModalVisible] = useState(false);
+  const [noteFolderModalVisible, setNoteFolderModalVisible] = useState(false);
   const [folderInput, setFolderInput] = useState('');
+  const [noteFolderInput, setNoteFolderInput] = useState('');
+  const [isNoteEditorVisible, setIsNoteEditorVisible] = useState(false);
+  const [editingNote, setEditingNote] = useState<Note | undefined>(undefined);
   const progressOffset = useSharedValue(CIRCLE_LENGTH);
 
   useEffect(() => {
     void loadTasks();
     void loadFolders();
-  }, [loadFolders, loadTasks]);
+    void loadNotes();
+    void loadNoteFolders();
+  }, [loadFolders, loadNoteFolders, loadNotes, loadTasks]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
@@ -254,6 +290,32 @@ export default function TasksScreen() {
     return Math.round((completedTasks.length / activeTasks.length) * 100);
   }, [tasks]);
 
+  const filteredNotes = useMemo(() => {
+    const normalizedQuery = noteSearchQuery.toLowerCase().trim();
+    const sorted = [...notes].sort((a, b) => {
+      if (noteSortBy === 'subject') {
+        return (a.subjectTag ?? '').localeCompare(b.subjectTag ?? '') || b.updatedAt.localeCompare(a.updatedAt);
+      }
+      if (noteSortBy === 'pinned') {
+        return Number(b.isPinned) - Number(a.isPinned) || b.updatedAt.localeCompare(a.updatedAt);
+      }
+      return b.updatedAt.localeCompare(a.updatedAt);
+    });
+
+    return sorted.filter((note) => {
+      if (note.isArchived !== showArchivedNotes) return false;
+      if (activeNoteTab === 'pinned' && !note.isPinned) return false;
+      if (activeNoteTab === 'subjects' && !note.subjectTag) return false;
+      if (activeNoteFolderId !== 'all' && note.folderId !== activeNoteFolderId) return false;
+      if (!normalizedQuery) return true;
+      return (
+        note.title.toLowerCase().includes(normalizedQuery) ||
+        note.body?.toLowerCase().includes(normalizedQuery) ||
+        note.subjectTag?.toLowerCase().includes(normalizedQuery)
+      );
+    });
+  }, [activeNoteFolderId, activeNoteTab, noteSearchQuery, noteSortBy, notes, showArchivedNotes]);
+
   useEffect(() => {
     const target = CIRCLE_LENGTH - (completionRate / 100) * CIRCLE_LENGTH;
     progressOffset.value = withTiming(target, { duration: 500 });
@@ -270,6 +332,13 @@ export default function TasksScreen() {
     if (!name) return;
     await addFolder(name, 'folder');
     setFolderInput('');
+  };
+
+  const handleCreateNoteFolder = async () => {
+    const name = noteFolderInput.trim();
+    if (!name) return;
+    await addNoteFolder(name, 'folder');
+    setNoteFolderInput('');
   };
 
   const handleRenameFolder = (folderId: string, currentName: string) => {
@@ -311,57 +380,137 @@ export default function TasksScreen() {
     );
   };
 
+  const handleRenameNoteFolder = (folderId: string, currentName: string) => {
+    if (!Alert.prompt) {
+      Alert.alert('Rename Folder', 'Folder rename is currently available on iOS prompt APIs in this build.');
+      return;
+    }
+    Alert.prompt(
+      'Rename Folder',
+      'Enter a new name',
+      async (value) => {
+        const trimmed = value?.trim();
+        if (!trimmed) return;
+        await renameNoteFolder(folderId, trimmed);
+      },
+      'plain-text',
+      currentName
+    );
+  };
+
+  const requestDeleteNoteFolder = (folderId: string, folderName: string) => {
+    Alert.alert('Delete Folder', `Delete "${folderName}"? Notes will be moved out of the folder.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          void deleteNoteFolder(folderId);
+        },
+      },
+    ]);
+  };
+
+  const openNewNote = () => {
+    setEditingNote(undefined);
+    setIsNoteEditorVisible(true);
+  };
+
+  const openEditNote = (note: Note) => {
+    setEditingNote(note);
+    setIsNoteEditorVisible(true);
+  };
+
+  const saveNote = async (payload: {
+    title: string;
+    body?: string;
+    subjectTag?: string;
+    folderId?: string;
+    isPinned?: boolean;
+  }) => {
+    if (editingNote) {
+      await updateNote(editingNote.id, {
+        title: payload.title,
+        body: payload.body,
+        subjectTag: payload.subjectTag,
+        folderId: payload.folderId,
+        isPinned: payload.isPinned,
+      });
+      return;
+    }
+    await addNote(payload);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Your Tasks</Text>
+          <Text style={styles.headerTitle}>{contentMode === 'tasks' ? 'Your Tasks' : 'My Notes'}</Text>
           <Text style={styles.headerSubtitle}>
-            {tasks.filter((t) => !t.isCompleted && !t.isArchived).length} items remaining
+            {contentMode === 'tasks'
+              ? `${tasks.filter((t) => !t.isCompleted && !t.isArchived).length} items remaining`
+              : `${filteredNotes.length} note${filteredNotes.length === 1 ? '' : 's'} shown`}
           </Text>
         </View>
-        <View style={styles.progressCircleWrap}>
-          <Svg width={56} height={56}>
-            <Circle
-              cx={28}
-              cy={28}
-              r={RADIUS}
-              stroke={`${Colors.outline}44`}
-              strokeWidth={STROKE_WIDTH}
-              fill="none"
-            />
-            <AnimatedCircle
-              animatedProps={animatedCircleProps}
-              cx={28}
-              cy={28}
-              r={RADIUS}
-              stroke={Colors.primary}
-              strokeWidth={STROKE_WIDTH}
-              strokeDasharray={`${CIRCLE_LENGTH}, ${CIRCLE_LENGTH}`}
-              strokeLinecap="round"
-              fill="none"
-              rotation={-90}
-              originX={28}
-              originY={28}
-            />
-          </Svg>
-          <Text style={styles.progressText}>{completionRate}%</Text>
-        </View>
+        {contentMode === 'tasks' ? (
+          <View style={styles.progressCircleWrap}>
+            <Svg width={56} height={56}>
+              <Circle
+                cx={28}
+                cy={28}
+                r={RADIUS}
+                stroke={`${Colors.outline}44`}
+                strokeWidth={STROKE_WIDTH}
+                fill="none"
+              />
+              <AnimatedCircle
+                animatedProps={animatedCircleProps}
+                cx={28}
+                cy={28}
+                r={RADIUS}
+                stroke={Colors.primary}
+                strokeWidth={STROKE_WIDTH}
+                strokeDasharray={`${CIRCLE_LENGTH}, ${CIRCLE_LENGTH}`}
+                strokeLinecap="round"
+                fill="none"
+                rotation={-90}
+                originX={28}
+                originY={28}
+              />
+            </Svg>
+            <Text style={styles.progressText}>{completionRate}%</Text>
+          </View>
+        ) : null}
+      </View>
+
+      <View style={styles.tabRow}>
+        <TouchableOpacity
+          style={[styles.tabButton, contentMode === 'tasks' && styles.tabButtonActive]}
+          onPress={() => setContentMode('tasks')}
+        >
+          <Text style={[styles.tabButtonText, contentMode === 'tasks' && styles.tabButtonTextActive]}>Tasks</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, contentMode === 'notes' && styles.tabButtonActive]}
+          onPress={() => setContentMode('notes')}
+        >
+          <Text style={[styles.tabButtonText, contentMode === 'notes' && styles.tabButtonTextActive]}>Notes</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.searchBar}>
         <MaterialIcons name="search" size={20} color={Colors.outline} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search tasks..."
+          placeholder={contentMode === 'tasks' ? 'Search tasks...' : 'Search notes...'}
           placeholderTextColor={Colors.outline}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+          value={contentMode === 'tasks' ? searchQuery : noteSearchQuery}
+          onChangeText={contentMode === 'tasks' ? setSearchQuery : setNoteSearchQuery}
         />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
+        {(contentMode === 'tasks' ? searchQuery.length : noteSearchQuery.length) > 0 && (
+          <TouchableOpacity onPress={() => (contentMode === 'tasks' ? setSearchQuery('') : setNoteSearchQuery(''))}>
             <MaterialIcons name="close" size={20} color={Colors.outline} />
           </TouchableOpacity>
         )}
@@ -369,102 +518,234 @@ export default function TasksScreen() {
 
       <View style={styles.tabRow}>
         <TouchableOpacity
-          style={[styles.tabButton, !showArchived && styles.tabButtonActive]}
-          onPress={() => setShowArchived(false)}
+          style={[styles.tabButton, !(contentMode === 'tasks' ? showArchived : showArchivedNotes) && styles.tabButtonActive]}
+          onPress={() => (contentMode === 'tasks' ? setShowArchived(false) : setShowArchivedNotes(false))}
         >
-          <Text style={[styles.tabButtonText, !showArchived && styles.tabButtonTextActive]}>
+          <Text
+            style={[
+              styles.tabButtonText,
+              !(contentMode === 'tasks' ? showArchived : showArchivedNotes) && styles.tabButtonTextActive,
+            ]}
+          >
             Active
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tabButton, showArchived && styles.tabButtonActive]}
-          onPress={() => setShowArchived(true)}
+          style={[styles.tabButton, (contentMode === 'tasks' ? showArchived : showArchivedNotes) && styles.tabButtonActive]}
+          onPress={() => (contentMode === 'tasks' ? setShowArchived(true) : setShowArchivedNotes(true))}
         >
-          <Text style={[styles.tabButtonText, showArchived && styles.tabButtonTextActive]}>
+          <Text
+            style={[
+              styles.tabButtonText,
+              (contentMode === 'tasks' ? showArchived : showArchivedNotes) && styles.tabButtonTextActive,
+            ]}
+          >
             Archive
           </Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.filterContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-          {CATEGORIES.map((cat) => (
-            <CategoryPill
-              key={cat}
-              category={cat}
-              active={activeFilter === cat}
-              onPress={() => setActiveFilter(cat)}
-            />
-          ))}
-        </ScrollView>
-      </View>
-
-      <View style={styles.filterContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-          <TouchableOpacity
-            style={[styles.folderPill, activeFolderId === 'all' && styles.folderPillActive]}
-            onPress={() => setActiveFolderId('all')}
-          >
-            <Text style={[styles.folderPillText, activeFolderId === 'all' && styles.folderPillTextActive]}>
-              All folders
-            </Text>
-          </TouchableOpacity>
-
-          {folders.map((folder) => (
-            <TouchableOpacity
-              key={folder.id}
-              style={[styles.folderPill, activeFolderId === folder.id && styles.folderPillActive]}
-              onPress={() => setActiveFolderId(folder.id)}
-            >
-              <Text
-                style={[
-                  styles.folderPillText,
-                  activeFolderId === folder.id && styles.folderPillTextActive,
-                ]}
-              >
-                {folder.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-
-          <TouchableOpacity style={styles.folderManageButton} onPress={openFolderManager}>
-            <MaterialIcons name="create-new-folder" size={18} color={Colors.primary} />
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-
-      <FlashList
-        data={filteredTasks}
-        renderItem={({ item }) => (
-          <TaskItem
-            task={item}
-            onToggle={toggleComplete}
-            onPin={togglePin}
-            onArchive={archiveTask}
-            onUnarchive={unarchiveTask}
-            onMoveTask={moveTask}
-            folders={folders}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <MaterialIcons name="assignment" size={64} color={Colors.surfaceHigh} />
-            <Text style={styles.emptyText}>
-              {showArchived ? 'No archived tasks' : 'No tasks found'}
-            </Text>
-            <Text style={styles.emptySubtext}>
-              {showArchived
-                ? 'Archived tasks appear here'
-                : 'Try another filter or add your first task'}
-            </Text>
+      {contentMode === 'tasks' ? (
+        <>
+          <View style={styles.filterContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+              {CATEGORIES.map((cat) => (
+                <CategoryPill
+                  key={cat}
+                  category={cat}
+                  active={activeFilter === cat}
+                  onPress={() => setActiveFilter(cat)}
+                />
+              ))}
+            </ScrollView>
           </View>
-        }
-      />
+
+          <View style={styles.filterContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+              <TouchableOpacity
+                style={[styles.folderPill, activeFolderId === 'all' && styles.folderPillActive]}
+                onPress={() => setActiveFolderId('all')}
+              >
+                <Text style={[styles.folderPillText, activeFolderId === 'all' && styles.folderPillTextActive]}>
+                  All folders
+                </Text>
+              </TouchableOpacity>
+
+              {folders.map((folder) => (
+                <TouchableOpacity
+                  key={folder.id}
+                  style={[styles.folderPill, activeFolderId === folder.id && styles.folderPillActive]}
+                  onPress={() => setActiveFolderId(folder.id)}
+                >
+                  <Text
+                    style={[
+                      styles.folderPillText,
+                      activeFolderId === folder.id && styles.folderPillTextActive,
+                    ]}
+                  >
+                    {folder.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+
+              <TouchableOpacity style={styles.folderManageButton} onPress={openFolderManager}>
+                <MaterialIcons name="create-new-folder" size={18} color={Colors.primary} />
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+
+          <FlashList
+            data={filteredTasks}
+            renderItem={({ item }) => (
+              <TaskItem
+                task={item}
+                onToggle={toggleComplete}
+                onPin={togglePin}
+                onArchive={archiveTask}
+                onUnarchive={unarchiveTask}
+                onMoveTask={moveTask}
+                folders={folders}
+              />
+            )}
+            contentContainerStyle={styles.listContent}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <MaterialIcons name="assignment" size={64} color={Colors.surfaceHigh} />
+                <Text style={styles.emptyText}>{showArchived ? 'No archived tasks' : 'No tasks found'}</Text>
+                <Text style={styles.emptySubtext}>
+                  {showArchived ? 'Archived tasks appear here' : 'Try another filter or add your first task'}
+                </Text>
+              </View>
+            }
+          />
+        </>
+      ) : (
+        <>
+          <View style={styles.filterContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+              {NOTE_TABS.map((tab) => (
+                <TouchableOpacity
+                  key={tab}
+                  style={[styles.pill, activeNoteTab === tab && styles.pillActive]}
+                  onPress={() => setActiveNoteTab(tab)}
+                >
+                  <Text style={[styles.pillText, activeNoteTab === tab && styles.pillTextActive]}>
+                    {tab === 'all' ? 'All' : tab === 'pinned' ? 'Pinned' : 'Subjects'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+
+              {NOTE_SORTS.map((sort) => (
+                <TouchableOpacity
+                  key={sort}
+                  style={[styles.folderPill, noteSortBy === sort && styles.folderPillActive]}
+                  onPress={() => setNoteSortBy(sort)}
+                >
+                  <Text style={[styles.folderPillText, noteSortBy === sort && styles.folderPillTextActive]}>
+                    Sort: {sort}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={styles.filterContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+              <TouchableOpacity
+                style={[styles.folderPill, activeNoteFolderId === 'all' && styles.folderPillActive]}
+                onPress={() => setActiveNoteFolderId('all')}
+              >
+                <Text style={[styles.folderPillText, activeNoteFolderId === 'all' && styles.folderPillTextActive]}>
+                  All folders
+                </Text>
+              </TouchableOpacity>
+
+              {noteFolders.map((folder) => (
+                <TouchableOpacity
+                  key={folder.id}
+                  style={[styles.folderPill, activeNoteFolderId === folder.id && styles.folderPillActive]}
+                  onPress={() => setActiveNoteFolderId(folder.id)}
+                >
+                  <Text
+                    style={[
+                      styles.folderPillText,
+                      activeNoteFolderId === folder.id && styles.folderPillTextActive,
+                    ]}
+                  >
+                    {folder.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+
+              <TouchableOpacity
+                style={styles.folderManageButton}
+                onPress={() => setNoteFolderModalVisible(true)}
+              >
+                <MaterialIcons name="create-new-folder" size={18} color={Colors.primary} />
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+
+          <FlashList
+            data={filteredNotes}
+            contentContainerStyle={styles.listContent}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => openEditNote(item)} activeOpacity={0.9} style={styles.taskContainer}>
+                <GlassCard style={styles.noteCard} intensity={20}>
+                  <View style={styles.noteHeader}>
+                    <View style={styles.noteTag}>
+                      <Text style={styles.noteTagText}>{item.subjectTag || 'General'}</Text>
+                    </View>
+                    <View style={styles.folderListActions}>
+                      <TouchableOpacity onPress={() => toggleNotePin(item.id)} style={styles.iconAction}>
+                        <MaterialIcons
+                          name="push-pin"
+                          size={18}
+                          color={item.isPinned ? Colors.primary : Colors.outline}
+                          style={{ opacity: item.isPinned ? 1 : 0.5 }}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          item.isArchived ? unarchiveNote(item.id) : archiveNote(item.id)
+                        }
+                        style={styles.iconAction}
+                      >
+                        <MaterialIcons
+                          name={item.isArchived ? 'unarchive' : 'archive'}
+                          size={18}
+                          color={item.isArchived ? Colors.warning : Colors.onSurfaceVariant}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  <Text style={styles.noteTitle} numberOfLines={1}>
+                    {item.title}
+                  </Text>
+                  {item.body ? (
+                    <Text style={styles.notePreview} numberOfLines={2}>
+                      {item.body}
+                    </Text>
+                  ) : null}
+                </GlassCard>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <MaterialIcons name="note-alt" size={64} color={Colors.surfaceHigh} />
+                <Text style={styles.emptyText}>{showArchivedNotes ? 'No archived notes' : 'No notes found'}</Text>
+                <Text style={styles.emptySubtext}>
+                  {showArchivedNotes ? 'Archived notes appear here' : 'Try another filter or create your first note'}
+                </Text>
+              </View>
+            }
+          />
+        </>
+      )}
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setIsAddSheetVisible(true)}
+        onPress={() => (contentMode === 'tasks' ? setIsAddSheetVisible(true) : openNewNote())}
       >
         <MaterialIcons name="add" size={32} color="white" />
       </TouchableOpacity>
@@ -522,6 +803,63 @@ export default function TasksScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        visible={noteFolderModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setNoteFolderModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Manage Note Folders</Text>
+            <View style={styles.modalRow}>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="New folder name"
+                placeholderTextColor={Colors.outline}
+                value={noteFolderInput}
+                onChangeText={setNoteFolderInput}
+              />
+              <TouchableOpacity style={styles.addFolderBtn} onPress={() => void handleCreateNoteFolder()}>
+                <MaterialIcons name="add" size={20} color={Colors.background} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.folderListModal}>
+              {noteFolders.map((folder) => (
+                <View key={folder.id} style={styles.folderListItem}>
+                  <Text style={styles.folderListName}>{folder.name}</Text>
+                  <View style={styles.folderListActions}>
+                    <TouchableOpacity
+                      onPress={() => handleRenameNoteFolder(folder.id, folder.name)}
+                      style={styles.iconAction}
+                    >
+                      <MaterialIcons name="edit" size={18} color={Colors.primary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => requestDeleteNoteFolder(folder.id, folder.name)}
+                      style={styles.iconAction}
+                    >
+                      <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            <GradientButton title="Done" onPress={() => setNoteFolderModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
+
+      <NoteEditor
+        isVisible={isNoteEditorVisible}
+        initialNote={editingNote}
+        folders={noteFolders}
+        onClose={() => setIsNoteEditorVisible(false)}
+        onSave={saveNote}
+      />
     </View>
   );
 }
@@ -680,6 +1018,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
+  },
+  noteCard: {
+    padding: Spacing.md,
+  },
+  noteHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  noteTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.full,
+    backgroundColor: `${Colors.secondary}22`,
+    borderWidth: 1,
+    borderColor: `${Colors.secondary}66`,
+  },
+  noteTagText: {
+    color: Colors.secondary,
+    fontFamily: Typography.fontFamily.body,
+    fontWeight: '700',
+    fontSize: Typography.size.xs,
+  },
+  noteTitle: {
+    color: Colors.onSurface,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.md,
+    fontWeight: '700',
+  },
+  notePreview: {
+    color: Colors.onSurfaceVariant,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.sm,
+    marginTop: 6,
   },
   checkbox: {
     marginRight: Spacing.md,

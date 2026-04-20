@@ -73,8 +73,8 @@
 | 1C | Navigation Shell | `✅ COMPLETE` | 4/4 |
 | 1D | Local Features — Timetable | `✅ COMPLETE` | 6/6 |
 | 1E | Local Features — Tasks | `✅ COMPLETE` | 6/6 |
-| 1F | Local Features — Notes | `🔵 IN PROGRESS` | 0/6 |
-| 1G | Local Features — PDF Vault | `⬜ NOT STARTED` | 0/6 |
+| 1F | Local Features — Notes | `✅ COMPLETE` | 6/6 |
+| 1G | Local Features — PDF Vault | `🔵 IN PROGRESS` | 0/6 |
 | 1H | Vault Hub Integration | `⬜ NOT STARTED` | 0/3 |
 | 1I | Cloud Features — Streak System | `⬜ NOT STARTED` | 0/5 |
 | 1J | Cloud Features — XP & Rank System | `⬜ NOT STARTED` | 0/6 |
@@ -484,42 +484,42 @@
 ---
 
 ## PHASE 1F: Local Features — Notes 📝
-**Status**: `🔵 IN PROGRESS`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 3 days
 **Goal**: Complete note-taking system.
 **Reference**: Section 3.3 (Notes), Screens 11-12, SQLite Schema 7.4-7.5
 
 ### Steps
 
-- [ ] **1F.1** — Create `src/models/note.ts`
+- [x] **1F.1** — Create `src/models/note.ts`
   - `Note` TypeScript interface matching SQLite schema
   - `NoteFolder` interface
 
-- [ ] **1F.2** — Create `src/store/noteStore.ts` (Zustand)
+- [x] **1F.2** — Create `src/store/noteStore.ts` (Zustand)
   - State: `notes`, `folders`, `activeTab`, `searchQuery`
   - Actions: `addNote`, `updateNote`, `deleteNote`, `togglePin`, `archiveNote`
   - Actions: `addFolder`, `renameFolder`, `deleteFolder`
   - Persist to expo-sqlite
 
-- [ ] **1F.3** — Create `app/(tabs)/vault/tasks.tsx` notes section + list screen
+- [x] **1F.3** — Create `app/(tabs)/vault/tasks.tsx` notes section + list screen
   - Header: "My Notes" + search TextInput
   - Navigation pills: All | Pinned | Subjects (horizontal ScrollView)
   - Pinned section: GlassCard with subject tag, title, body preview
   - Recent Notes section: lighter cards
   - FAB: "+" to navigate to note editor
 
-- [ ] **1F.4** — Create `src/components/notes/NoteEditor.tsx` — Note Editor Screen
+- [x] **1F.4** — Create `src/components/notes/NoteEditor.tsx` — Note Editor Screen
   - Back button + Save button in header
   - Title TextInput (large, bold, Space Grotesk)
   - Subject tag selector (chip row)
   - Body TextInput (multiline, basic markdown — bold/italic via toolbar)
   - Pin toggle in header toolbar
 
-- [ ] **1F.5** — Implement note folders
+- [x] **1F.5** — Implement note folders
   - Create, rename, delete note folders
   - Folder filter in notes screen
 
-- [ ] **1F.6** — Note polish features
+- [x] **1F.6** — Note polish features
   - Full-text search (filter notes by title + body)
   - Sort options: by date, subject, pinned
   - Archive / soft delete
@@ -1327,23 +1327,24 @@
 |---|---|---|---|---|
 | 1 | 2026-04-19 | Setup | Created plan_checker.md + Updated to React Native/Expo stack | Flutter replaced with Expo + Zustand + Expo Router |
 | 2 | 2026-04-20 | 1E | Completed 1E.1 to 1E.6 (Tasks model/store/screen/sheet/folders/polish) | Added archive tab, folder manager, task move, search + filters, progress circle |
+| 3 | 2026-04-20 | 1F | Completed 1F.1 to 1F.6 (Notes model/store/editor + tasks-notes integration) | Added note folders, search, sort by date/subject/pinned, archive flow, notes cards, note editor toolbar |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1F — Local Features: Notes`
-**Next Step**: `1F.1 — Create src/models/note.ts`
+**Active Phase**: `🔵 Phase 1G — Local Features: PDF Vault`
+**Next Step**: `1G.1 — Create src/models/pdf.ts`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 0
+- **Completed**: 45
 - **In Progress**: 0
-- **Remaining**: 198
-- **Overall Progress**: 0%
+- **Remaining**: 153
+- **Overall Progress**: 22.7%
 
 ---
 
@@ -1354,4 +1355,4 @@
 
 ---
 
-*Last Updated: 2026-04-19 | Stack: React Native + Expo + TypeScript + Zustand + Supabase*
+*Last Updated: 2026-04-20 | Stack: React Native + Expo + TypeScript + Zustand + Supabase*

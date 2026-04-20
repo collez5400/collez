@@ -14,11 +14,17 @@ import {
   Manrope_700Bold,
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
-import { initSQLite } from '../src/services/sqliteService';
 import { configureGoogleSignIn } from '../src/services/authService';
 import { useStreakStore } from '../src/store/streakStore';
 import { useXpStore } from '../src/store/xpStore';
 import { XP_VALUES } from '../src/config/constants';
+
+const { initSQLite } =
+  Platform.OS === 'web'
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('../src/services/sqliteService.web')
+    : // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('../src/services/sqliteService.native');
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();

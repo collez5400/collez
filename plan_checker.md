@@ -72,8 +72,8 @@
 | 1B | Authentication & Onboarding | `✅ COMPLETE` | 10/10 |
 | 1C | Navigation Shell | `✅ COMPLETE` | 4/4 |
 | 1D | Local Features — Timetable | `✅ COMPLETE` | 6/6 |
-| 1E | Local Features — Tasks | `🔵 IN PROGRESS` | 0/6 |
-| 1F | Local Features — Notes | `⬜ NOT STARTED` | 0/6 |
+| 1E | Local Features — Tasks | `✅ COMPLETE` | 6/6 |
+| 1F | Local Features — Notes | `🔵 IN PROGRESS` | 0/6 |
 | 1G | Local Features — PDF Vault | `⬜ NOT STARTED` | 0/6 |
 | 1H | Vault Hub Integration | `⬜ NOT STARTED` | 0/3 |
 | 1I | Cloud Features — Streak System | `⬜ NOT STARTED` | 0/5 |
@@ -434,25 +434,25 @@
 ---
 
 ## PHASE 1E: Local Features — Tasks 📋
-**Status**: `🔵 IN PROGRESS`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 3 days
 **Goal**: Complete task management system.
 **Reference**: Section 3.3 (Tasks), Screen 10, SQLite Schema 7.2-7.3
 
 ### Steps
 
-- [ ] **1E.1** — Create `src/models/task.ts`
+- [x] **1E.1** — Create `src/models/task.ts`
   - `Task` TypeScript interface matching SQLite schema
   - `TaskCategory` enum ('study' | 'personal' | 'college')
   - `TaskFolder` interface
 
-- [ ] **1E.2** — Create `src/store/taskStore.ts` (Zustand)
+- [x] **1E.2** — Create `src/store/taskStore.ts` (Zustand)
   - State: `tasks`, `folders`, `activeFilter`, `searchQuery`
   - Actions: `addTask`, `updateTask`, `deleteTask`, `toggleComplete`, `togglePin`, `archiveTask`
   - Actions: `addFolder`, `renameFolder`, `deleteFolder`, `moveTask`
   - Persist to expo-sqlite
 
-- [ ] **1E.3** — Create `app/(tabs)/vault/tasks.tsx` — Tasks Screen
+- [x] **1E.3** — Create `app/(tabs)/vault/tasks.tsx` — Tasks Screen
   - Header: "Your Tasks" + animated progress circle (Reanimated)
   - Category filter pills (ScrollView, All/Study/Personal/College)
   - Task cards using `@shopify/flash-list` for performance
@@ -460,7 +460,7 @@
   - Completed: faded, strikethrough text, filled checkmark
   - FAB: "+" to open Add Task sheet
 
-- [ ] **1E.4** — Create `src/components/tasks/AddTaskSheet.tsx`
+- [x] **1E.4** — Create `src/components/tasks/AddTaskSheet.tsx`
   - Title TextInput
   - Description TextInput (optional, multiline)
   - Category selector (color-coded chip row)
@@ -468,13 +468,13 @@
   - Folder selector dropdown
   - "Save Task" GradientButton
 
-- [ ] **1E.5** — Implement task folders
+- [x] **1E.5** — Implement task folders
   - Folder management bottom sheet
   - Create, rename, delete folders
   - Move tasks between folders
   - Folder view with task counts
 
-- [ ] **1E.6** — Task polish features
+- [x] **1E.6** — Task polish features
   - Checkbox completion animation (Reanimated strikethrough)
   - Pin to top (sorted first in list)
   - Archive tab in tasks screen
@@ -484,7 +484,7 @@
 ---
 
 ## PHASE 1F: Local Features — Notes 📝
-**Status**: `⬜ NOT STARTED`
+**Status**: `🔵 IN PROGRESS`
 **Estimated Time**: 3 days
 **Goal**: Complete note-taking system.
 **Reference**: Section 3.3 (Notes), Screens 11-12, SQLite Schema 7.4-7.5
@@ -1326,13 +1326,14 @@
 | Session # | Date | Phase Worked | Steps Completed | Notes |
 |---|---|---|---|---|
 | 1 | 2026-04-19 | Setup | Created plan_checker.md + Updated to React Native/Expo stack | Flutter replaced with Expo + Zustand + Expo Router |
+| 2 | 2026-04-20 | 1E | Completed 1E.1 to 1E.6 (Tasks model/store/screen/sheet/folders/polish) | Added archive tab, folder manager, task move, search + filters, progress circle |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 0 — Project Bootstrap`
-**Next Step**: `0.1 — Create Expo project with TypeScript template`
+**Active Phase**: `🔵 Phase 1F — Local Features: Notes`
+**Next Step**: `1F.1 — Create src/models/note.ts`
 
 ---
 

@@ -13,7 +13,7 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
 
 export async function initSQLite() {
   const database = await getDb();
-  
+
   // Set journal mode to WAL for better performance
   await database.execAsync('PRAGMA journal_mode = WAL');
 
@@ -114,3 +114,4 @@ export async function initSQLite() {
     await database.execAsync(`PRAGMA user_version = ${CURRENT_VERSION}`);
   }
 }
+

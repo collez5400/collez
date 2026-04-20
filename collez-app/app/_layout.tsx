@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, AppStateStatus } from 'react-native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import {
@@ -15,6 +16,7 @@ import {
 } from '@expo-google-fonts/manrope';
 import { initSQLite } from '../src/services/sqliteService';
 import { configureGoogleSignIn } from '../src/services/authService';
+import { useStreakStore } from '../src/store/streakStore';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -34,6 +36,8 @@ export default function RootLayout() {
   });
 
   const [isReady, setIsReady] = useState(false);
+  const appOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   useEffect(() => {
     async function prepareApp() {
@@ -57,6 +61,36 @@ export default function RootLayout() {
       }
     }
   }, [fontsLoaded, fontError, isReady]);
+
+  useEffect(() => {
+    const startAppOpenTimer = () => {
+      if (appOpenTimerRef.current) clearTimeout(appOpenTimerRef.current);
+      appOpenTimerRef.current = setTimeout(() => {
+        void useStreakStore.getState().logStreakAction('app_open');
+      }, 5000);
+    };
+
+    startAppOpenTimer();
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      const previousState = previousStateRef.current;
+      previousStateRef.current = nextState;
+
+      if (nextState === 'active' && previousState !== 'active') {
+        startAppOpenTimer();
+      }
+
+      if (nextState !== 'active' && appOpenTimerRef.current) {
+        clearTimeout(appOpenTimerRef.current);
+        appOpenTimerRef.current = null;
+      }
+    });
+
+    return () => {
+      subscription.remove();
+      if (appOpenTimerRef.current) clearTimeout(appOpenTimerRef.current);
+    };
+  }, []);
 
   if (!fontsLoaded && !fontError) return null;
   if (!isReady) return null;

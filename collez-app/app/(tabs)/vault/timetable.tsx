@@ -6,6 +6,7 @@ import { DayOfWeek, TimetableEntry } from '../../../src/models/timetable';
 import { useTimetableStore } from '../../../src/store/timetableStore';
 import { AddSubjectSheet } from '../../../src/components/timetable/AddSubjectSheet';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../src/config/theme';
+import { useStreakStore } from '../../../src/store/streakStore';
 
 const DAYS = [
   { id: DayOfWeek.Monday, label: 'Mon' },
@@ -24,6 +25,7 @@ export default function TimetableScreen() {
 
   useEffect(() => {
     fetchEntries();
+    void useStreakStore.getState().logStreakAction('timetable_view');
   }, []);
 
   const dayEntries = entries[selectedDay] || [];

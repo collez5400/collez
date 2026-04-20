@@ -17,6 +17,22 @@ export interface XpTransaction {
   created_at: string;
 }
 
+export interface StreakLog {
+  id: string;
+  user_id: string;
+  action_type: string;
+  logged_date: string;
+  created_at: string;
+}
+
+export interface Badge {
+  id: string;
+  user_id: string;
+  badge_type: string;
+  badge_name: string;
+  earned_at: string;
+}
+
 type TableDef<Row> = {
   Row: Row;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,6 +48,8 @@ export type Database = {
       colleges: TableDef<College>;
       college_requests: TableDef<CollegeRequest>;
       xp_transactions: TableDef<XpTransaction>;
+      streak_logs: TableDef<StreakLog>;
+      badges: TableDef<Badge>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

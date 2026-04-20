@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { CreateTaskInput, Task, TaskCategory, TaskFolder } from '../models/task';
 import { getDb } from '../services/sqliteService';
 import { v4 as uuidv4 } from 'uuid';
+import { useStreakStore } from './streakStore';
 
 interface TaskState {
   tasks: Task[];
@@ -191,6 +192,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         isCompleted: nextCompleted,
         completedAt: nextCompleted ? new Date().toISOString() : undefined,
       });
+      if (nextCompleted) {
+        void useStreakStore.getState().logStreakAction('task_complete');
+      }
     }
   },
 

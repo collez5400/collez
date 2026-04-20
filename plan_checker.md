@@ -76,7 +76,7 @@
 | 1F | Local Features — Notes | `✅ COMPLETE` | 6/6 |
 | 1G | Local Features — PDF Vault | `✅ COMPLETE` | 6/6 |
 | 1H | Vault Hub Integration | `✅ COMPLETE` | 3/3 |
-| 1I | Cloud Features — Streak System | `⬜ NOT STARTED` | 0/5 |
+| 1I | Cloud Features — Streak System | `✅ COMPLETE` | 5/5 |
 | 1J | Cloud Features — XP & Rank System | `⬜ NOT STARTED` | 0/6 |
 | 1K | Cloud Features — Leaderboard | `⬜ NOT STARTED` | 0/5 |
 | 1L | Cloud Features — Daily Quote | `⬜ NOT STARTED` | 0/3 |
@@ -602,14 +602,14 @@
 ---
 
 ## PHASE 1I: Cloud Features — Streak System 🔥
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 2 days
 **Goal**: Daily streak tracking with milestone badges.
 **Reference**: Section 3.5, Section 8 (Sync Strategy for Streak)
 
 ### Steps
 
-- [ ] **1I.1** — Create `src/services/streakService.ts`
+- [x] **1I.1** — Create `src/services/streakService.ts`
   - Check if streak logged today (AsyncStorage flag `streak_logged_[date]`)
   - POST to Supabase `streak_logs` table
   - Increment `streak_count` in `users` table
@@ -617,22 +617,22 @@
   - Insert into `badges` table on milestone
   - Handle midnight IST rollover (use `dayjs` + `Asia/Kolkata` timezone)
 
-- [ ] **1I.2** — Create `src/models/streak.ts`
+- [x] **1I.2** — Create `src/models/streak.ts`
   - `StreakData` interface (count, lastActiveDate, longestStreak)
   - `StreakMilestone` type with day + badge name + icon mapping
 
-- [ ] **1I.3** — Create `src/store/streakStore.ts` (Zustand)
+- [x] **1I.3** — Create `src/store/streakStore.ts` (Zustand)
   - State: `streakCount`, `isLoggedToday`, `longestStreak`, `badges`
   - Actions: `logStreakAction(actionType)`, `fetchStreakData()`
 
-- [ ] **1I.4** — Hook streak into qualifying actions
+- [x] **1I.4** — Hook streak into qualifying actions
   - App foreground (AppState: active for >5s) → logStreakAction('app_open')
   - Timetable screen mount → logStreakAction('timetable_view')
   - Task marked complete → logStreakAction('task_complete')
   - Leaderboard screen mount → logStreakAction('leaderboard_view')
   - Quote card viewed → logStreakAction('quote_read')
 
-- [ ] **1I.5** — Streak UI components
+- [x] **1I.5** — Streak UI components
   - Streak stat pill on dashboard (🔥 + count, Reanimated count-up)
   - Milestone badge celebration modal (Reanimated scale + fade)
   - Streak display on profile screen
@@ -1330,23 +1330,24 @@
 | 3 | 2026-04-20 | 1F | Completed 1F.1 to 1F.6 (Notes model/store/editor + tasks-notes integration) | Added note folders, search, sort by date/subject/pinned, archive flow, notes cards, note editor toolbar |
 | 4 | 2026-04-20 | 1G | Completed 1G.1 to 1G.6 (PDF model/store/screen + file and folder operations) | Added upload/copy flow, nested breadcrumb folders, move/rename/delete, search/sort, recent docs, storage usage UI |
 | 5 | 2026-04-20 | 1H | Completed 1H.1 to 1H.3 (Vault top tabs integration + tab behavior verification) | Added custom animated gradient top-tab bar, wired Timetable/Tasks+Notes/PDFs routes, and kept tab screens mounted to prevent state loss |
+| 6 | 2026-04-20 | 1I | Completed 1I.1 to 1I.5 (streak service/model/store + qualifying action hooks + streak UI) | Added IST-aware streak logging with AsyncStorage daily flag, milestone badge insertion, AppState app-open tracking, timetable/task/rankings/quote streak hooks, and milestone celebration modal |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1I — Cloud Features — Streak System`
-**Next Step**: `1I.1 — Create src/services/streakService.ts`
+**Active Phase**: `🔵 Phase 1J — Cloud Features — XP & Rank System`
+**Next Step**: `1J.1 — Create Supabase Edge Functions (award-xp, reset-daily-xp, refresh-leaderboard)`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 54
+- **Completed**: 59
 - **In Progress**: 0
-- **Remaining**: 144
-- **Overall Progress**: 27.3%
+- **Remaining**: 139
+- **Overall Progress**: 29.8%
 
 ---
 

@@ -6,6 +6,7 @@ import { supabase } from '../config/supabase';
 import { User } from '../models/user';
 
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+const OAUTH_REDIRECT_URL = process.env.EXPO_PUBLIC_OAUTH_REDIRECT_URL;
 const SESSION_KEY = 'collez_session';
 let isGoogleConfigured = false;
 
@@ -50,7 +51,8 @@ export function configureGoogleSignIn() {
 export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }> {
   if (Platform.OS === 'web') {
     const redirectTo =
-      typeof window !== 'undefined' ? window.location.origin : undefined;
+      OAUTH_REDIRECT_URL ||
+      (typeof window !== 'undefined' ? window.location.origin : undefined);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
@@ -129,6 +131,35 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
 
 /** Restore session from SecureStore on app launch. */
 export async function restoreSession() {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    const callbackUrl = new URL(window.location.href);
+    const hasOAuthCode = callbackUrl.searchParams.has('code');
+    const hasOAuthError = callbackUrl.searchParams.has('error');
+
+    if (hasOAuthCode) {
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(
+        window.location.href
+      );
+      if (exchangeError) {
+        console.warn('OAuth code exchange failed:', exchangeError.message);
+      }
+
+      // Remove OAuth query params after exchange so refreshes don't reprocess callback.
+      callbackUrl.searchParams.delete('code');
+      callbackUrl.searchParams.delete('state');
+      callbackUrl.searchParams.delete('error');
+      callbackUrl.searchParams.delete('error_code');
+      callbackUrl.searchParams.delete('error_description');
+      window.history.replaceState({}, document.title, callbackUrl.toString());
+    } else if (hasOAuthError) {
+      const oauthError =
+        callbackUrl.searchParams.get('error_description') ??
+        callbackUrl.searchParams.get('error') ??
+        'Unknown OAuth error';
+      console.warn('OAuth callback returned error:', oauthError);
+    }
+  }
+
   // Supabase already persists session via configured storage (AsyncStorage/web storage).
   // Prefer this source to avoid stale-token drift with our legacy SecureStore copy.
   const { data, error } = await supabase.auth.getSession();

@@ -341,7 +341,6 @@ export default function PDFsScreen() {
         data={currentFiles}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.fileList}
-        estimatedItemSize={72}
         renderItem={({ item }) => (
           <GlassCard intensity={20} style={styles.fileCard}>
             <TouchableOpacity style={styles.fileMain} onPress={() => void openFile(item.id)}>
@@ -391,7 +390,6 @@ export default function PDFsScreen() {
         keyExtractor={(item) => `recent-${item.id}`}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.recentList}
-        estimatedItemSize={190}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.recentCard} onPress={() => void openFile(item.id)}>
             <MaterialIcons name="description" size={20} color={Colors.primary} />

@@ -31,9 +31,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     storage: Platform.OS === 'web' ? webStorage : AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
-    // We handle web OAuth callback exchange explicitly in authService.restoreSession().
-    // Keeping this false avoids duplicate callback parsing/races.
-    detectSessionInUrl: false,
+    detectSessionInUrl: Platform.OS === 'web',
     flowType: 'pkce',
   },
 });

@@ -3,7 +3,7 @@ import * as SQLite from 'expo-sqlite';
 let db: SQLite.SQLiteDatabase | null = null;
 
 // The current database schema version
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
 
 export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db;
@@ -60,6 +60,7 @@ export async function initSQLite() {
         category TEXT NOT NULL,
         folder_id TEXT,
         due_date TEXT,
+        completed_at TEXT,
         is_completed INTEGER DEFAULT 0,
         is_pinned INTEGER DEFAULT 0,
         is_archived INTEGER DEFAULT 0,
@@ -111,6 +112,16 @@ export async function initSQLite() {
       COMMIT;
     `);
     // Set version after transaction commits
+    await database.execAsync(`PRAGMA user_version = ${CURRENT_VERSION}`);
+    return;
+  }
+
+  if (currentVersion === 1) {
+    await database.execAsync(`
+      BEGIN TRANSACTION;
+      ALTER TABLE tasks ADD COLUMN completed_at TEXT;
+      COMMIT;
+    `);
     await database.execAsync(`PRAGMA user_version = ${CURRENT_VERSION}`);
   }
 }

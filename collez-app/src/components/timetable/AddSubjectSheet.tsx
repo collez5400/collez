@@ -10,6 +10,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { ColorLabel, TimetableEntry, DayOfWeek } from '../../models/timetable';
 import { GradientButton } from '../shared/GradientButton';
 import { Colors, Typography, Spacing, BorderRadius } from '../../config/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -24,6 +25,7 @@ interface AddSubjectSheetProps {
 export const AddSubjectSheet: React.FC<AddSubjectSheetProps> = ({
   visible, onClose, onSave, editEntry, selectedDay,
 }) => {
+  const insets = useSafeAreaInsets();
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const opacity = useSharedValue(0);
 
@@ -111,7 +113,7 @@ export const AddSubjectSheet: React.FC<AddSubjectSheetProps> = ({
         <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => { Keyboard.dismiss(); onClose(); }} />
       </Animated.View>
 
-      <Animated.View style={[styles.sheet, sheetStyle]}>
+      <Animated.View style={[styles.sheet, sheetStyle, { paddingBottom: Math.max(insets.bottom + 16, 32) }]}>
         <View style={styles.handle} />
         <Text style={styles.title}>{editEntry ? 'Edit Class' : 'Add Class'}</Text>
 
@@ -187,7 +189,7 @@ export const AddSubjectSheet: React.FC<AddSubjectSheetProps> = ({
             ))}
           </View>
 
-          <GradientButton title="Save Class" onPress={handleSave} disabled={!subject.trim()} />
+          <GradientButton title="Save Class" onPress={handleSave} disabled={!subject.trim() || subject.trim().toLowerCase() === 'break'} />
         </View>
       </Animated.View>
     </View>

@@ -52,7 +52,7 @@ export default function AddTaskSheet({ isVisible, onClose }: AddTaskSheetProps) 
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<TaskCategory>('study');
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [dueDate, setDueDate] = useState<Date | null>(new Date());
   const [folderId, setFolderId] = useState<string | undefined>(undefined);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
 
@@ -78,7 +78,7 @@ export default function AddTaskSheet({ isVisible, onClose }: AddTaskSheetProps) 
     setTitle('');
     setDescription('');
     setCategory('study');
-    setDueDate(null);
+    setDueDate(new Date());
     setFolderId(undefined);
     setShowDatePicker(false);
     setShowFolderPicker(false);

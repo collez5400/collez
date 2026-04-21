@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, TextInput } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist';
 import { DayOfWeek, TimetableEntry } from '../../../src/models/timetable';
@@ -7,6 +7,7 @@ import { useTimetableStore } from '../../../src/store/timetableStore';
 import { AddSubjectSheet } from '../../../src/components/timetable/AddSubjectSheet';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../src/config/theme';
 import { useStreakStore } from '../../../src/store/streakStore';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DAYS = [
   { id: DayOfWeek.Monday, label: 'Mon' },
@@ -18,10 +19,17 @@ const DAYS = [
 ];
 
 export default function TimetableScreen() {
-  const { entries, selectedDay, setSelectedDay, fetchEntries, addEntry, updateEntry, deleteEntry, reorderEntries, duplicateDay, resetSemester } = useTimetableStore();
+  const { entries, selectedDay, setSelectedDay, fetchEntries, addEntry, updateEntry, deleteEntry, reorderEntries, duplicateDay, resetSemester, generateWeekSlots } = useTimetableStore();
+  const insets = useSafeAreaInsets();
   
   const [sheetVisible, setSheetVisible] = useState(false);
   const [editingEntry, setEditingEntry] = useState<TimetableEntry | null>(null);
+  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [periodMinutes, setPeriodMinutes] = useState('50');
+  const [classStart, setClassStart] = useState('09:00');
+  const [classEnd, setClassEnd] = useState('16:00');
+  const [breakStart, setBreakStart] = useState('12:00');
+  const [breakEnd, setBreakEnd] = useState('12:30');
 
   useEffect(() => {
     fetchEntries();
@@ -29,6 +37,7 @@ export default function TimetableScreen() {
   }, []);
 
   const dayEntries = entries[selectedDay] || [];
+  const hasAnyEntries = useMemo(() => Object.values(entries).some((list) => list.length > 0), [entries]);
 
   const handleSave = async (entry: Partial<TimetableEntry>) => {
     if (editingEntry) {
@@ -48,6 +57,26 @@ export default function TimetableScreen() {
         onPress: () => { duplicateDay(selectedDay, d.id); }
       } as const)).concat([{ text: 'Cancel', onPress: () => {} }])
     );
+  };
+
+  const handleGenerateWeek = async () => {
+    const minutes = Number(periodMinutes);
+    if (!Number.isFinite(minutes) || minutes <= 0) {
+      Alert.alert('Invalid period length', 'Enter a valid number of minutes.');
+      return;
+    }
+    try {
+      await generateWeekSlots({
+        periodMinutes: minutes,
+        classStart,
+        classEnd,
+        breakStart,
+        breakEnd,
+      });
+      setIsGeneratorOpen(false);
+    } catch (error: any) {
+      Alert.alert('Could not generate timetable', error?.message ?? 'Please check your slot settings.');
+    }
   };
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<TimetableEntry>) => {
@@ -79,6 +108,9 @@ export default function TimetableScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Timetable</Text>
         <View style={styles.actions}>
+          <TouchableOpacity onPress={() => setIsGeneratorOpen(true)} style={styles.actionBtn}>
+            <MaterialIcons name="auto-awesome" size={20} color={Colors.primary} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={handleDuplicate} style={styles.actionBtn}>
             <MaterialIcons name="content-copy" size={20} color={Colors.onSurface} />
           </TouchableOpacity>
@@ -117,7 +149,7 @@ export default function TimetableScreen() {
       )}
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: insets.bottom + 72 }]}
         onPress={() => { setEditingEntry(null); setSheetVisible(true); }}
       >
         <MaterialIcons name="add" size={28} color={Colors.surface} />
@@ -130,6 +162,42 @@ export default function TimetableScreen() {
         editEntry={editingEntry}
         selectedDay={selectedDay}
       />
+
+      <Modal visible={isGeneratorOpen} animationType="slide" transparent onRequestClose={() => setIsGeneratorOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalCard, { paddingBottom: Math.max(insets.bottom + 16, 24) }]}>
+            <Text style={styles.modalTitle}>Auto-generate Week Slots</Text>
+            <Text style={styles.modalSub}>Mon-Sat slots will be created first. Tap a slot later to add subjects.</Text>
+
+            <TextInput style={styles.input} value={periodMinutes} onChangeText={setPeriodMinutes} keyboardType="numeric" placeholder="Each period (minutes)" placeholderTextColor={Colors.onSurfaceVariant} />
+            <TextInput style={styles.input} value={classStart} onChangeText={setClassStart} placeholder="Class starts at (HH:MM)" placeholderTextColor={Colors.onSurfaceVariant} />
+            <TextInput style={styles.input} value={classEnd} onChangeText={setClassEnd} placeholder="Class ends at (HH:MM)" placeholderTextColor={Colors.onSurfaceVariant} />
+            <TextInput style={styles.input} value={breakStart} onChangeText={setBreakStart} placeholder="Break starts (HH:MM)" placeholderTextColor={Colors.onSurfaceVariant} />
+            <TextInput style={styles.input} value={breakEnd} onChangeText={setBreakEnd} placeholder="Break ends (HH:MM)" placeholderTextColor={Colors.onSurfaceVariant} />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.secondaryBtn} onPress={() => setIsGeneratorOpen(false)}>
+                <Text style={styles.secondaryBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.primaryBtn}
+                onPress={() => {
+                  if (hasAnyEntries) {
+                    Alert.alert('Replace existing timetable?', 'This will replace all current classes for Mon-Sat.', [
+                      { text: 'Cancel', style: 'cancel' },
+                      { text: 'Replace', style: 'destructive', onPress: () => { void handleGenerateWeek(); } },
+                    ]);
+                    return;
+                  }
+                  void handleGenerateWeek();
+                }}
+              >
+                <Text style={styles.primaryBtnText}>Generate</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -159,4 +227,14 @@ const styles = StyleSheet.create({
   emptyIcon: { fontSize: 48, marginBottom: Spacing.sm },
   emptyText: { fontSize: 18, fontFamily: Typography.fontFamily.heading, color: Colors.onSurface, fontWeight: '700' },
   emptySub: { fontSize: 14, fontFamily: Typography.fontFamily.body, color: Colors.onSurfaceVariant, marginTop: 4 },
+  modalBackdrop: { flex: 1, backgroundColor: '#00000077', justifyContent: 'flex-end' },
+  modalCard: { backgroundColor: Colors.surface, borderTopLeftRadius: BorderRadius.xl, borderTopRightRadius: BorderRadius.xl, padding: Spacing.lg, gap: Spacing.sm },
+  modalTitle: { fontSize: Typography.size.lg, fontFamily: Typography.fontFamily.heading, color: Colors.onSurface, fontWeight: '700' },
+  modalSub: { fontSize: Typography.size.sm, fontFamily: Typography.fontFamily.body, color: Colors.onSurfaceVariant, marginBottom: Spacing.sm },
+  input: { backgroundColor: Colors.surfaceLow, borderWidth: 1, borderColor: `${Colors.outline}44`, borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, paddingVertical: 12, color: Colors.onSurface, fontFamily: Typography.fontFamily.body },
+  modalButtons: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.sm },
+  secondaryBtn: { flex: 1, borderWidth: 1, borderColor: `${Colors.outline}66`, borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
+  secondaryBtnText: { color: Colors.onSurfaceVariant, fontFamily: Typography.fontFamily.body, fontWeight: '600' },
+  primaryBtn: { flex: 1, backgroundColor: Colors.primary, borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
+  primaryBtnText: { color: Colors.background, fontFamily: Typography.fontFamily.body, fontWeight: '700' },
 });

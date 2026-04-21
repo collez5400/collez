@@ -25,6 +25,7 @@ import { GradientButton } from '../../../src/components/shared/GradientButton';
 import { useNoteStore } from '../../../src/store/noteStore';
 import { Note, NoteSortOption, NoteTab } from '../../../src/models/note';
 import NoteEditor from '../../../src/components/notes/NoteEditor';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CATEGORIES: (TaskCategory | 'all')[] = ['all', 'study', 'personal', 'college'];
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -79,6 +80,7 @@ const TaskItem = ({
   onArchive,
   onUnarchive,
   onMoveTask,
+  onDelete,
   folders,
 }: {
   task: Task;
@@ -87,6 +89,7 @@ const TaskItem = ({
   onArchive: (id: string) => void;
   onUnarchive: (id: string) => void;
   onMoveTask: (taskId: string, folderId?: string) => void;
+  onDelete: (id: string) => void;
   folders: { id: string; name: string }[];
 }) => {
   const categoryColor = useMemo(() => getCategoryColor(task.category), [task.category]);
@@ -164,6 +167,10 @@ const TaskItem = ({
                 <Text style={styles.dueText}>{task.dueDate}</Text>
               </View>
             )}
+            <View style={styles.folderContainer}>
+              <MaterialIcons name="schedule" size={14} color={Colors.onSurfaceVariant} />
+              <Text style={styles.dueText}>{task.createdAt.slice(0, 10)}</Text>
+            </View>
 
             {folderName ? (
               <View style={styles.folderContainer}>
@@ -197,6 +204,9 @@ const TaskItem = ({
               <MaterialIcons name="archive" size={20} color={Colors.onSurfaceVariant} />
             </TouchableOpacity>
           )}
+          <TouchableOpacity onPress={() => onDelete(task.id)} style={styles.iconAction}>
+            <MaterialIcons name="delete-outline" size={20} color={Colors.error} />
+          </TouchableOpacity>
         </View>
       </GlassCard>
     </View>
@@ -204,6 +214,7 @@ const TaskItem = ({
 };
 
 export default function TasksScreen() {
+  const insets = useSafeAreaInsets();
   const {
     tasks,
     folders,
@@ -225,6 +236,7 @@ export default function TasksScreen() {
     togglePin,
     archiveTask,
     unarchiveTask,
+    deleteTask,
     isLoading,
   } = useTaskStore();
   const {
@@ -234,6 +246,7 @@ export default function TasksScreen() {
     loadFolders: loadNoteFolders,
     addNote,
     updateNote,
+    deleteNote,
     togglePin: toggleNotePin,
     archiveNote,
     unarchiveNote,
@@ -604,6 +617,12 @@ export default function TasksScreen() {
                 onArchive={archiveTask}
                 onUnarchive={unarchiveTask}
                 onMoveTask={moveTask}
+                onDelete={(id) =>
+                  Alert.alert('Delete task?', 'This cannot be undone.', [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Delete', style: 'destructive', onPress: () => void deleteTask(id) },
+                  ])
+                }
                 folders={folders}
               />
             )}
@@ -717,6 +736,17 @@ export default function TasksScreen() {
                           color={item.isArchived ? Colors.warning : Colors.onSurfaceVariant}
                         />
                       </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          Alert.alert('Delete note?', 'This cannot be undone.', [
+                            { text: 'Cancel', style: 'cancel' },
+                            { text: 'Delete', style: 'destructive', onPress: () => void deleteNote(item.id) },
+                          ])
+                        }
+                        style={styles.iconAction}
+                      >
+                        <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
+                      </TouchableOpacity>
                     </View>
                   </View>
                   <Text style={styles.noteTitle} numberOfLines={1}>
@@ -744,7 +774,7 @@ export default function TasksScreen() {
       )}
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: insets.bottom + 24 }]}
         onPress={() => (contentMode === 'tasks' ? setIsAddSheetVisible(true) : openNewNote())}
       >
         <MaterialIcons name="add" size={32} color="white" />

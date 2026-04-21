@@ -6,10 +6,14 @@ import { useAuthStore } from './authStore';
 
 export type FriendListUser = Pick<
   User,
-  'id' | 'full_name' | 'username' | 'avatar_url' | 'xp' | 'streak_count' | 'rank_tier' | 'is_coordinator'
+  'id' | 'full_name' | 'username' | 'avatar_url' | 'xp' | 'streak_count' | 'is_coordinator'
 > & { college_name: string | null };
 
 type PendingRequestWithSender = FriendRequest & { sender: FriendListUser | null };
+type FriendRequestRow = Pick<
+  FriendRequest,
+  'id' | 'sender_id' | 'receiver_id' | 'status' | 'created_at' | 'updated_at'
+>;
 
 interface FriendStoreState {
   friends: FriendListUser[];
@@ -41,6 +45,18 @@ function uniqueById<T extends { id: string }>(items: T[]) {
   return Array.from(map.values());
 }
 
+function normalizePendingByUser(
+  incoming: FriendRequest[],
+  me: string
+): Record<string, FriendRequest> {
+  const out: Record<string, FriendRequest> = {};
+  for (const req of incoming) {
+    const otherUserId = req.sender_id === me ? req.receiver_id : req.sender_id;
+    out[otherUserId] = req;
+  }
+  return out;
+}
+
 export const useFriendStore = create<FriendStoreState>((set, get) => ({
   friends: [],
   pendingIncoming: [],
@@ -60,7 +76,7 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
 
     const { data, error } = await supabase
       .from('users')
-      .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, colleges(name)')
+      .select('id, full_name, username, avatar_url, xp, streak_count, is_coordinator, colleges(name)')
       .ilike('username', `${clean}%`)
       .limit(limit);
 
@@ -79,7 +95,6 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
         avatar_url: u.avatar_url,
         xp: u.xp,
         streak_count: u.streak_count,
-        rank_tier: u.rank_tier,
         is_coordinator: u.is_coordinator,
         college_name: u.colleges?.name ?? null,
       })) as FriendListUser[];
@@ -107,7 +122,7 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
 
       const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, colleges(name)')
+        .select('id, full_name, username, avatar_url, xp, streak_count, is_coordinator, colleges(name)')
         .in('id', friendIds);
 
       if (usersError) throw new Error(usersError.message);
@@ -120,7 +135,6 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
         avatar_url: u.avatar_url,
         xp: u.xp,
         streak_count: u.streak_count,
-        rank_tier: u.rank_tier,
         is_coordinator: u.is_coordinator,
         college_name: u.colleges?.name ?? null,
       }));
@@ -148,17 +162,27 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
     if (!me) return;
     set({ isLoading: true, error: null });
     try {
-      const { data, error } = await supabase
+      const { data: incomingData, error: incomingError } = await supabase
         .from('friend_requests')
         .select(
-          'id, sender_id, receiver_id, status, created_at, updated_at, sender:sender_id(id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, colleges(name))'
+          'id, sender_id, receiver_id, status, created_at, updated_at, sender:sender_id(id, full_name, username, avatar_url, xp, streak_count, is_coordinator, colleges(name))'
         )
         .eq('receiver_id', me)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
+      if (incomingError) throw new Error(incomingError.message);
+
+      const { data, error } = await supabase
+        .from('friend_requests')
+        .select('id, sender_id, receiver_id, status, created_at, updated_at')
+        .eq('sender_id', me)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
       if (error) throw new Error(error.message);
-      const rows = (data ?? []) as any[];
+      const rows = (incomingData ?? []) as any[];
+      const outgoingRequests = ((data ?? []) as FriendRequest[]) ?? [];
       const pendingIncoming: PendingRequestWithSender[] = rows.map((r) => ({
         id: r.id,
         sender_id: r.sender_id,
@@ -174,7 +198,6 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
               avatar_url: r.sender.avatar_url,
               xp: r.sender.xp,
               streak_count: r.sender.streak_count,
-              rank_tier: r.sender.rank_tier,
               is_coordinator: r.sender.is_coordinator,
               college_name: r.sender.colleges?.name ?? null,
             } as FriendListUser)
@@ -183,9 +206,13 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
 
       set((state) => ({
         pendingIncoming,
+        pendingOutgoingByUserId: normalizePendingByUser(outgoingRequests, me),
         relationshipByUserId: {
           ...state.relationshipByUserId,
           ...Object.fromEntries(pendingIncoming.map((p) => [p.sender_id, { kind: 'incoming_request', requestId: p.id }])),
+          ...Object.fromEntries(
+            outgoingRequests.map((p) => [p.receiver_id, { kind: 'outgoing_request' as const, requestId: p.id }])
+          ),
         },
         isLoading: false,
       }));
@@ -206,7 +233,7 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
     if (cached) return cached;
 
     // 1) Check friendships
-    const { data: friendship, error: friendshipError } = await supabase
+    const { data: friendshipData, error: friendshipError } = await supabase
       .from('friendships')
       .select('id')
       .eq('user_id', me)
@@ -217,6 +244,7 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
       set({ error: friendshipError.message });
       return { kind: 'none' };
     }
+    const friendship = (friendshipData ?? null) as { id?: string } | null;
     if (friendship?.id) {
       const status: FriendshipStatus = { kind: 'friends' };
       set((state) => ({
@@ -226,7 +254,7 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
     }
 
     // 2) Check pending requests in either direction
-    const { data: req, error: reqError } = await supabase
+    const { data: reqData, error: reqError } = await supabase
       .from('friend_requests')
       .select('id, sender_id, receiver_id, status, created_at, updated_at')
       .or(`and(sender_id.eq.${me},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${me})`)
@@ -239,6 +267,7 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
     }
 
     let status: FriendshipStatus = { kind: 'none' };
+    const req = (reqData ?? null) as FriendRequestRow | null;
     if (req?.id) {
       status =
         req.sender_id === me
@@ -252,7 +281,7 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
         status.kind === 'outgoing_request'
           ? {
               ...state.pendingOutgoingByUserId,
-              [otherUserId]: req as FriendRequest,
+              [otherUserId]: req as unknown as FriendRequest,
             }
           : state.pendingOutgoingByUserId,
     }));
@@ -265,6 +294,12 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
     if (!me || !receiverId || receiverId === me) return false;
     set({ isLoading: true, error: null });
     try {
+      const existing = await get().fetchRelationship(receiverId);
+      if (existing.kind !== 'none') {
+        set({ isLoading: false });
+        return true;
+      }
+
       const { data, error } = await supabase
         .from('friend_requests')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -285,9 +320,15 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
       }));
       return true;
     } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send request';
+      if (message.toLowerCase().includes('duplicate key value')) {
+        const refreshed = await get().fetchRelationship(receiverId);
+        set({ isLoading: false });
+        return refreshed.kind !== 'none';
+      }
       set({
         isLoading: false,
-        error: err instanceof Error ? err.message : 'Failed to send request',
+        error: message,
       });
       return false;
     }
@@ -298,21 +339,20 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
     if (!me || !requestId) return false;
     set({ isLoading: true, error: null });
     try {
-      const { data: req, error: reqError } = await supabase
+      const { data: reqData, error: reqError } = await supabase
         .from('friend_requests')
         .select('id, sender_id, receiver_id, status, created_at, updated_at')
         .eq('id', requestId)
         .single();
 
+      const req = (reqData ?? null) as FriendRequestRow | null;
       if (reqError || !req) throw new Error(reqError?.message ?? 'Request not found');
       if (req.receiver_id !== me) throw new Error('Unauthorized request');
 
       const friendId = String(req.sender_id);
 
-      const { error: updateError } = await supabase
-        .from('friend_requests')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update({ status: 'accepted', updated_at: new Date().toISOString() } as any)
+      const { error: updateError } = await (supabase.from('friend_requests') as any)
+        .update({ status: 'accepted', updated_at: new Date().toISOString() })
         .eq('id', requestId);
       if (updateError) throw new Error(updateError.message);
 
@@ -320,11 +360,17 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
       const { error: insertError } = await supabase
         .from('friendships')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert([{ user_id: me, friend_id: friendId }, { user_id: friendId, friend_id: me }] as any);
+        .upsert([{ user_id: me, friend_id: friendId }, { user_id: friendId, friend_id: me }] as any, {
+          onConflict: 'user_id,friend_id',
+          ignoreDuplicates: true,
+        });
       if (insertError) throw new Error(insertError.message);
 
       set((state) => ({
         pendingIncoming: state.pendingIncoming.filter((p) => p.id !== requestId),
+        pendingOutgoingByUserId: Object.fromEntries(
+          Object.entries(state.pendingOutgoingByUserId).filter(([, req]) => req.id !== requestId)
+        ),
         relationshipByUserId: { ...state.relationshipByUserId, [friendId]: { kind: 'friends' } },
         isLoading: false,
       }));
@@ -345,21 +391,20 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
     if (!me || !requestId) return false;
     set({ isLoading: true, error: null });
     try {
-      const { data: req, error: reqError } = await supabase
+      const { data: reqData, error: reqError } = await supabase
         .from('friend_requests')
         .select('id, sender_id, receiver_id, status, created_at, updated_at')
         .eq('id', requestId)
         .single();
 
+      const req = (reqData ?? null) as FriendRequestRow | null;
       if (reqError || !req) throw new Error(reqError?.message ?? 'Request not found');
       if (req.receiver_id !== me) throw new Error('Unauthorized request');
 
       const friendId = String(req.sender_id);
 
-      const { error: updateError } = await supabase
-        .from('friend_requests')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update({ status: 'rejected', updated_at: new Date().toISOString() } as any)
+      const { error: updateError } = await (supabase.from('friend_requests') as any)
+        .update({ status: 'rejected', updated_at: new Date().toISOString() })
         .eq('id', requestId);
       if (updateError) throw new Error(updateError.message);
 
@@ -368,6 +413,9 @@ export const useFriendStore = create<FriendStoreState>((set, get) => ({
         delete next[friendId];
         return {
           pendingIncoming: state.pendingIncoming.filter((p) => p.id !== requestId),
+          pendingOutgoingByUserId: Object.fromEntries(
+            Object.entries(state.pendingOutgoingByUserId).filter(([, req]) => req.id !== requestId)
+          ),
           relationshipByUserId: next,
           isLoading: false,
         };

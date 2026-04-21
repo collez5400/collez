@@ -74,10 +74,11 @@
 ### Rule 9: Commit and Push Upon Completion
 - Before replying that the implementation of a phase or part of the plan is completed, you MUST crosscheck it.
 - Ensure all files are modified correctly and there are no errors.
+- First verify all intended files are saved to disk (clean save check) before any commit operation.
 - Before declaring any phase/step as implemented, resolve all current errors first.
 - If errors are caused by files/features planned for future phases and those files are not present yet, explicitly report that status and ask the user whether to fix now or defer to the planned phase.
 - If any code change requires execution inside Supabase (SQL migration, RPC/function deployment, cron setup, RLS/policy updates, etc.), explicitly inform the user what must be run in Supabase before claiming completion.
-- Once verified error-free, you must commit and push all the changes to the repository before marking the phase as `✅ COMPLETE`.
+- Commit/push should happen only after save verification and explicit user confirmation to proceed with commit.
 
 ### Rule 10: Full-Phase Completion Is Mandatory
 - **ALWAYS properly complete the full phase when started.**

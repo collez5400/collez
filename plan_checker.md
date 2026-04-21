@@ -97,7 +97,7 @@
 | 1J | Cloud Features — XP & Rank System | `✅ COMPLETE` | 6/6 |
 | 1K | Cloud Features — Leaderboard | `✅ COMPLETE` | 5/5 |
 | 1L | Cloud Features — Daily Quote | `✅ COMPLETE` | 3/3 |
-| 1M | Cloud Features — Profile System | `⬜ NOT STARTED` | 0/5 |
+| 1M | Cloud Features — Profile System | `✅ COMPLETE` | 5/5 |
 | 1N | Home Dashboard (Full) | `⬜ NOT STARTED` | 0/7 |
 | 1O | Cache & Offline System | `⬜ NOT STARTED` | 0/4 |
 | 1P | Admin Dashboard (Basic) | `⬜ NOT STARTED` | 0/7 |
@@ -768,19 +768,19 @@
 ---
 
 ## PHASE 1M: Cloud Features — Profile System 👤
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 2 days
 **Goal**: User profile view and edit with all stats displayed.
 **Reference**: Section 3.8, Screens 16-17
 
 ### Steps
 
-- [ ] **1M.1** — Create `src/store/userStore.ts` (Zustand)
+- [x] **1M.1** — Create `src/store/userStore.ts` (Zustand)
   - State: `profile` (full user data), `badges`
   - Actions: `fetchProfile()`, `updateProfile(data)`, `uploadAvatar(uri)`
   - Username change gate: check `updated_at` > 30 days
 
-- [ ] **1M.2** — Create `app/(tabs)/profile.tsx` — Own Profile Screen
+- [x] **1M.2** — Create `app/(tabs)/profile.tsx` — Own Profile Screen
   - Large avatar with edit overlay (ImageBackground + TouchableOpacity)
   - Name, username, college name
   - Stats row: Rank badge, XP count, Streak count (3-column)
@@ -788,20 +788,20 @@
   - Coordinator badge special section (if applicable)
   - Edit Profile, Settings, Logout buttons
 
-- [ ] **1M.3** — Create Edit Profile bottom sheet / screen
+- [x] **1M.3** — Create Edit Profile bottom sheet / screen
   - Avatar: `expo-image-picker` → upload to Supabase Storage → update `avatar_url`
   - Name TextInput
   - Username TextInput (show restriction notice if <30 days)
   - "Save" GradientButton → updateProfile()
 
-- [ ] **1M.4** — Create Settings Screen
+- [x] **1M.4** — Create Settings Screen
   - Edit Name, Edit Username
   - Change College (info: requires admin)
   - About COLLEZ, Terms of Service, Privacy Policy links
   - Delete Account (with confirmation)
   - App version display (`expo-constants`)
 
-- [ ] **1M.5** — Create Other User Profile Screen `app/profile/[id].tsx`
+- [x] **1M.5** — Create Other User Profile Screen `app/profile/[id].tsx`
   - Same layout, data fetched by user ID
   - "Add Friend" / "Friends" / "Pending" button (inactive until Phase 2)
   - No settings/logout
@@ -1360,23 +1360,24 @@
 | 8 | 2026-04-20 | 1K | Completed 1K.1 to 1K.4 (leaderboard store/screen/components + home mini card) | Added cached paginated leaderboard Zustand store (college/national/weekly), full rankings tab with sticky user rank card + FlashList + pull-to-refresh, reusable leaderboard row components, and dashboard `LeaderboardMini` linked to rankings |
 | 9 | 2026-04-21 | 1K | Completed 1K.5 (seed + verification hardening) | Added Phase 0 Supabase schema migration + rerunnable leaderboard seed workflow, validated leaderboard store pagination/refresh/cache paths, and finalized Phase 1K completion criteria |
 | 10 | 2026-04-21 | 1L | Completed 1L.1 to 1L.3 (daily quote service/card + 30-day seed SQL) | Added Supabase-backed quote fetch with 24h AsyncStorage cache + fallback, integrated reusable `QuoteCard` into home with `quote_read` streak trigger, and added rerunnable `daily_quotes_seed.sql` |
+| 11 | 2026-04-21 | 1M | Completed 1M.1 to 1M.5 (user store + own/other profile + edit sheet + settings) | Added `userStore` with profile/badge fetching, update and avatar upload + 30-day username cooldown gate; replaced own profile with stats/coordinator/badges + edit modal + logout; added `settings.tsx`; added `app/profile/[id].tsx` with friend placeholder and report action |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1M — Cloud Features — Profile System`
-**Next Step**: `1M.1 — Create user store (fetch/update profile + avatar upload + username change gate)`
+**Active Phase**: `🔵 Phase 1N — Home Dashboard (Full)`
+**Next Step**: `1N.1 — Create GreetingHeader (time-aware greeting + avatar + brand + quick action icon)`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 73
+- **Completed**: 78
 - **In Progress**: 0
-- **Remaining**: 125
-- **Overall Progress**: 36.9%
+- **Remaining**: 120
+- **Overall Progress**: 39.4%
 
 ---
 

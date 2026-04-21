@@ -91,6 +91,17 @@ create table if not exists public.badges (
 
 create index if not exists idx_badges_user on public.badges(user_id);
 
+create table if not exists public.quotes (
+  id uuid primary key default gen_random_uuid(),
+  text text not null,
+  author text,
+  scheduled_date date unique,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_quotes_date on public.quotes(scheduled_date);
+
 -- Leaderboard materialized views
 drop materialized view if exists public.mv_college_leaderboard;
 create materialized view public.mv_college_leaderboard as

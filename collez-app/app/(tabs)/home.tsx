@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { useStreakStore } from '../../src/store/streakStore';
@@ -10,6 +10,8 @@ import { XpProgressBar } from '../../src/components/home/XpProgressBar';
 import { MilestoneCelebrationModal } from '../../src/components/streak/MilestoneCelebrationModal';
 import { LeaderboardMini } from '../../src/components/home/LeaderboardMini';
 import { useLeaderboardStore } from '../../src/store/leaderboardStore';
+import { fetchTodayQuote } from '../../src/services/quoteService';
+import { QuoteCard } from '../../src/components/home/QuoteCard';
 
 export default function HomeScreen() {
   const {
@@ -22,6 +24,8 @@ export default function HomeScreen() {
   } = useStreakStore();
   const { totalXp, rankTier, rankProgress, xpNeededToNextRank, fetchXpData } = useXpStore();
   const { fetchCollegeBoard } = useLeaderboardStore();
+  const [dailyQuote, setDailyQuote] = useState('Progress over perfection.');
+  const [dailyQuoteAuthor, setDailyQuoteAuthor] = useState('COLLEZ');
   const quoteLoggedRef = useRef(false);
 
   useEffect(() => {
@@ -29,6 +33,16 @@ export default function HomeScreen() {
     void fetchXpData();
     void fetchCollegeBoard();
   }, [fetchCollegeBoard, fetchStreakData, fetchXpData]);
+
+  useEffect(() => {
+    const loadQuote = async () => {
+      const quote = await fetchTodayQuote();
+      setDailyQuote(quote.text);
+      setDailyQuoteAuthor(quote.author);
+    };
+
+    void loadQuote();
+  }, []);
 
   const handleQuoteLayout = () => {
     if (quoteLoggedRef.current) return;
@@ -55,12 +69,7 @@ export default function HomeScreen() {
           <Text style={styles.infoValue}>{isLoggedToday ? 'Yes' : 'No'}</Text>
         </View>
 
-        <View style={styles.quoteCard} onLayout={handleQuoteLayout}>
-          <Text style={styles.quoteLabel}>Daily quote preview</Text>
-          <Text style={styles.quoteText}>
-            "Progress over perfection."
-          </Text>
-        </View>
+        <QuoteCard quote={dailyQuote} author={dailyQuoteAuthor} onViewed={handleQuoteLayout} />
       </ScrollView>
 
       <MilestoneCelebrationModal
@@ -115,27 +124,5 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.heading,
     fontSize: Typography.size.lg,
     fontWeight: '700',
-  },
-  quoteCard: {
-    backgroundColor: Colors.surfaceLow,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}44`,
-    padding: Spacing.md,
-    minHeight: 120,
-    justifyContent: 'center',
-    gap: Spacing.xs,
-  },
-  quoteLabel: {
-    color: Colors.primary,
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.size.sm,
-    fontWeight: '700',
-  },
-  quoteText: {
-    color: Colors.onSurface,
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.size.md,
-    lineHeight: 24,
   },
 });

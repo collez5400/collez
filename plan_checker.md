@@ -98,7 +98,7 @@
 | 1K | Cloud Features — Leaderboard | `✅ COMPLETE` | 5/5 |
 | 1L | Cloud Features — Daily Quote | `✅ COMPLETE` | 3/3 |
 | 1M | Cloud Features — Profile System | `✅ COMPLETE` | 5/5 |
-| 1N | Home Dashboard (Full) | `⬜ NOT STARTED` | 0/7 |
+| 1N | Home Dashboard (Full) | `✅ COMPLETE` | 7/7 |
 | 1O | Cache & Offline System | `⬜ NOT STARTED` | 0/4 |
 | 1P | Admin Dashboard (Basic) | `⬜ NOT STARTED` | 0/7 |
 | 1Q | Polish, Testing & Launch Prep | `⬜ NOT STARTED` | 0/10 |
@@ -810,46 +810,46 @@
 ---
 
 ## PHASE 1N: Home Dashboard (Full) 🏠
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 4 days
 **Goal**: Assemble the complete dashboard with all cards and data sources.
 **Reference**: Section 3.1, Screen 7
 
 ### Steps
 
-- [ ] **1N.1** — Create `src/components/home/GreetingHeader.tsx`
+- [x] **1N.1** — Create `src/components/home/GreetingHeader.tsx`
   - Time-aware greeting ("Good Morning, [Name]!") using `dayjs`
   - Profile avatar (left), COLLEZ branding (center), ⚡ icon button (right)
   - Avatar navigates to own profile
 
-- [ ] **1N.2** — Create `src/components/home/StatPills.tsx`
+- [x] **1N.2** — Create `src/components/home/StatPills.tsx`
   - Horizontal ScrollView of stat pills: 🔥 Streak | ⚡ XP | 🏅 Rank
   - Reanimated count-up numbers
   - Each pill navigates to relevant tab
 
-- [ ] **1N.3** — Create `src/components/home/EventBanner.tsx`
+- [x] **1N.3** — Create `src/components/home/EventBanner.tsx`
   - Full-width rounded ImageBackground card
   - "LIVE" badge (blinking Reanimated animation)
   - Event title + CTA "Join Now" button
   - Hidden with `display: 'none'` if no active event
 
-- [ ] **1N.4** — Create `src/components/home/TimetableCard.tsx`
+- [x] **1N.4** — Create `src/components/home/TimetableCard.tsx`
   - Next 2 upcoming classes from timetableStore
   - Subject name, time range, color-coded left border
   - "No classes today" empty state
   - Navigate to timetable tab on tap
 
-- [ ] **1N.5** — Create `src/components/home/TasksCard.tsx`
+- [x] **1N.5** — Create `src/components/home/TasksCard.tsx`
   - Active tasks count + LinearGradient progress bar
   - First 2 uncompleted tasks preview
   - Tap → navigate to tasks tab
 
-- [ ] **1N.6** — Create `src/components/home/QuickActions.tsx`
+- [x] **1N.6** — Create `src/components/home/QuickActions.tsx`
   - 2×2 grid of action buttons (GlassCard style)
   - Add Task | Quick Note | Upload PDF | Customize
   - Each triggers navigation or bottom sheet
 
-- [ ] **1N.7** — Create `app/(tabs)/home.tsx` — Home Screen
+- [x] **1N.7** — Create `app/(tabs)/home.tsx` — Home Screen
   - ScrollView assembling all components
   - Bento-style grid layout using absolute sizing
   - Loading strategy: local store instant, cloud fetch async, show ShimmerLoader for cloud cards
@@ -1361,23 +1361,24 @@
 | 9 | 2026-04-21 | 1K | Completed 1K.5 (seed + verification hardening) | Added Phase 0 Supabase schema migration + rerunnable leaderboard seed workflow, validated leaderboard store pagination/refresh/cache paths, and finalized Phase 1K completion criteria |
 | 10 | 2026-04-21 | 1L | Completed 1L.1 to 1L.3 (daily quote service/card + 30-day seed SQL) | Added Supabase-backed quote fetch with 24h AsyncStorage cache + fallback, integrated reusable `QuoteCard` into home with `quote_read` streak trigger, and added rerunnable `daily_quotes_seed.sql` |
 | 11 | 2026-04-21 | 1M | Completed 1M.1 to 1M.5 (user store + own/other profile + edit sheet + settings) | Added `userStore` with profile/badge fetching, update and avatar upload + 30-day username cooldown gate; replaced own profile with stats/coordinator/badges + edit modal + logout; added `settings.tsx`; added `app/profile/[id].tsx` with friend placeholder and report action |
+| 12 | 2026-04-21 | 1N | Completed 1N.1 to 1N.7 (home dashboard full assembly) | Added `GreetingHeader`, `StatPills`, `EventBanner`, `TimetableCard`, `TasksCard`, and `QuickActions`; rebuilt `app/(tabs)/home.tsx` with bento layout, pull-to-refresh, cloud/local data loading, quote shimmer fallback, and navigation wiring to profile/rankings/vault/settings |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1N — Home Dashboard (Full)`
-**Next Step**: `1N.1 — Create GreetingHeader (time-aware greeting + avatar + brand + quick action icon)`
+**Active Phase**: `🔵 Phase 1O — Cache & Offline System`
+**Next Step**: `1O.1 — Implement SQLite app_cache table (key/value/expires_at)`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 78
+- **Completed**: 85
 - **In Progress**: 0
-- **Remaining**: 120
-- **Overall Progress**: 39.4%
+- **Remaining**: 113
+- **Overall Progress**: 42.9%
 
 ---
 

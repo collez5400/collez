@@ -8,6 +8,7 @@
 
 import type { User } from './user';
 import type { College, CollegeRequest } from './college';
+import type { FriendRequest, Friendship } from './friend';
 
 export interface XpTransaction {
   id: string;
@@ -33,6 +34,9 @@ export interface Badge {
   earned_at: string;
 }
 
+export type FriendRequestRow = FriendRequest;
+export type FriendshipRow = Friendship;
+
 type TableDef<Row> = {
   Row: Row;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +54,8 @@ export type Database = {
       xp_transactions: TableDef<XpTransaction>;
       streak_logs: TableDef<StreakLog>;
       badges: TableDef<Badge>;
+      friend_requests: TableDef<FriendRequestRow>;
+      friendships: TableDef<FriendshipRow>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

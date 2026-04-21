@@ -7,11 +7,21 @@ import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { BadgeIcon } from '../../src/components/shared/BadgeIcon';
 import { GlassCard } from '../../src/components/shared/GlassCard';
 import { useUserStore } from '../../src/store/userStore';
+import { useFriendStore } from '../../src/store/friendStore';
+import { useAuthStore } from '../../src/store/authStore';
 import { getRankMeta, getRankTier } from '../../src/utils/rankCalculator';
 
 export default function OtherUserProfileScreen() {
   const params = useLocalSearchParams<{ id: string }>();
   const { profile, isLoading, fetchProfile } = useUserStore();
+  const {
+    relationshipByUserId,
+    fetchRelationship,
+    sendFriendRequest,
+    acceptFriendRequest,
+    removeFriend,
+  } = useFriendStore();
+  const myStreakCount = useAuthStore((s) => s.user?.streak_count ?? 0);
 
   useEffect(() => {
     if (params.id) {
@@ -19,10 +29,44 @@ export default function OtherUserProfileScreen() {
     }
   }, [fetchProfile, params.id]);
 
+  useEffect(() => {
+    if (!params.id) return;
+    void fetchRelationship(params.id);
+  }, [fetchRelationship, params.id]);
+
   const rankMeta = useMemo(
     () => getRankMeta(getRankTier(profile?.xp ?? 0)),
     [profile?.xp]
   );
+
+  const relationship = useMemo(() => {
+    if (!params.id) return { kind: 'none' as const };
+    return relationshipByUserId[params.id] ?? ({ kind: 'none' as const } as const);
+  }, [params.id, relationshipByUserId]);
+
+  const mutualFriendCount = useMemo(() => {
+    if (!params.id) return 0;
+    // Placeholder until we add a dedicated mutual-friends query.
+    return 0;
+  }, [params.id]);
+
+  const streakDeltaText = useMemo(() => {
+    const theirStreak = profile?.streak_count ?? 0;
+    const delta = theirStreak - myStreakCount;
+    if (delta === 0) return 'You’re tied on streak.';
+    if (delta > 0) return `They’re +${delta} days ahead.`;
+    return `You’re +${Math.abs(delta)} days ahead.`;
+  }, [myStreakCount, profile?.streak_count]);
+
+  const friendButton = useMemo(() => {
+    if (!profile?.id) return { label: 'Add Friend', sub: '', disabled: true };
+    if (relationship.kind === 'friends') return { label: 'Friends', sub: 'Tap to remove', disabled: false };
+    if (relationship.kind === 'outgoing_request')
+      return { label: 'Request Sent', sub: 'Waiting for approval', disabled: true };
+    if (relationship.kind === 'incoming_request')
+      return { label: 'Accept Request', sub: 'They want to add you', disabled: false };
+    return { label: 'Add Friend', sub: 'Send a friend request', disabled: false };
+  }, [profile?.id, relationship.kind]);
 
   return (
     <View style={styles.screen}>
@@ -55,10 +99,46 @@ export default function OtherUserProfileScreen() {
           </GlassCard>
         </View>
 
-        <Pressable style={styles.friendBtn}>
-          <Text style={styles.friendBtnText}>Add Friend</Text>
-          <Text style={styles.friendSubText}>Phase 2</Text>
+        <Pressable
+          style={[styles.friendBtn, friendButton.disabled && styles.friendBtnDisabled]}
+          disabled={friendButton.disabled}
+          onPress={() => {
+            if (!profile?.id) return;
+            if (relationship.kind === 'none') {
+              void sendFriendRequest(profile.id);
+              return;
+            }
+            if (relationship.kind === 'incoming_request') {
+              void acceptFriendRequest(relationship.requestId);
+              return;
+            }
+            if (relationship.kind === 'friends') {
+              Alert.alert('Remove friend?', `Remove @${profile.username} from your friends list?`, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Remove',
+                  style: 'destructive',
+                  onPress: () => void removeFriend(profile.id),
+                },
+              ]);
+            }
+          }}
+          accessibilityLabel="Friend action button"
+        >
+          <Text style={styles.friendBtnText}>{friendButton.label}</Text>
+          <Text style={styles.friendSubText}>{friendButton.sub}</Text>
         </Pressable>
+
+        <GlassCard style={styles.socialCard}>
+          <View style={styles.socialRow}>
+            <MaterialIcons name="people" size={18} color={Colors.onSurfaceVariant} />
+            <Text style={styles.socialText}>Mutual friends: {mutualFriendCount}</Text>
+          </View>
+          <View style={styles.socialRow}>
+            <MaterialIcons name="local-fire-department" size={18} color={Colors.secondary} />
+            <Text style={styles.socialText}>{streakDeltaText}</Text>
+          </View>
+        </GlassCard>
 
         <Pressable
           style={styles.reportBtn}
@@ -145,6 +225,9 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     alignItems: 'center',
   },
+  friendBtnDisabled: {
+    opacity: 0.65,
+  },
   friendBtnText: {
     color: Colors.primary,
     fontFamily: Typography.fontFamily.heading,
@@ -156,6 +239,20 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.xs,
     marginTop: 2,
+  },
+  socialCard: {
+    padding: Spacing.md,
+    gap: Spacing.sm,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  socialText: {
+    color: Colors.onSurfaceVariant,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.sm,
   },
   reportBtn: {
     alignSelf: 'flex-start',

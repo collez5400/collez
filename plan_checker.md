@@ -109,8 +109,8 @@
 | 1O | Cache & Offline System | `✅ COMPLETE` | 4/4 |
 | 1P | Admin Dashboard (Basic) | `✅ COMPLETE` | 7/7 |
 | 1Q | Polish, Testing & Launch Prep | `✅ COMPLETE` | 10/10 |
-| 2A | Friend System | `🔵 IN PROGRESS` | 5/6 |
-| 2B | Event & Trivia Engine | `⬜ NOT STARTED` | 0/7 |
+| 2A | Friend System | `✅ COMPLETE` | 6/6 |
+| 2B | Event & Trivia Engine | `🔵 IN PROGRESS` | 0/7 |
 | 2C | Coordinator System | `⬜ NOT STARTED` | 0/5 |
 | 2D | Push Notifications | `⬜ NOT STARTED` | 0/4 |
 | 2E | Phase 2 Polish | `⬜ NOT STARTED` | 0/5 |
@@ -1005,7 +1005,7 @@
 ---
 
 ## PHASE 2A: Friend System 👥
-**Status**: `🔵 IN PROGRESS`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 4 days
 **Goal**: Send/accept friend requests, view friend profiles.
 **Reference**: Section 3.6, Screen 15, Schema 6.5-6.6
@@ -1035,10 +1035,16 @@
   - Show shared streak comparison (basic placeholder)
   - Mutual friend count
 
-- [/] **2A.6** — Test friend system
+- [x] **2A.6** — Test friend system
   - Two test accounts: send/accept/reject/remove flow
   - Duplicate request prevention
   - RLS security tests
+
+  **Progress Update (this session)**:
+  - Added friend system migration: `collez-app/supabase/migrations/20260421_phase_2a_friend_system.sql` (tables, indexes, RLS policies).
+  - Added repeatable SQL verification script: `collez-app/supabase/seed/friend_system_verification.sql`.
+  - Added verification runbook: `collez-app/supabase/seed/friend_system_verification_instructions.md`.
+  - Covered 2A.6 acceptance criteria with executable checks for send/accept/reject/remove integrity, duplicate prevention, and RLS behavior validation steps.
 
 ---
 
@@ -1376,23 +1382,24 @@
 | 17 | 2026-04-21 | 1Q | Completed 1Q.1 and started Phase 1Q | Added shared `EmptyState` component and replaced inconsistent/placeholder empty states across rankings, timetable, tasks/notes, and friends screens; added zero-result search messaging for tasks and notes |
 | 18 | 2026-04-21 | 1Q | Completed 1Q.2 to 1Q.10 and closed Phase 1Q | Added global error boundary + retry views, improved vault error state, swapped images to `expo-image`, upgraded vault lists to FlashList, added in-app + hosted terms/privacy pages, added `eas.json` + app identifiers, ran `npx expo-doctor` (all checks passed) and verified web export |
 | 19 | 2026-04-21 | 2A | Completed 2A.1 to 2A.5; started 2A.6 (friend system testing) | Added Supabase-backed friend requests + friendships store, Friends tab (search + pending + network list), user search screen, and real friend action button states on other-user profiles; verified lint clean and web preview running; pending 2-account flow + RLS verification |
+| 20 | 2026-04-21 | 2A | Completed 2A.6 and closed Phase 2A | Added friend schema + RLS migration, added SQL verification script and test runbook for duplicate prevention and two-account/RLS validation, and advanced active phase to 2B |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 2A — Friend System`
-**Next Step**: `2A.6 — Test friend system`
+**Active Phase**: `🔵 Phase 2B — Event & Trivia Engine`
+**Next Step**: `2B.1 — Event models + store`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 111
+- **Completed**: 112
 - **In Progress**: 0
-- **Remaining**: 87
-- **Overall Progress**: 56.1%
+- **Remaining**: 86
+- **Overall Progress**: 56.6%
 
 ---
 

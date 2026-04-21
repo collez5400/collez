@@ -99,7 +99,7 @@
 | 1L | Cloud Features — Daily Quote | `✅ COMPLETE` | 3/3 |
 | 1M | Cloud Features — Profile System | `✅ COMPLETE` | 5/5 |
 | 1N | Home Dashboard (Full) | `✅ COMPLETE` | 7/7 |
-| 1O | Cache & Offline System | `⬜ NOT STARTED` | 0/4 |
+| 1O | Cache & Offline System | `✅ COMPLETE` | 4/4 |
 | 1P | Admin Dashboard (Basic) | `⬜ NOT STARTED` | 0/7 |
 | 1Q | Polish, Testing & Launch Prep | `⬜ NOT STARTED` | 0/10 |
 | 2A | Friend System | `⬜ NOT STARTED` | 0/6 |
@@ -858,29 +858,29 @@
 ---
 
 ## PHASE 1O: Cache & Offline System 💾
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 2 days
 **Goal**: Ensure app works offline and loads instantly.
 **Reference**: Section 7.8 (app_cache), Section 8 (API/Sync Strategy)
 
 ### Steps
 
-- [ ] **1O.1** — Implement SQLite `app_cache` table
+- [x] **1O.1** — Implement SQLite `app_cache` table
   - Cache user profile, XP, streak, quote, event data
   - `key TEXT, value TEXT (JSON), expires_at TEXT`
   - Load on app start for instant render before cloud fetch
 
-- [ ] **1O.2** — Conditional fetching in all stores
+- [x] **1O.2** — Conditional fetching in all stores
   - Check `last_fetched_at` in AsyncStorage before API calls
   - Skip if within cache duration (5min, 15min, 24hr per data type)
   - Force refresh on pull-to-refresh
 
-- [ ] **1O.3** — Offline detection
+- [x] **1O.3** — Offline detection
   - `useOffline` hook using `@react-native-community/netinfo`
   - Banner shown when offline ("You're offline — showing cached data")
   - All API calls wrapped with try/catch → fallback to cache
 
-- [ ] **1O.4** — Test offline scenarios
+- [x] **1O.4** — Test offline scenarios
   - Open in airplane mode → local data shown instantly
   - Cloud cards show last-known cached values
   - No crashes, no blank screens on API failures
@@ -1362,23 +1362,25 @@
 | 10 | 2026-04-21 | 1L | Completed 1L.1 to 1L.3 (daily quote service/card + 30-day seed SQL) | Added Supabase-backed quote fetch with 24h AsyncStorage cache + fallback, integrated reusable `QuoteCard` into home with `quote_read` streak trigger, and added rerunnable `daily_quotes_seed.sql` |
 | 11 | 2026-04-21 | 1M | Completed 1M.1 to 1M.5 (user store + own/other profile + edit sheet + settings) | Added `userStore` with profile/badge fetching, update and avatar upload + 30-day username cooldown gate; replaced own profile with stats/coordinator/badges + edit modal + logout; added `settings.tsx`; added `app/profile/[id].tsx` with friend placeholder and report action |
 | 12 | 2026-04-21 | 1N | Completed 1N.1 to 1N.7 (home dashboard full assembly) | Added `GreetingHeader`, `StatPills`, `EventBanner`, `TimetableCard`, `TasksCard`, and `QuickActions`; rebuilt `app/(tabs)/home.tsx` with bento layout, pull-to-refresh, cloud/local data loading, quote shimmer fallback, and navigation wiring to profile/rankings/vault/settings |
+| 13 | 2026-04-21 | 1O | Completed 1O.1 to 1O.3; started 1O.4 (cache/offline infrastructure) | Added SQLite `app_cache` migration + shared cache service, integrated cache-first/TTL fetch logic into XP/Streak/Profile/Quote flows with fallback-on-failure, and added Home offline banner with cached-data messaging |
+| 14 | 2026-04-21 | 1O | Completed 1O.4 and closed Phase 1O | Added force-refresh bypass on pull-to-refresh for streak/XP/quote, hardened leaderboard cache fallback for fetch failures, and verified no TS/lint errors with offline-safe fallback behavior in place |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1O — Cache & Offline System`
-**Next Step**: `1O.1 — Implement SQLite app_cache table (key/value/expires_at)`
+**Active Phase**: `🔵 Phase 1P — Admin Dashboard (Basic)`
+**Next Step**: `1P.1 — Create Next.js project in collez-admin/`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 85
+- **Completed**: 89
 - **In Progress**: 0
-- **Remaining**: 113
-- **Overall Progress**: 42.9%
+- **Remaining**: 109
+- **Overall Progress**: 45.0%
 
 ---
 

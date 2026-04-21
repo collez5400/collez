@@ -22,6 +22,7 @@ import { ShimmerLoader } from '../../src/components/shared/ShimmerLoader';
 import { MilestoneCelebrationModal } from '../../src/components/streak/MilestoneCelebrationModal';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { fetchTodayQuote } from '../../src/services/quoteService';
+import { useOffline } from '../../src/hooks/useOffline';
 import { useAuthStore } from '../../src/store/authStore';
 import { useLeaderboardStore } from '../../src/store/leaderboardStore';
 import { useStreakStore } from '../../src/store/streakStore';
@@ -50,6 +51,7 @@ export default function HomeScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const quoteLoggedRef = useRef(false);
   const homeEvent = null;
+  const isOffline = useOffline();
 
   useEffect(() => {
     void fetchStreakData();
@@ -74,13 +76,13 @@ export default function HomeScreen() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await Promise.all([
-      fetchStreakData(),
-      fetchXpData(),
+      fetchStreakData({ forceRefresh: true }),
+      fetchXpData({ forceRefresh: true }),
       fetchCollegeBoard({ refresh: true }),
       fetchEntries(),
       loadTasks(),
       (async () => {
-        const quote = await fetchTodayQuote();
+        const quote = await fetchTodayQuote({ forceRefresh: true });
         setDailyQuote(quote.text);
         setDailyQuoteAuthor(quote.author);
       })(),
@@ -100,6 +102,13 @@ export default function HomeScreen() {
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />}
       >
+        {isOffline && (
+          <View style={styles.offlineBanner}>
+            <MaterialIcons name="wifi-off" size={14} color={Colors.error} />
+            <Text style={styles.offlineBannerText}>You're offline — showing cached data</Text>
+          </View>
+        )}
+
         <GreetingHeader
           fullName={authUser?.full_name ?? 'Scholar'}
           avatarUrl={authUser?.avatar_url}
@@ -184,6 +193,24 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.lg,
     gap: Spacing.md,
+  },
+  offlineBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: Spacing.xs,
+    borderWidth: 1,
+    borderColor: `${Colors.error}66`,
+    backgroundColor: `${Colors.error}22`,
+    borderRadius: 999,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+  },
+  offlineBannerText: {
+    color: Colors.error,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.xs,
+    fontWeight: '700',
   },
   bentoRow: {
     flexDirection: 'row',

@@ -97,6 +97,15 @@ const mapWeeklyRow = (row: Record<string, any>, fallbackPosition: number): Leade
 });
 
 const shouldUseCache = (updatedAt: number): boolean => Date.now() - updatedAt < LEADERBOARD_CACHE_TTL_MS;
+const readCachePayload = async (): Promise<LeaderboardCachePayload | null> => {
+  const cached = await AsyncStorage.getItem(LEADERBOARD_CACHE_KEY);
+  if (!cached) return null;
+  try {
+    return JSON.parse(cached) as LeaderboardCachePayload;
+  } catch {
+    return null;
+  }
+};
 
 export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
   collegeBoard: [],
@@ -120,22 +129,19 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     if (!refresh && !current.hasMoreCollege) return;
 
     if (!refresh && currentLength === 0) {
-      const cached = await AsyncStorage.getItem(LEADERBOARD_CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached) as LeaderboardCachePayload;
-        if (shouldUseCache(parsed.updatedAt) && parsed.collegeBoard.length > 0) {
-          set({
-            collegeBoard: parsed.collegeBoard,
-            nationalBoard: parsed.nationalBoard,
-            weeklyBoard: parsed.weeklyBoard,
-            userCollegeRank: parsed.userCollegeRank,
-            hasMoreCollege: parsed.collegeBoard.length >= LEADERBOARD_PAGE_SIZE,
-            hasMoreNational: parsed.nationalBoard.length >= LEADERBOARD_PAGE_SIZE,
-            hasMoreWeekly: parsed.weeklyBoard.length >= LEADERBOARD_PAGE_SIZE,
-            error: null,
-          });
-          return;
-        }
+      const parsed = await readCachePayload();
+      if (parsed && shouldUseCache(parsed.updatedAt) && parsed.collegeBoard.length > 0) {
+        set({
+          collegeBoard: parsed.collegeBoard,
+          nationalBoard: parsed.nationalBoard,
+          weeklyBoard: parsed.weeklyBoard,
+          userCollegeRank: parsed.userCollegeRank,
+          hasMoreCollege: parsed.collegeBoard.length >= LEADERBOARD_PAGE_SIZE,
+          hasMoreNational: parsed.nationalBoard.length >= LEADERBOARD_PAGE_SIZE,
+          hasMoreWeekly: parsed.weeklyBoard.length >= LEADERBOARD_PAGE_SIZE,
+          error: null,
+        });
+        return;
       }
     }
 
@@ -187,6 +193,22 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       };
       await AsyncStorage.setItem(LEADERBOARD_CACHE_KEY, JSON.stringify(payload));
     } catch (error) {
+      const parsed = await readCachePayload();
+      if (parsed?.collegeBoard?.length) {
+        set({
+          collegeBoard: parsed.collegeBoard,
+          nationalBoard: parsed.nationalBoard,
+          weeklyBoard: parsed.weeklyBoard,
+          userCollegeRank: parsed.userCollegeRank,
+          hasMoreCollege: parsed.collegeBoard.length >= LEADERBOARD_PAGE_SIZE,
+          hasMoreNational: parsed.nationalBoard.length >= LEADERBOARD_PAGE_SIZE,
+          hasMoreWeekly: parsed.weeklyBoard.length >= LEADERBOARD_PAGE_SIZE,
+          isLoading: false,
+          isRefreshing: false,
+          error: null,
+        });
+        return;
+      }
       set({
         error: error instanceof Error ? error.message : 'Failed fetching college leaderboard',
         isLoading: false,
@@ -234,6 +256,16 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
         error: null,
       });
     } catch (error) {
+      const parsed = await readCachePayload();
+      if (parsed?.nationalBoard?.length) {
+        set({
+          nationalBoard: parsed.nationalBoard,
+          isLoading: false,
+          isRefreshing: false,
+          error: null,
+        });
+        return;
+      }
       set({
         error: error instanceof Error ? error.message : 'Failed fetching national leaderboard',
         isLoading: false,
@@ -281,6 +313,16 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
         error: null,
       });
     } catch (error) {
+      const parsed = await readCachePayload();
+      if (parsed?.weeklyBoard?.length) {
+        set({
+          weeklyBoard: parsed.weeklyBoard,
+          isLoading: false,
+          isRefreshing: false,
+          error: null,
+        });
+        return;
+      }
       set({
         error: error instanceof Error ? error.message : 'Failed fetching weekly leaderboard',
         isLoading: false,

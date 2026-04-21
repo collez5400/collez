@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import dayjs from 'dayjs';
 import { CACHE_DURATIONS } from '../config/constants';
 import { supabase } from '../config/supabase';
+import { getCachedValue, markFetched, setCachedValue, shouldFetchByTimestamp } from './appCacheService';
 
 const QUOTE_CACHE_KEY_PREFIX = 'daily_quote_v1';
 
@@ -50,9 +51,16 @@ const cacheQuote = async (cacheKey: string, quote: DailyQuote): Promise<void> =>
 export async function fetchTodayQuote(options?: { forceRefresh?: boolean }): Promise<DailyQuote> {
   const dateKey = dayjs().format('YYYY-MM-DD');
   const cacheKey = buildCacheKey(dateKey);
+  const sqliteCacheKey = `quote:${dateKey}`;
   const forceRefresh = options?.forceRefresh ?? false;
 
-  if (!forceRefresh) {
+  const canFetch = await shouldFetchByTimestamp('quote_today', CACHE_DURATIONS.LONG, forceRefresh);
+  if (!canFetch) {
+    const sqliteQuote = await getCachedValue<DailyQuote>(sqliteCacheKey);
+    if (sqliteQuote) return sqliteQuote;
+  }
+
+  if (!forceRefresh && canFetch) {
     const cachedQuote = parseCachedQuote(await AsyncStorage.getItem(cacheKey));
     if (cachedQuote) return cachedQuote;
   }
@@ -80,8 +88,12 @@ export async function fetchTodayQuote(options?: { forceRefresh?: boolean }): Pro
       : FALLBACK_QUOTE;
 
     await cacheQuote(cacheKey, quote);
+    await setCachedValue(sqliteCacheKey, quote, CACHE_DURATIONS.LONG);
+    await markFetched('quote_today');
     return quote;
   } catch {
+    const sqliteQuote = await getCachedValue<DailyQuote>(sqliteCacheKey);
+    if (sqliteQuote) return sqliteQuote;
     const cachedQuote = parseCachedQuote(await AsyncStorage.getItem(cacheKey));
     return cachedQuote ?? FALLBACK_QUOTE;
   }

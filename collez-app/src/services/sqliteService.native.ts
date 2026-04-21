@@ -3,7 +3,7 @@ import * as SQLite from 'expo-sqlite';
 let db: SQLite.SQLiteDatabase | null = null;
 
 // The current database schema version
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 
 export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db;
@@ -109,6 +109,14 @@ export async function initSQLite() {
         created_at TEXT NOT NULL
       );
 
+      -- App cache
+      CREATE TABLE IF NOT EXISTS app_cache (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        expires_at TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
       COMMIT;
     `);
     // Set version after transaction commits
@@ -120,6 +128,20 @@ export async function initSQLite() {
     await database.execAsync(`
       BEGIN TRANSACTION;
       ALTER TABLE tasks ADD COLUMN completed_at TEXT;
+      COMMIT;
+    `);
+    await database.execAsync('PRAGMA user_version = 2');
+  }
+
+  if (currentVersion <= 2) {
+    await database.execAsync(`
+      BEGIN TRANSACTION;
+      CREATE TABLE IF NOT EXISTS app_cache (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        expires_at TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
       COMMIT;
     `);
     await database.execAsync(`PRAGMA user_version = ${CURRENT_VERSION}`);

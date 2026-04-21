@@ -3,6 +3,8 @@ import { supabase } from '../config/supabase';
 import { User } from '../models/user';
 import { Badge } from '../models/database.types';
 import { useAuthStore } from './authStore';
+import { CACHE_DURATIONS } from '../config/constants';
+import { getCachedValue, markFetched, setCachedValue, shouldFetchByTimestamp } from '../services/appCacheService';
 
 const USERNAME_CHANGE_COOLDOWN_DAYS = 30;
 
@@ -56,6 +58,24 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
   fetchProfile: async (userId) => {
     const targetUserId = userId ?? useAuthStore.getState().user?.id;
     if (!targetUserId) return null;
+    const cacheKey = `profile:${targetUserId}`;
+    const shouldFetch = await shouldFetchByTimestamp(`profile_${targetUserId}`, CACHE_DURATIONS.LONG);
+
+    if (!shouldFetch) {
+      const cached = await getCachedValue<PublicProfile>(cacheKey);
+      if (cached) {
+        const daysSinceUpdate = getDaysSinceUpdated(cached.updated_at);
+        const canChange = daysSinceUpdate >= USERNAME_CHANGE_COOLDOWN_DAYS;
+        const daysRemaining = canChange ? 0 : USERNAME_CHANGE_COOLDOWN_DAYS - daysSinceUpdate;
+        set({
+          profile: cached,
+          usernameCanChange: canChange,
+          usernameChangeAvailableInDays: daysRemaining,
+          error: null,
+        });
+        return cached;
+      }
+    }
 
     set({ isLoading: true, error: null });
     try {
@@ -85,6 +105,8 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
         usernameCanChange: canChange,
         usernameChangeAvailableInDays: daysRemaining,
       });
+      await setCachedValue(cacheKey, profile, CACHE_DURATIONS.LONG);
+      await markFetched(`profile_${targetUserId}`);
 
       if (!userId) {
         const authState = useAuthStore.getState();
@@ -100,6 +122,20 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
 
       return profile;
     } catch (err) {
+      const cached = await getCachedValue<PublicProfile>(cacheKey);
+      if (cached) {
+        const daysSinceUpdate = getDaysSinceUpdated(cached.updated_at);
+        const canChange = daysSinceUpdate >= USERNAME_CHANGE_COOLDOWN_DAYS;
+        const daysRemaining = canChange ? 0 : USERNAME_CHANGE_COOLDOWN_DAYS - daysSinceUpdate;
+        set({
+          profile: cached,
+          isLoading: false,
+          usernameCanChange: canChange,
+          usernameChangeAvailableInDays: daysRemaining,
+          error: null,
+        });
+        return cached;
+      }
       set({
         isLoading: false,
         error: err instanceof Error ? err.message : 'Failed to fetch user profile',

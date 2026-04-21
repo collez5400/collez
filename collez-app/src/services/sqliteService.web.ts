@@ -16,7 +16,7 @@ const webDb: WebDatabase = {
   },
   async getFirstAsync<T>(query: string) {
     if (query.includes('PRAGMA user_version')) {
-      return { user_version: 1 } as T;
+      return { user_version: 3 } as T;
     }
     return null;
   },

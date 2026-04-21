@@ -85,7 +85,7 @@ export default function OnboardingStep3() {
     fullName: string;
     username: string;
     avatarUri: string;
-    collegeId: string;
+    collegeId?: string;
     collegeName: string;
   }>();
 
@@ -162,7 +162,7 @@ export default function OnboardingStep3() {
         full_name: params.fullName,
         username: params.username,
         avatar_url: avatarUrl,
-        college_id: params.collegeId,
+        college_id: params.collegeId?.trim() ? params.collegeId : null,
         streak_count: 1,
         xp: XP_VALUES.DAILY_LOGIN,
         last_active_date: new Date().toISOString().split('T')[0],

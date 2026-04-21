@@ -50,6 +50,7 @@ export default function OnboardingStep2() {
   const [loading, setLoading] = useState(true);
   const [showRequestSheet, setShowRequestSheet] = useState(false);
   const [requestPending, setRequestPending] = useState(false);
+  const [requestedCollegeName, setRequestedCollegeName] = useState('');
   const [request, setRequest] = useState<CollegeRequest>({ name: '', city: '', state: '' });
   const [submittingRequest, setSubmittingRequest] = useState(false);
 
@@ -138,13 +139,42 @@ export default function OnboardingStep2() {
       error = result.error;
     }
     setSubmittingRequest(false);
+
+    // If request tables are missing in production (404), keep onboarding unblocked.
+    const tableMissing =
+      typeof error?.message === 'string' &&
+      (error.message.includes('relation') || error.message.includes('not found'));
+    if (tableMissing) {
+      setShowRequestSheet(false);
+      setRequestedCollegeName(payload.college_name);
+      setRequestPending(true);
+      setRequest({ name: '', city: '', state: '' });
+      return;
+    }
+
     if (error) {
       Alert.alert('Error', 'Request failed. Please contact support if this keeps happening.');
       return;
     }
     setShowRequestSheet(false);
+    setRequestedCollegeName(payload.college_name);
     setRequestPending(true);
     setRequest({ name: '', city: '', state: '' });
+  }
+
+  function continueWithRequestedCollege() {
+    if (!requestedCollegeName) {
+      setRequestPending(false);
+      return;
+    }
+    router.push({
+      pathname: '/(auth)/onboarding/step3',
+      params: {
+        ...params,
+        collegeId: '',
+        collegeName: requestedCollegeName,
+      },
+    });
   }
 
   function handleContinue() {
@@ -190,6 +220,8 @@ export default function OnboardingStep2() {
         <Text style={styles.pendingBody}>
           We'll review your college and add it soon. Meanwhile, ask your coordinator to onboard your campus.
         </Text>
+        <GradientButton title="Continue for Now" onPress={continueWithRequestedCollege} />
+        <View style={{ height: Spacing.md }} />
         <GradientButton title="Go Back to Search" onPress={() => setRequestPending(false)} />
       </View>
     );

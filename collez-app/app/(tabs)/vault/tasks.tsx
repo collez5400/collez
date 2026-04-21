@@ -22,6 +22,7 @@ import AddTaskSheet from '../../../src/components/tasks/AddTaskSheet';
 import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import { GradientButton } from '../../../src/components/shared/GradientButton';
+import { EmptyState } from '../../../src/components/shared/EmptyState';
 import { useNoteStore } from '../../../src/store/noteStore';
 import { Note, NoteSortOption, NoteTab } from '../../../src/models/note';
 import NoteEditor from '../../../src/components/notes/NoteEditor';
@@ -628,13 +629,23 @@ export default function TasksScreen() {
             )}
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <MaterialIcons name="assignment" size={64} color={Colors.surfaceHigh} />
-                <Text style={styles.emptyText}>{showArchived ? 'No archived tasks' : 'No tasks found'}</Text>
-                <Text style={styles.emptySubtext}>
-                  {showArchived ? 'Archived tasks appear here' : 'Try another filter or add your first task'}
-                </Text>
-              </View>
+              <EmptyState
+                icon={showArchived ? 'archive' : searchQuery.trim().length > 0 ? 'search-off' : 'assignment'}
+                title={
+                  showArchived
+                    ? 'No archived tasks'
+                    : searchQuery.trim().length > 0
+                      ? 'No matching tasks'
+                      : 'No tasks found'
+                }
+                description={
+                  showArchived
+                    ? 'Archived tasks appear here.'
+                    : searchQuery.trim().length > 0
+                      ? 'Try a different keyword or clear filters.'
+                      : 'Add your first task to start tracking progress.'
+                }
+              />
             }
           />
         </>
@@ -761,13 +772,23 @@ export default function TasksScreen() {
               </TouchableOpacity>
             )}
             ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <MaterialIcons name="note-alt" size={64} color={Colors.surfaceHigh} />
-                <Text style={styles.emptyText}>{showArchivedNotes ? 'No archived notes' : 'No notes found'}</Text>
-                <Text style={styles.emptySubtext}>
-                  {showArchivedNotes ? 'Archived notes appear here' : 'Try another filter or create your first note'}
-                </Text>
-              </View>
+              <EmptyState
+                icon={showArchivedNotes ? 'archive' : noteSearchQuery.trim().length > 0 ? 'search-off' : 'note-alt'}
+                title={
+                  showArchivedNotes
+                    ? 'No archived notes'
+                    : noteSearchQuery.trim().length > 0
+                      ? 'No matching notes'
+                      : 'No notes found'
+                }
+                description={
+                  showArchivedNotes
+                    ? 'Archived notes appear here.'
+                    : noteSearchQuery.trim().length > 0
+                      ? 'Try a different search or adjust filters.'
+                      : 'Create your first note to build your study vault.'
+                }
+              />
             }
           />
         </>
@@ -1162,24 +1183,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 8,
-  },
-  emptyContainer: {
-    marginTop: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.lg,
-    color: Colors.onSurfaceVariant,
-    marginTop: Spacing.lg,
-  },
-  emptySubtext: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.size.sm,
-    color: Colors.outline,
-    marginTop: Spacing.sm,
-    textAlign: 'center',
   },
   modalBackdrop: {
     flex: 1,

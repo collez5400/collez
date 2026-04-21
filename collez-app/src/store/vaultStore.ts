@@ -49,6 +49,7 @@ interface VaultState {
   totalStorageUsedBytes: number;
   freeDiskStorageBytes: number;
   isLoading: boolean;
+  error: string | null;
 
   loadVaultData: () => Promise<void>;
   loadFiles: () => Promise<void>;
@@ -76,11 +77,20 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   totalStorageUsedBytes: 0,
   freeDiskStorageBytes: 0,
   isLoading: false,
+  error: null,
 
   loadVaultData: async () => {
-    set({ isLoading: true });
-    await Promise.all([get().loadFolders(), get().loadFiles(), get().refreshStorageStats()]);
-    set({ isLoading: false });
+    set({ isLoading: true, error: null });
+    try {
+      await Promise.all([get().loadFolders(), get().loadFiles(), get().refreshStorageStats()]);
+      set({ isLoading: false, error: null });
+    } catch (error) {
+      console.error('Failed to load vault:', error);
+      set({
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to load vault',
+      });
+    }
   },
 
   loadFiles: async () => {
@@ -111,6 +121,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       set({ files, recentFiles });
     } catch (error) {
       console.error('Failed to load PDF files:', error);
+      set({ error: error instanceof Error ? error.message : 'Failed to load PDF files' });
     }
   },
 
@@ -131,6 +142,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       set({ folders });
     } catch (error) {
       console.error('Failed to load PDF folders:', error);
+      set({ error: error instanceof Error ? error.message : 'Failed to load PDF folders' });
     }
   },
 
@@ -152,6 +164,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
       set({ totalStorageUsedBytes, freeDiskStorageBytes });
     } catch (error) {
       console.error('Failed to refresh vault storage stats:', error);
+      set({ error: error instanceof Error ? error.message : 'Failed to refresh storage stats' });
     }
   },
 

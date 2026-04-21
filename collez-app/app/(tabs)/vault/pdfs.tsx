@@ -12,12 +12,14 @@ import {
   View,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { FlashList } from '@shopify/flash-list';
 
 import { BorderRadius, Colors, Spacing, Typography } from '../../../src/config/theme';
 import { GlassCard } from '../../../src/components/shared/GlassCard';
 import { GradientButton } from '../../../src/components/shared/GradientButton';
 import { PdfFile, PdfFolderType, PdfSortOption } from '../../../src/models/pdf';
 import { useVaultStore } from '../../../src/store/vaultStore';
+import { ErrorState } from '../../../src/components/shared/ErrorState';
 
 const SORT_OPTIONS: PdfSortOption[] = ['date', 'name', 'size'];
 const FOLDER_TYPES: PdfFolderType[] = ['semester', 'subject', 'pyq', 'books', 'notes', 'important', 'custom'];
@@ -58,6 +60,7 @@ export default function PDFsScreen() {
     totalStorageUsedBytes,
     freeDiskStorageBytes,
     isLoading,
+    error,
     loadVaultData,
     uploadPdf,
     openFile,
@@ -215,6 +218,8 @@ export default function PDFsScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
+      {error ? <ErrorState message={error} onRetry={loadVaultData} compact /> : null}
+
       <View style={styles.header}>
         <View style={styles.titleGradient}>
           <Text style={styles.title}>Vault</Text>
@@ -332,10 +337,11 @@ export default function PDFsScreen() {
         <Text style={styles.sectionTitle}>Documents</Text>
       </View>
 
-      <FlatList
+      <FlashList
         data={currentFiles}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.fileList}
+        estimatedItemSize={72}
         renderItem={({ item }) => (
           <GlassCard intensity={20} style={styles.fileCard}>
             <TouchableOpacity style={styles.fileMain} onPress={() => void openFile(item.id)}>
@@ -379,12 +385,13 @@ export default function PDFsScreen() {
         <Text style={styles.sectionTitle}>Recent</Text>
       </View>
 
-      <FlatList
+      <FlashList
         data={filteredRecentFiles}
         horizontal
         keyExtractor={(item) => `recent-${item.id}`}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.recentList}
+        estimatedItemSize={190}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.recentCard} onPress={() => void openFile(item.id)}>
             <MaterialIcons name="description" size={20} color={Colors.primary} />

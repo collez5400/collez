@@ -49,6 +49,8 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityLabel={title}
       style={[
         styles.touchable,
         fullWidth && styles.fullWidth,

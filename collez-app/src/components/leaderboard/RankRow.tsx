@@ -1,6 +1,7 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { Colors, Spacing, Typography } from '../../config/theme';
 import { LeaderboardEntry } from '../../store/leaderboardStore';
 
@@ -24,7 +25,7 @@ export function RankRow({ entry, isCurrentUser, showCollege = true, xpLabel = 'X
       <Text style={styles.rank}>{getRankDisplay(entry.position)}</Text>
 
       {entry.avatar_url ? (
-        <Image source={{ uri: entry.avatar_url }} style={styles.avatar} />
+        <Image source={{ uri: entry.avatar_url }} style={styles.avatar} contentFit="cover" />
       ) : (
         <View style={styles.avatarFallback}>
           <MaterialIcons name="person" size={16} color={Colors.onSurfaceVariant} />

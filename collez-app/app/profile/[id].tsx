@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { BadgeIcon } from '../../src/components/shared/BadgeIcon';
 import { GlassCard } from '../../src/components/shared/GlassCard';
@@ -28,7 +29,7 @@ export default function OtherUserProfileScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <GlassCard style={styles.header}>
           {profile?.avatar_url ? (
-            <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
+            <Image source={{ uri: profile.avatar_url }} style={styles.avatar} contentFit="cover" />
           ) : (
             <View style={[styles.avatar, styles.avatarFallback]}>
               <MaterialIcons name="person" size={42} color={Colors.onSurfaceVariant} />

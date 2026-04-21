@@ -5,6 +5,7 @@ import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flat
 import { DayOfWeek, TimetableEntry } from '../../../src/models/timetable';
 import { useTimetableStore } from '../../../src/store/timetableStore';
 import { AddSubjectSheet } from '../../../src/components/timetable/AddSubjectSheet';
+import { EmptyState } from '../../../src/components/shared/EmptyState';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../src/config/theme';
 import { useStreakStore } from '../../../src/store/streakStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -133,11 +134,11 @@ export default function TimetableScreen() {
       </ScrollView>
 
       {dayEntries.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyIcon}>😴</Text>
-          <Text style={styles.emptyText}>No classes today.</Text>
-          <Text style={styles.emptySub}>Enjoy the break or add a class.</Text>
-        </View>
+        <EmptyState
+          icon="event-busy"
+          title="No classes today"
+          description="Enjoy the break or add your next class."
+        />
       ) : (
         <DraggableFlatList
           data={dayEntries}
@@ -223,10 +224,6 @@ const styles = StyleSheet.create({
   room: { fontSize: 12, fontFamily: Typography.fontFamily.body, color: Colors.primary },
   delBtn: { padding: Spacing.md },
   fab: { position: 'absolute', bottom: Spacing.xl + 40, right: Spacing.md, width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center', ...Shadows.glass, elevation: 8 },
-  empty: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyIcon: { fontSize: 48, marginBottom: Spacing.sm },
-  emptyText: { fontSize: 18, fontFamily: Typography.fontFamily.heading, color: Colors.onSurface, fontWeight: '700' },
-  emptySub: { fontSize: 14, fontFamily: Typography.fontFamily.body, color: Colors.onSurfaceVariant, marginTop: 4 },
   modalBackdrop: { flex: 1, backgroundColor: '#00000077', justifyContent: 'flex-end' },
   modalCard: { backgroundColor: Colors.surface, borderTopLeftRadius: BorderRadius.xl, borderTopRightRadius: BorderRadius.xl, padding: Spacing.lg, gap: Spacing.sm },
   modalTitle: { fontSize: Typography.size.lg, fontFamily: Typography.fontFamily.heading, color: Colors.onSurface, fontWeight: '700' },

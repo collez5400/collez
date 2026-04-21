@@ -1,14 +1,13 @@
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 import { Colors, Spacing, Typography } from '../src/config/theme';
 import { GlassCard } from '../src/components/shared/GlassCard';
-
-const TERMS_URL = 'https://example.com/terms';
-const PRIVACY_URL = 'https://example.com/privacy';
 
 const appVersion = Constants.expoConfig?.version ?? 'dev';
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
@@ -34,10 +33,10 @@ export default function SettingsScreen() {
           <Text style={styles.rowText}>College changes require admin approval.</Text>
         </GlassCard>
 
-        <Pressable style={styles.linkCard} onPress={() => void Linking.openURL(TERMS_URL)}>
+        <Pressable style={styles.linkCard} onPress={() => router.push('/terms')} accessibilityRole="button" accessibilityLabel="Terms of Service">
           <Text style={styles.rowTitle}>Terms of Service</Text>
         </Pressable>
-        <Pressable style={styles.linkCard} onPress={() => void Linking.openURL(PRIVACY_URL)}>
+        <Pressable style={styles.linkCard} onPress={() => router.push('/privacy')} accessibilityRole="button" accessibilityLabel="Privacy Policy">
           <Text style={styles.rowTitle}>Privacy Policy</Text>
         </Pressable>
         <GlassCard style={styles.card}>

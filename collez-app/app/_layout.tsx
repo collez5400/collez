@@ -18,6 +18,7 @@ import { configureGoogleSignIn } from '../src/services/authService';
 import { useStreakStore } from '../src/store/streakStore';
 import { useXpStore } from '../src/store/xpStore';
 import { XP_VALUES } from '../src/config/constants';
+import { AppErrorBoundary } from '../src/components/shared/AppErrorBoundary';
 
 const { initSQLite } =
   Platform.OS === 'web'
@@ -51,8 +52,6 @@ export default function RootLayout() {
     async function prepareApp() {
       try {
         await initSQLite();
-        // Artificial delay for demonstration to keep splash screen visible longer
-        await new Promise(resolve => setTimeout(resolve, 100));
       } catch (e) {
         console.warn('SQLite init error:', e);
       } finally {
@@ -119,9 +118,11 @@ export default function RootLayout() {
   if (!isReady) return null;
 
   return (
-    <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
-      {/* Splash / redirect gate */}
-      <Stack.Screen name="index" />
-    </Stack>
+    <AppErrorBoundary>
+      <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+        {/* Splash / redirect gate */}
+        <Stack.Screen name="index" />
+      </Stack>
+    </AppErrorBoundary>
   );
 }

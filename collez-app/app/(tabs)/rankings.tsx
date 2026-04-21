@@ -5,6 +5,8 @@ import { useStreakStore } from '../../src/store/streakStore';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { RankRow } from '../../src/components/leaderboard/RankRow';
 import { UserRankCard } from '../../src/components/leaderboard/UserRankCard';
+import { EmptyState } from '../../src/components/shared/EmptyState';
+import { ErrorState } from '../../src/components/shared/ErrorState';
 import { LeaderboardEntry, LeaderboardType, useLeaderboardStore } from '../../src/store/leaderboardStore';
 import { useAuthStore } from '../../src/store/authStore';
 
@@ -105,7 +107,7 @@ export default function RankingsScreen() {
         {tabButton('weekly', 'Weekly')}
       </View>
       <UserRankCard summary={summary} />
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {error ? <ErrorState message={error} onRetry={onRefresh} compact /> : null}
     </View>
   );
 
@@ -113,7 +115,14 @@ export default function RankingsScreen() {
     <Text style={styles.footerText}>You reached the end of this leaderboard.</Text>
   ) : null;
 
-  const listEmpty = !isLoading ? <Text style={styles.footerText}>No leaderboard data yet.</Text> : null;
+  const listEmpty = !isLoading ? (
+    <EmptyState
+      icon="emoji-events"
+      title="Leaderboard is warming up"
+      description="No ranking data yet. Pull to refresh after users start earning XP."
+      compact
+    />
+  ) : null;
 
   return (
     <View style={styles.container}>

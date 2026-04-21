@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -14,7 +13,9 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'expo-image';
 import { BadgeIcon } from '../../src/components/shared/BadgeIcon';
+import { ErrorState } from '../../src/components/shared/ErrorState';
 import { GradientButton } from '../../src/components/shared/GradientButton';
 import { GlassCard } from '../../src/components/shared/GlassCard';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
@@ -101,7 +102,7 @@ export default function ProfileScreen() {
         <GlassCard style={styles.headerCard}>
           <Pressable style={styles.avatarWrap} onPress={handlePickAvatar}>
             {profile?.avatar_url ? (
-              <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
+              <Image source={{ uri: profile.avatar_url }} style={styles.avatar} contentFit="cover" />
             ) : (
               <View style={[styles.avatar, styles.avatarFallback]}>
                 <MaterialIcons name="person" size={48} color={Colors.onSurfaceVariant} />
@@ -162,8 +163,15 @@ export default function ProfileScreen() {
         </GlassCard>
 
         {error ? (
-          <Pressable style={styles.errorCard} onPress={clearError}>
-            <Text style={styles.errorText}>{error}</Text>
+          <Pressable onPress={clearError}>
+            <ErrorState
+              message={error}
+              onRetry={() => {
+                void fetchProfile();
+                void fetchBadges();
+              }}
+              compact
+            />
           </Pressable>
         ) : null}
 
@@ -314,18 +322,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: Colors.onSurfaceVariant,
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.size.sm,
-  },
-  errorCard: {
-    backgroundColor: `${Colors.error}22`,
-    borderWidth: 1,
-    borderColor: `${Colors.error}55`,
-    borderRadius: 12,
-    padding: Spacing.sm,
-  },
-  errorText: {
-    color: Colors.error,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,
   },

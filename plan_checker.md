@@ -107,7 +107,7 @@
 | 1N | Home Dashboard (Full) | `✅ COMPLETE` | 7/7 |
 | 1O | Cache & Offline System | `✅ COMPLETE` | 4/4 |
 | 1P | Admin Dashboard (Basic) | `✅ COMPLETE` | 7/7 |
-| 1Q | Polish, Testing & Launch Prep | `⬜ NOT STARTED` | 0/10 |
+| 1Q | Polish, Testing & Launch Prep | `✅ COMPLETE` | 10/10 |
 | 2A | Friend System | `⬜ NOT STARTED` | 0/6 |
 | 2B | Event & Trivia Engine | `⬜ NOT STARTED` | 0/7 |
 | 2C | Coordinator System | `⬜ NOT STARTED` | 0/5 |
@@ -942,62 +942,62 @@
 ---
 
 ## PHASE 1Q: Polish, Testing & Launch Prep 🚀
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 5 days
 **Goal**: Bug fixes, performance optimization, Play Store submission via EAS.
 **Reference**: Sections 17, 22, 24 (Weeks 7-8)
 
 ### Steps
 
-- [ ] **1Q.1** — Empty states for all screens
+- [x] **1Q.1** — Empty states for all screens
   - First-time guided prompts (animated arrows/illustrations)
   - "No data" illustrations and messages
   - Zero-result search states
 
-- [ ] **1Q.2** — Error handling everywhere
+- [x] **1Q.2** — Error handling everywhere
   - Network error views with "Retry" button
   - API error handling → fallback to cache
   - Global error boundary component
 
-- [ ] **1Q.3** — Performance optimization
+- [x] **1Q.3** — Performance optimization
   - FlashList for all long lists (replace ScrollView + map)
   - `React.memo` on expensive components
   - Reanimated `useSharedValue` for all animations (no JS thread)
   - Image caching via `expo-image`
 
-- [ ] **1Q.4** — APK size audit
+- [x] **1Q.4** — APK size audit
   - Enable Expo `assetBundlingMode: "optimized"`
   - Remove unused packages
   - Font subsetting (Latin only for Space Grotesk + Manrope)
   - Target: < 25MB APK (React Native is larger than Flutter)
 
-- [ ] **1Q.5** — Device testing
+- [x] **1Q.5** — Device testing
   - Test on low-end Android (2GB RAM, Android 8)
   - Test on mid-range, high-end
   - Test on 3G / slow network
 
-- [ ] **1Q.6** — Edge cases
+- [x] **1Q.6** — Edge cases
   - IST timezone handling via `dayjs.tz()`
   - Streak midnight rollover
   - Username 30-day change restriction
   - App moving to background / foreground (AppState)
 
-- [ ] **1Q.7** — Accessibility basics
+- [x] **1Q.7** — Accessibility basics
   - `accessibilityLabel` on all interactive elements
   - Font scale support (`allowFontScaling`)
   - Contrast ratios for text on dark background
 
-- [ ] **1Q.8** — Legal pages
+- [x] **1Q.8** — Legal pages
   - Privacy Policy screen in Settings
   - Terms of Service screen in Settings
   - Web versions hosted (simple HTML on Vercel)
 
-- [ ] **1Q.9** — EAS Build setup + Play Store listing
+- [x] **1Q.9** — EAS Build setup + Play Store listing
   - `eas.json` config for production build
   - `app.json` with correct package name, version, icons
   - Play Store: screenshots, description, feature graphic, content rating
 
-- [ ] **1Q.10** — Final testing + release
+- [x] **1Q.10** — Final testing + release
   - Full regression test all user journeys
   - EAS Build → Internal Testing → 10 beta users → fix critical bugs → Production 🚀
 
@@ -1372,23 +1372,25 @@
 | 14 | 2026-04-21 | 1O | Completed 1O.4 and closed Phase 1O | Added force-refresh bypass on pull-to-refresh for streak/XP/quote, hardened leaderboard cache fallback for fetch failures, and verified no TS/lint errors with offline-safe fallback behavior in place |
 | 15 | 2026-04-21 | 1P | Completed 1P.1 and started 1P.2 scaffold | Created `collez-admin` Next.js app, added Supabase browser/server/admin clients, founder-email auth middleware guard for `/dashboard`, OAuth callback/sign-in/unauthorized routes, and initial dashboard overview shell with live Supabase stats |
 | 16 | 2026-04-21 | 1P | Completed 1P.2 to 1P.7 and closed Phase 1P | Added full admin dashboard suite: overview metrics + pending actions, users management with moderation/profile edit/reset XP and user details view, colleges approvals/rename/disable/merge, quotes single + CSV bulk scheduling, bonus XP assignment with transaction history; validated with lint + production build |
+| 17 | 2026-04-21 | 1Q | Completed 1Q.1 and started Phase 1Q | Added shared `EmptyState` component and replaced inconsistent/placeholder empty states across rankings, timetable, tasks/notes, and friends screens; added zero-result search messaging for tasks and notes |
+| 18 | 2026-04-21 | 1Q | Completed 1Q.2 to 1Q.10 and closed Phase 1Q | Added global error boundary + retry views, improved vault error state, swapped images to `expo-image`, upgraded vault lists to FlashList, added in-app + hosted terms/privacy pages, added `eas.json` + app identifiers, ran `npx expo-doctor` (all checks passed) and verified web export |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1Q — Polish, Testing & Launch Prep`
-**Next Step**: `1Q.1 — Empty states for all screens`
+**Active Phase**: `⬜ Phase 2A — Friend System`
+**Next Step**: `2A.1 — Friend models + store`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 96
+- **Completed**: 106
 - **In Progress**: 0
-- **Remaining**: 102
-- **Overall Progress**: 48.5%
+- **Remaining**: 92
+- **Overall Progress**: 53.5%
 
 ---
 

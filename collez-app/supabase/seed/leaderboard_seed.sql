@@ -25,6 +25,12 @@ set
   is_disabled = excluded.is_disabled,
   updated_at = now();
 
+-- 1.5) Reset previous dev seed rows so script is re-runnable without duplicates
+delete from public.xp_transactions
+where user_id in (
+  select id from public.users where email like 'dev_user_%@collez.dev'
+);
+
 -- 2) Users
 -- NOTE: In production, users are created via Supabase Auth.
 -- For dev/testing, inserting directly into public.users is fine when executed as admin/service.
@@ -73,7 +79,17 @@ upserted as (
     seed.streak_count,
     current_date as last_active_date,
     seed.streak_count as longest_streak,
-    'fresher' as rank_tier,
+    case
+      when seed.xp >= 150000 then 'national_icon'
+      when seed.xp >= 60000 then 'state_hero'
+      when seed.xp >= 25000 then 'campus_legend'
+      when seed.xp >= 10000 then 'titan'
+      when seed.xp >= 4000 then 'elite'
+      when seed.xp >= 1500 then 'strategist'
+      when seed.xp >= 500 then 'scholar'
+      when seed.xp >= 100 then 'grinder'
+      else 'fresher'
+    end as rank_tier,
     false as is_coordinator,
     null as coordinator_type,
     null as coordinator_region,

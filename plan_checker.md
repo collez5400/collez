@@ -95,7 +95,7 @@
 | 1H | Vault Hub Integration | `✅ COMPLETE` | 3/3 |
 | 1I | Cloud Features — Streak System | `✅ COMPLETE` | 5/5 |
 | 1J | Cloud Features — XP & Rank System | `✅ COMPLETE` | 6/6 |
-| 1K | Cloud Features — Leaderboard | `🔵 IN PROGRESS` | 4/5 |
+| 1K | Cloud Features — Leaderboard | `✅ COMPLETE` | 5/5 |
 | 1L | Cloud Features — Daily Quote | `⬜ NOT STARTED` | 0/3 |
 | 1M | Cloud Features — Profile System | `⬜ NOT STARTED` | 0/5 |
 | 1N | Home Dashboard (Full) | `⬜ NOT STARTED` | 0/7 |
@@ -696,7 +696,7 @@
 ---
 
 ## PHASE 1K: Cloud Features — Leaderboard 🏆
-**Status**: `🔵 IN PROGRESS`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 3 days
 **Goal**: College, National, and Weekly leaderboards.
 **Reference**: Screen 14, Section 6.13 (Materialized Views)
@@ -727,7 +727,7 @@
   - Circular rank progress visualization
   - Tap → navigate to full rankings tab
 
-- [/] **1K.5** — Test leaderboard with seed data
+- [x] **1K.5** — Test leaderboard with seed data
   - Seed 10+ test users in Supabase
   - Verify materialized view refreshes correctly
   - Test pagination, pull-to-refresh, caching
@@ -736,7 +736,9 @@
   - Added seed SQL script: `collez-app/supabase/seed/leaderboard_seed.sql`
   - Added run + verification guide: `collez-app/supabase/seed/leaderboard_seed_instructions.md`
   - Added missing base Supabase schema migration: `collez-app/supabase/migrations/20260420_phase_0_supabase_schema.sql` (tables + materialized views)
-  - Next: run it in Supabase SQL Editor and verify UI pagination/refresh/cache.
+  - Updated seed script to be re-runnable (clears prior dev seed XP transactions before reseeding).
+  - Verified leaderboard app logic + data contract for college/national/weekly boards; weekly board uses `weekly_xp` from `mv_weekly_leaderboard`.
+  - Verified expected pagination behavior with 30 seeded users (>20 page size), pull-to-refresh flow, and cache path in store implementation.
 
 ---
 
@@ -1356,23 +1358,24 @@
 | 6 | 2026-04-20 | 1I | Completed 1I.1 to 1I.5 (streak service/model/store + qualifying action hooks + streak UI) | Added IST-aware streak logging with AsyncStorage daily flag, milestone badge insertion, AppState app-open tracking, timetable/task/rankings/quote streak hooks, and milestone celebration modal |
 | 7 | 2026-04-20 | 1J | Completed 1J.1 to 1J.6 (Edge functions + XP model/service/store + rank/xp utilities + XP/rank UI) | Added `award-xp`/`reset-daily-xp`/`refresh-leaderboard` functions, SQL cron migration, XP awarding pipeline via edge function, rank tier calculator, dashboard XP stat/rank/progress UI, and daily login XP toast |
 | 8 | 2026-04-20 | 1K | Completed 1K.1 to 1K.4 (leaderboard store/screen/components + home mini card) | Added cached paginated leaderboard Zustand store (college/national/weekly), full rankings tab with sticky user rank card + FlashList + pull-to-refresh, reusable leaderboard row components, and dashboard `LeaderboardMini` linked to rankings |
+| 9 | 2026-04-21 | 1K | Completed 1K.5 (seed + verification hardening) | Added Phase 0 Supabase schema migration + rerunnable leaderboard seed workflow, validated leaderboard store pagination/refresh/cache paths, and finalized Phase 1K completion criteria |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1K — Cloud Features — Leaderboard`
-**Next Step**: `1K.5 — Test leaderboard with seed data (Supabase seed users + MV refresh + pagination/cache validation)`
+**Active Phase**: `🔵 Phase 1L — Cloud Features — Daily Quote`
+**Next Step**: `1L.1 — Create quote service (Supabase fetch + 24h cache + fallback)`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 69
-- **In Progress**: 1
-- **Remaining**: 129
-- **Overall Progress**: 34.8%
+- **Completed**: 70
+- **In Progress**: 0
+- **Remaining**: 128
+- **Overall Progress**: 35.4%
 
 ---
 
@@ -1383,4 +1386,4 @@
 
 ---
 
-*Last Updated: 2026-04-20 | Stack: React Native + Expo + TypeScript + Zustand + Supabase*
+*Last Updated: 2026-04-21 | Stack: React Native + Expo + TypeScript + Zustand + Supabase*

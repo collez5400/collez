@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,39 @@ import {
 
 const TOTAL_STEPS = 3;
 const STEP = 2;
+const KARNATAKA_STATE = 'Karnataka';
+const KARNATAKA_DISTRICTS = [
+  'Bagalkot',
+  'Ballari',
+  'Belagavi',
+  'Bengaluru Rural',
+  'Bengaluru Urban',
+  'Bidar',
+  'Chamarajanagar',
+  'Chikkaballapur',
+  'Chikkamagaluru',
+  'Chitradurga',
+  'Dakshina Kannada',
+  'Davanagere',
+  'Dharwad',
+  'Gadag',
+  'Hassan',
+  'Haveri',
+  'Kalaburagi',
+  'Kodagu',
+  'Kolar',
+  'Koppal',
+  'Mandya',
+  'Mysuru',
+  'Raichur',
+  'Ramanagara',
+  'Shivamogga',
+  'Tumakuru',
+  'Udupi',
+  'Uttara Kannada',
+  'Vijayapura',
+  'Yadgir',
+] as const;
 
 interface CollegeRequest {
   name: string;
@@ -44,15 +77,17 @@ export default function OnboardingStep2() {
   }>();
 
   const [colleges, setColleges] = useState<College[]>([]);
-  const [filtered, setFiltered] = useState<College[]>([]);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<College | null>(null);
   const [loading, setLoading] = useState(true);
   const [showRequestSheet, setShowRequestSheet] = useState(false);
   const [requestPending, setRequestPending] = useState(false);
   const [requestedCollegeName, setRequestedCollegeName] = useState('');
-  const [request, setRequest] = useState<CollegeRequest>({ name: '', city: '', state: '' });
+  const [request, setRequest] = useState<CollegeRequest>({ name: '', city: '', state: KARNATAKA_STATE });
+  const [districtSearch, setDistrictSearch] = useState('');
+  const [showDistrictPicker, setShowDistrictPicker] = useState(false);
   const [submittingRequest, setSubmittingRequest] = useState(false);
+  const isCollegeRequestTableUnavailable = useRef(false);
 
   // Progress bar
   const progressWidth = useSharedValue(0);
@@ -65,18 +100,32 @@ export default function OnboardingStep2() {
     fetchColleges();
   }, []);
 
-  useEffect(() => {
-    const query = search.toLowerCase();
-    setFiltered(
-      query
-        ? colleges.filter(
-            c =>
-              (c.name ?? '').toLowerCase().includes(query) ||
-              (c.city ?? '').toLowerCase().includes(query)
-          )
-        : colleges
-    );
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return colleges;
+
+    return colleges.filter((college) => {
+      const collegeName = (college.name ?? '').toLowerCase();
+      const city = (college.city ?? '').toLowerCase();
+      const nameWords = collegeName.split(/\s+/).filter(Boolean);
+      const cityWords = city.split(/\s+/).filter(Boolean);
+
+      return (
+        collegeName.startsWith(query) ||
+        city.startsWith(query) ||
+        collegeName.includes(query) ||
+        city.includes(query) ||
+        nameWords.some((word) => word.startsWith(query)) ||
+        cityWords.some((word) => word.startsWith(query))
+      );
+    });
   }, [search, colleges]);
+
+  const filteredDistricts = useMemo(() => {
+    const q = districtSearch.trim().toLowerCase();
+    if (!q) return KARNATAKA_DISTRICTS;
+    return KARNATAKA_DISTRICTS.filter((district) => district.toLowerCase().includes(q));
+  }, [districtSearch]);
 
   async function fetchColleges() {
     setLoading(true);
@@ -111,7 +160,6 @@ export default function OnboardingStep2() {
       }))
       .filter((row) => row.id && row.name) as College[];
     setColleges(normalized);
-    setFiltered(normalized);
   }
 
   async function submitCollegeRequest() {
@@ -127,16 +175,29 @@ export default function OnboardingStep2() {
       state: request.state.trim(),
       status: 'pending',
     };
-    const tablesToTry = ['college_requests', 'college_request'] as const;
     let error: any = null;
-    for (const tableName of tablesToTry) {
-      // @ts-expect-error Supabase type shim limitations
-      const result = await supabase.from(tableName).insert(payload);
-      if (!result.error) {
-        error = null;
-        break;
+    if (!isCollegeRequestTableUnavailable.current) {
+      const tablesToTry = ['college_requests', 'college_request'] as const;
+      for (const tableName of tablesToTry) {
+        // @ts-expect-error Supabase type shim limitations
+        const result = await supabase.from(tableName).insert(payload);
+        if (!result.error) {
+          error = null;
+          break;
+        }
+        error = result.error;
+        const tableMissingForThisName =
+          String(result.error?.code ?? '').toUpperCase() === 'PGRST205' ||
+          (typeof result.error?.message === 'string' &&
+            (result.error.message.includes('relation') || result.error.message.includes('not found')));
+        // If the first call already confirms missing table, stop trying extra endpoints.
+        if (tableMissingForThisName) {
+          isCollegeRequestTableUnavailable.current = true;
+          break;
+        }
       }
-      error = result.error;
+    } else {
+      error = { message: 'college request table not found' };
     }
     setSubmittingRequest(false);
 
@@ -148,7 +209,8 @@ export default function OnboardingStep2() {
       setShowRequestSheet(false);
       setRequestedCollegeName(payload.college_name);
       setRequestPending(true);
-      setRequest({ name: '', city: '', state: '' });
+      setRequest({ name: '', city: '', state: KARNATAKA_STATE });
+      setDistrictSearch('');
       return;
     }
 
@@ -159,7 +221,8 @@ export default function OnboardingStep2() {
     setShowRequestSheet(false);
     setRequestedCollegeName(payload.college_name);
     setRequestPending(true);
-    setRequest({ name: '', city: '', state: '' });
+    setRequest({ name: '', city: '', state: KARNATAKA_STATE });
+    setDistrictSearch('');
   }
 
   function continueWithRequestedCollege() {
@@ -301,14 +364,33 @@ export default function OnboardingStep2() {
                 <Text style={styles.label}>
                   {field === 'name' ? 'College Name' : field === 'city' ? 'City' : 'State'}
                 </Text>
-                <TextInput
-                  style={styles.modalInput}
-                  value={request[field]}
-                  onChangeText={v => setRequest(r => ({ ...r, [field]: v }))}
-                  placeholder={`Enter ${field}`}
-                  placeholderTextColor={Colors.onSurfaceVariant}
-                  accessibilityLabel={`College ${field} input`}
-                />
+                {field === 'name' ? (
+                  <TextInput
+                    style={styles.modalInput}
+                    value={request.name}
+                    onChangeText={v => setRequest(r => ({ ...r, name: v }))}
+                    placeholder="Enter college name"
+                    placeholderTextColor={Colors.onSurfaceVariant}
+                    accessibilityLabel="College name input"
+                  />
+                ) : null}
+                {field === 'city' ? (
+                  <TouchableOpacity
+                    style={styles.modalInputPicker}
+                    onPress={() => setShowDistrictPicker(true)}
+                    accessibilityLabel="Select district"
+                    activeOpacity={0.8}
+                  >
+                    <Text style={request.city ? styles.modalInputPickerText : styles.modalInputPickerPlaceholder}>
+                      {request.city || 'Select district'}
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
+                {field === 'state' ? (
+                  <View style={styles.modalInputPicker}>
+                    <Text style={styles.modalInputPickerText}>{KARNATAKA_STATE}</Text>
+                  </View>
+                ) : null}
               </View>
             ))}
 
@@ -325,6 +407,55 @@ export default function OnboardingStep2() {
             </TouchableOpacity>
           </GlassCard>
         </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal
+        visible={showDistrictPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDistrictPicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <GlassCard style={styles.districtPickerCard} padding={20}>
+            <Text style={styles.modalTitle}>Select District</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={districtSearch}
+              onChangeText={setDistrictSearch}
+              placeholder="Search district"
+              placeholderTextColor={Colors.onSurfaceVariant}
+              accessibilityLabel="Search district input"
+              autoCapitalize="words"
+            />
+            <FlatList
+              data={filteredDistricts}
+              keyExtractor={(item) => item}
+              style={styles.districtList}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.districtItem}
+                  onPress={() => {
+                    setRequest((prev) => ({ ...prev, city: item, state: KARNATAKA_STATE }));
+                    setShowDistrictPicker(false);
+                    setDistrictSearch('');
+                  }}
+                >
+                  <Text style={styles.districtText}>{item}</Text>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={<Text style={styles.emptyText}>No district found.</Text>}
+            />
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => {
+                setShowDistrictPicker(false);
+                setDistrictSearch('');
+              }}
+            >
+              <Text style={styles.cancelText}>Close</Text>
+            </TouchableOpacity>
+          </GlassCard>
+        </View>
       </Modal>
     </View>
   );
@@ -455,6 +586,43 @@ const styles = StyleSheet.create({
     borderColor: `${Colors.outline}44`,
     paddingHorizontal: Spacing.md,
     height: 48,
+    color: Colors.onSurface,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.md,
+  },
+  modalInputPicker: {
+    backgroundColor: Colors.surfaceLow,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: `${Colors.outline}44`,
+    paddingHorizontal: Spacing.md,
+    height: 48,
+    justifyContent: 'center',
+  },
+  modalInputPickerText: {
+    color: Colors.onSurface,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.md,
+  },
+  modalInputPickerPlaceholder: {
+    color: Colors.onSurfaceVariant,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.md,
+  },
+  districtPickerCard: {
+    marginHorizontal: 24,
+    marginTop: 120,
+    maxHeight: '70%',
+  },
+  districtList: {
+    marginTop: Spacing.md,
+  },
+  districtItem: {
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: `${Colors.outline}22`,
+  },
+  districtText: {
     color: Colors.onSurface,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.md,

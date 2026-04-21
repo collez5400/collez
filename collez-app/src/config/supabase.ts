@@ -10,12 +10,24 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Missing Supabase environment variables. Check your .env file.');
 }
 
+const webStorage =
+  typeof window !== 'undefined' && window.localStorage
+    ? {
+        getItem: (key: string) => window.localStorage.getItem(key),
+        setItem: (key: string, value: string) => window.localStorage.setItem(key, value),
+        removeItem: (key: string) => window.localStorage.removeItem(key),
+      }
+    : undefined;
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: AsyncStorage,
+    storage: Platform.OS === 'web' ? webStorage : AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: Platform.OS === 'web',
+    // We handle web OAuth callback exchange explicitly in authService.restoreSession().
+    // Keeping this false avoids duplicate callback parsing/races.
+    detectSessionInUrl: false,
+    flowType: 'pkce',
   },
 });
 

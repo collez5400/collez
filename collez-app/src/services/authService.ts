@@ -10,11 +10,27 @@ const OAUTH_REDIRECT_URL = process.env.EXPO_PUBLIC_OAUTH_REDIRECT_URL;
 const SESSION_KEY = 'collez_session';
 let isGoogleConfigured = false;
 
+function deriveUsername(authUser: SupabaseAuthUser): string {
+  const fromMetadata = (authUser.user_metadata?.user_name ?? authUser.user_metadata?.username ?? '')
+    .toString()
+    .trim();
+  if (fromMetadata) return fromMetadata.slice(0, 32);
+
+  const emailPrefix = (authUser.email ?? '')
+    .split('@')[0]
+    .replace(/[^a-zA-Z0-9._-]/g, '')
+    .trim();
+  if (emailPrefix) return emailPrefix.slice(0, 32);
+
+  return `user_${authUser.id.slice(0, 8)}`;
+}
+
 function buildNewUserProfile(authUser: SupabaseAuthUser): Partial<User> {
   return {
     id: authUser.id,
     email: authUser.email ?? '',
     full_name: authUser.user_metadata?.full_name ?? '',
+    username: deriveUsername(authUser),
     avatar_url: authUser.user_metadata?.avatar_url ?? null,
     xp: 0,
     daily_xp_earned: 0,
@@ -96,7 +112,7 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
       .from('users')
       .select('*')
       .eq('id', data.user.id)
-      .single();
+      .maybeSingle();
 
     if (profile) {
       return { user: profile as User, isNew: false };
@@ -105,14 +121,36 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
     // New user - create a minimal profile record
     const newUser = buildNewUserProfile(data.user);
 
-    const { data: created, error: createError } = await supabase
+    let { data: created, error: createError } = await supabase
       .from('users')
       // @ts-expect-error type shim limitations for Supabase
       .insert(newUser)
       .select()
       .single();
 
-    if (createError) throw new Error(`Failed to create user: ${createError.message}`);
+    // Fallback for stricter/older schemas that reject newer profile columns.
+    if (createError) {
+      const minimalUser = {
+        id: data.user.id,
+        email: data.user.email ?? '',
+        full_name: data.user.user_metadata?.full_name ?? '',
+        username: deriveUsername(data.user),
+        avatar_url: data.user.user_metadata?.avatar_url ?? null,
+      };
+      const fallbackResult = await supabase
+        .from('users')
+        // @ts-expect-error type shim limitations for Supabase
+        .insert(minimalUser)
+        .select()
+        .single();
+
+      created = fallbackResult.data;
+      createError = fallbackResult.error;
+    }
+
+    if (createError || !created) {
+      throw new Error(`Failed to create user: ${createError?.message ?? 'unknown error'}`);
+    }
 
     return { user: created as User, isNew: true };
   } catch (error: any) {
@@ -184,7 +222,7 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
     .from('users')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) return null;
   return data as User;
@@ -208,7 +246,23 @@ export async function ensureUserProfileFromAuthUser(
     .single();
 
   if (error || !data) {
-    return null;
+    const minimalUser = {
+      id: authUser.id,
+      email: authUser.email ?? '',
+      full_name: authUser.user_metadata?.full_name ?? '',
+      username: deriveUsername(authUser),
+      avatar_url: authUser.user_metadata?.avatar_url ?? null,
+    };
+    const fallbackResult: any = await supabase
+      .from('users')
+      // @ts-expect-error type shim limitations for Supabase
+      .insert(minimalUser)
+      .select()
+      .single();
+    if (fallbackResult.error || !fallbackResult.data) {
+      return null;
+    }
+    return fallbackResult.data as User;
   }
 
   return data as User;

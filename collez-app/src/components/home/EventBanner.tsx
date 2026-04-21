@@ -37,29 +37,33 @@ export function EventBanner({ event, onJoin }: EventBannerProps) {
 
   if (!event) return null;
 
+  const content = (
+    <View style={styles.overlay}>
+      <Animated.View style={[styles.liveBadge, liveStyle]}>
+        <Text style={styles.liveText}>LIVE</Text>
+      </Animated.View>
+      <Text style={styles.title}>{event.title}</Text>
+      <GradientButton
+        title="Join Now"
+        onPress={() => onJoin(event.id)}
+        fullWidth={false}
+        style={styles.cta}
+        textStyle={styles.ctaText}
+      />
+    </View>
+  );
+
+  if (!event.imageUrl) {
+    return <View style={[styles.banner, styles.fallbackBanner]}>{content}</View>;
+  }
+
   return (
     <ImageBackground
-      source={
-        event.imageUrl
-          ? { uri: event.imageUrl }
-          : require('../../../assets/images/adaptive-icon.png')
-      }
+      source={{ uri: event.imageUrl }}
       imageStyle={styles.image}
       style={styles.banner}
     >
-      <View style={styles.overlay}>
-        <Animated.View style={[styles.liveBadge, liveStyle]}>
-          <Text style={styles.liveText}>LIVE</Text>
-        </Animated.View>
-        <Text style={styles.title}>{event.title}</Text>
-        <GradientButton
-          title="Join Now"
-          onPress={() => onJoin(event.id)}
-          fullWidth={false}
-          style={styles.cta}
-          textStyle={styles.ctaText}
-        />
-      </View>
+      {content}
     </ImageBackground>
   );
 }
@@ -72,6 +76,9 @@ const styles = StyleSheet.create({
   },
   image: {
     borderRadius: BorderRadius.lg,
+  },
+  fallbackBanner: {
+    backgroundColor: '#1f2937',
   },
   overlay: {
     flex: 1,

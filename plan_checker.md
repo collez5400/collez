@@ -19,6 +19,7 @@
 - Work **only on the current active phase** (marked `🔵 IN PROGRESS`).
 - Do NOT start the next phase until the current phase is marked `✅ COMPLETE`.
 - Within a phase, work step-by-step in the listed order.
+- Once a phase is started, it MUST be completed fully before pausing or switching to another phase.
 
 ### Rule 3: Update After Every Session
 - After each development session, update this file:
@@ -78,6 +79,11 @@
 - If any code change requires execution inside Supabase (SQL migration, RPC/function deployment, cron setup, RLS/policy updates, etc.), explicitly inform the user what must be run in Supabase before claiming completion.
 - Once verified error-free, you must commit and push all the changes to the repository before marking the phase as `✅ COMPLETE`.
 
+### Rule 10: Full-Phase Completion Is Mandatory
+- **ALWAYS properly complete the full phase when started.**
+- Do not stop after partial phase progress unless a blocker requires user input.
+- If a blocker appears, report it immediately and resume the same phase as soon as it is resolved.
+
 ---
 
 ## 📊 Progress Overview
@@ -100,7 +106,7 @@
 | 1M | Cloud Features — Profile System | `✅ COMPLETE` | 5/5 |
 | 1N | Home Dashboard (Full) | `✅ COMPLETE` | 7/7 |
 | 1O | Cache & Offline System | `✅ COMPLETE` | 4/4 |
-| 1P | Admin Dashboard (Basic) | `⬜ NOT STARTED` | 0/7 |
+| 1P | Admin Dashboard (Basic) | `✅ COMPLETE` | 7/7 |
 | 1Q | Polish, Testing & Launch Prep | `⬜ NOT STARTED` | 0/10 |
 | 2A | Friend System | `⬜ NOT STARTED` | 0/6 |
 | 2B | Event & Trivia Engine | `⬜ NOT STARTED` | 0/7 |
@@ -888,14 +894,14 @@
 ---
 
 ## PHASE 1P: Admin Dashboard (Basic) 🖥️
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 4 days
 **Goal**: Web admin dashboard for managing users, colleges, and quotes.
 **Reference**: Section 10
 
 ### Steps
 
-- [ ] **1P.1** — Create Next.js project (separate `collez-admin/` directory)
+- [x] **1P.1** — Create Next.js project (separate `collez-admin/` directory)
   ```bash
   npx create-next-app@latest collez-admin --typescript --tailwind --app
   ```
@@ -903,32 +909,32 @@
   - Supabase client (service role key — server-side only)
   - Protected: founder email only via Supabase Auth
 
-- [ ] **1P.2** — Create Overview page (`/dashboard`)
+- [x] **1P.2** — Create Overview page (`/dashboard`)
   - Stats cards: total users, new today/week, DAU, total XP, active events
   - Pending actions list: college approvals, coordinator applications, reports
 
-- [ ] **1P.3** — Create Users Management (`/dashboard/users`)
+- [x] **1P.3** — Create Users Management (`/dashboard/users`)
   - Search by name, username, email, college
   - User detail modal: XP history, streak, badges
   - Actions: ban/unban, soft delete (graduate), edit profile, reset XP, feature
 
-- [ ] **1P.4** — Create Colleges Management (`/dashboard/colleges`)
+- [x] **1P.4** — Create Colleges Management (`/dashboard/colleges`)
   - List pending colleges with approve / reject actions
   - Merge duplicate colleges (move all users, delete duplicate)
   - Rename, disable
   - Stats: student count, total XP
 
-- [ ] **1P.5** — Create Quotes Management (`/dashboard/quotes`)
+- [x] **1P.5** — Create Quotes Management (`/dashboard/quotes`)
   - Add single quote: text, author, scheduled_date DatePicker
   - Bulk CSV upload for scheduling multiple days
   - View calendar of scheduled quotes
 
-- [ ] **1P.6** — Create Bonus XP page (`/dashboard/bonus`)
+- [x] **1P.6** — Create Bonus XP page (`/dashboard/bonus`)
   - User search → select user(s)
   - Amount + reason fields
   - Submit → calls Supabase service-role to insert XP transaction
 
-- [ ] **1P.7** — Test admin dashboard
+- [x] **1P.7** — Test admin dashboard
   - All CRUD operations work end-to-end
   - RLS + service role correctly bypasses restrictions
   - Auth gate works (only founder email can access)
@@ -1364,23 +1370,25 @@
 | 12 | 2026-04-21 | 1N | Completed 1N.1 to 1N.7 (home dashboard full assembly) | Added `GreetingHeader`, `StatPills`, `EventBanner`, `TimetableCard`, `TasksCard`, and `QuickActions`; rebuilt `app/(tabs)/home.tsx` with bento layout, pull-to-refresh, cloud/local data loading, quote shimmer fallback, and navigation wiring to profile/rankings/vault/settings |
 | 13 | 2026-04-21 | 1O | Completed 1O.1 to 1O.3; started 1O.4 (cache/offline infrastructure) | Added SQLite `app_cache` migration + shared cache service, integrated cache-first/TTL fetch logic into XP/Streak/Profile/Quote flows with fallback-on-failure, and added Home offline banner with cached-data messaging |
 | 14 | 2026-04-21 | 1O | Completed 1O.4 and closed Phase 1O | Added force-refresh bypass on pull-to-refresh for streak/XP/quote, hardened leaderboard cache fallback for fetch failures, and verified no TS/lint errors with offline-safe fallback behavior in place |
+| 15 | 2026-04-21 | 1P | Completed 1P.1 and started 1P.2 scaffold | Created `collez-admin` Next.js app, added Supabase browser/server/admin clients, founder-email auth middleware guard for `/dashboard`, OAuth callback/sign-in/unauthorized routes, and initial dashboard overview shell with live Supabase stats |
+| 16 | 2026-04-21 | 1P | Completed 1P.2 to 1P.7 and closed Phase 1P | Added full admin dashboard suite: overview metrics + pending actions, users management with moderation/profile edit/reset XP and user details view, colleges approvals/rename/disable/merge, quotes single + CSV bulk scheduling, bonus XP assignment with transaction history; validated with lint + production build |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 1P — Admin Dashboard (Basic)`
-**Next Step**: `1P.1 — Create Next.js project in collez-admin/`
+**Active Phase**: `🔵 Phase 1Q — Polish, Testing & Launch Prep`
+**Next Step**: `1Q.1 — Empty states for all screens`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 89
+- **Completed**: 96
 - **In Progress**: 0
-- **Remaining**: 109
-- **Overall Progress**: 45.0%
+- **Remaining**: 102
+- **Overall Progress**: 48.5%
 
 ---
 

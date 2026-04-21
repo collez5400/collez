@@ -20,6 +20,7 @@ import { GradientButton } from '../../../src/components/shared/GradientButton';
 import { GlassCard } from '../../../src/components/shared/GlassCard';
 import { supabase } from '../../../src/config/supabase';
 import { College } from '../../../src/models/college';
+import { useAuthStore } from '../../../src/store/authStore';
 import {
   Colors, Typography, Spacing, BorderRadius,
 } from '../../../src/config/theme';
@@ -35,6 +36,7 @@ interface CollegeRequest {
 
 export default function OnboardingStep2() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const params = useLocalSearchParams<{
     fullName: string;
     username: string;
@@ -68,8 +70,8 @@ export default function OnboardingStep2() {
       query
         ? colleges.filter(
             c =>
-              c.name.toLowerCase().includes(query) ||
-              c.city.toLowerCase().includes(query)
+              (c.name ?? '').toLowerCase().includes(query) ||
+              (c.city ?? '').toLowerCase().includes(query)
           )
         : colleges
     );
@@ -77,17 +79,38 @@ export default function OnboardingStep2() {
 
   async function fetchColleges() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('colleges')
-      .select('*')
-      .order('name', { ascending: true });
+    const tablesToTry = ['colleges', 'college'] as const;
+    let data: any[] | null = null;
+    let error: any = null;
+
+    for (const tableName of tablesToTry) {
+      const result = await supabase
+        .from(tableName)
+        .select('*')
+        .order('name', { ascending: true });
+      if (!result.error) {
+        data = result.data ?? [];
+        error = null;
+        break;
+      }
+      error = result.error;
+    }
+
     setLoading(false);
     if (error) {
       Alert.alert('Error', 'Could not load colleges. Check your connection.');
       return;
     }
-    setColleges((data ?? []) as College[]);
-    setFiltered((data ?? []) as College[]);
+    const normalized = (data ?? [])
+      .map((row) => ({
+        ...row,
+        name: row.name ?? row.college_name ?? '',
+        city: row.city ?? '',
+        student_count: Number(row.student_count ?? 0),
+      }))
+      .filter((row) => row.id && row.name) as College[];
+    setColleges(normalized);
+    setFiltered(normalized);
   }
 
   async function submitCollegeRequest() {
@@ -96,20 +119,32 @@ export default function OnboardingStep2() {
       return;
     }
     setSubmittingRequest(true);
-    // @ts-expect-error Supabase type shim limitations
-    const { error } = await supabase.from('college_requests').insert({
-      college_name: request.name,
-      city: request.city,
-      state: request.state,
+    const payload = {
+      requested_by: user?.id ?? null,
+      college_name: request.name.trim(),
+      city: request.city.trim(),
+      state: request.state.trim(),
       status: 'pending',
-    });
+    };
+    const tablesToTry = ['college_requests', 'college_request'] as const;
+    let error: any = null;
+    for (const tableName of tablesToTry) {
+      // @ts-expect-error Supabase type shim limitations
+      const result = await supabase.from(tableName).insert(payload);
+      if (!result.error) {
+        error = null;
+        break;
+      }
+      error = result.error;
+    }
     setSubmittingRequest(false);
     if (error) {
-      Alert.alert('Error', 'Request failed. Try again later.');
+      Alert.alert('Error', 'Request failed. Please contact support if this keeps happening.');
       return;
     }
     setShowRequestSheet(false);
     setRequestPending(true);
+    setRequest({ name: '', city: '', state: '' });
   }
 
   function handleContinue() {

@@ -71,6 +71,10 @@ export default function RootLayout() {
   }, [fontsLoaded, fontError, isReady]);
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+
     const startAppOpenTimer = () => {
       if (appOpenTimerRef.current) clearTimeout(appOpenTimerRef.current);
       appOpenTimerRef.current = setTimeout(() => {

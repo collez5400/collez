@@ -108,7 +108,7 @@
 | 1O | Cache & Offline System | `✅ COMPLETE` | 4/4 |
 | 1P | Admin Dashboard (Basic) | `✅ COMPLETE` | 7/7 |
 | 1Q | Polish, Testing & Launch Prep | `✅ COMPLETE` | 10/10 |
-| 2A | Friend System | `✅ COMPLETE` | 6/6 |
+| 2A | Friend System | `🔵 IN PROGRESS` | 5/6 |
 | 2B | Event & Trivia Engine | `⬜ NOT STARTED` | 0/7 |
 | 2C | Coordinator System | `⬜ NOT STARTED` | 0/5 |
 | 2D | Push Notifications | `⬜ NOT STARTED` | 0/4 |
@@ -1004,7 +1004,7 @@
 ---
 
 ## PHASE 2A: Friend System 👥
-**Status**: `✅ COMPLETE`
+**Status**: `🔵 IN PROGRESS`
 **Estimated Time**: 4 days
 **Goal**: Send/accept friend requests, view friend profiles.
 **Reference**: Section 3.6, Screen 15, Schema 6.5-6.6
@@ -1034,7 +1034,7 @@
   - Show shared streak comparison (basic placeholder)
   - Mutual friend count
 
-- [x] **2A.6** — Test friend system
+- [/] **2A.6** — Test friend system
   - Two test accounts: send/accept/reject/remove flow
   - Duplicate request prevention
   - RLS security tests
@@ -1374,24 +1374,24 @@
 | 16 | 2026-04-21 | 1P | Completed 1P.2 to 1P.7 and closed Phase 1P | Added full admin dashboard suite: overview metrics + pending actions, users management with moderation/profile edit/reset XP and user details view, colleges approvals/rename/disable/merge, quotes single + CSV bulk scheduling, bonus XP assignment with transaction history; validated with lint + production build |
 | 17 | 2026-04-21 | 1Q | Completed 1Q.1 and started Phase 1Q | Added shared `EmptyState` component and replaced inconsistent/placeholder empty states across rankings, timetable, tasks/notes, and friends screens; added zero-result search messaging for tasks and notes |
 | 18 | 2026-04-21 | 1Q | Completed 1Q.2 to 1Q.10 and closed Phase 1Q | Added global error boundary + retry views, improved vault error state, swapped images to `expo-image`, upgraded vault lists to FlashList, added in-app + hosted terms/privacy pages, added `eas.json` + app identifiers, ran `npx expo-doctor` (all checks passed) and verified web export |
-| 19 | 2026-04-21 | 2A | Completed 2A.1 to 2A.6 (friend store + screens + profile integration) | Added Supabase-backed friend requests + friendships store, Friends tab (search + pending + network list), user search screen, and real friend action button states on other-user profiles; verified lint clean and web preview running |
+| 19 | 2026-04-21 | 2A | Completed 2A.1 to 2A.5; started 2A.6 (friend system testing) | Added Supabase-backed friend requests + friendships store, Friends tab (search + pending + network list), user search screen, and real friend action button states on other-user profiles; verified lint clean and web preview running; pending 2-account flow + RLS verification |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `⬜ Phase 2B — Event & Trivia Engine`
-**Next Step**: `2B.1 — Event models + store`
+**Active Phase**: `🔵 Phase 2A — Friend System`
+**Next Step**: `2A.6 — Test friend system`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 112
+- **Completed**: 111
 - **In Progress**: 0
-- **Remaining**: 86
-- **Overall Progress**: 56.6%
+- **Remaining**: 87
+- **Overall Progress**: 56.1%
 
 ---
 

@@ -114,7 +114,7 @@
 | 2C | Coordinator System | `✅ COMPLETE` | 5/5 |
 | 2D | Push Notifications | `✅ COMPLETE` | 4/4 |
 | 2E | Phase 2 Polish | `✅ COMPLETE` | 5/5 |
-| 3A | Treasure Hunt Engine | `⬜ NOT STARTED` | 0/5 |
+| 3A | Treasure Hunt Engine | `✅ COMPLETE` | 5/5 |
 | 3B | Puzzle Rush | `⬜ NOT STARTED` | 0/4 |
 | 3C | College Battle System | `⬜ NOT STARTED` | 0/4 |
 | 3D | Advanced Features | `⬜ NOT STARTED` | 0/5 |
@@ -1183,33 +1183,33 @@
 ---
 
 ## PHASE 3A: Treasure Hunt Engine 🗺️
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 5 days
 **Reference**: Section 12.3, Screen 20
 
 ### Steps
 
-- [ ] **3A.1** — Treasure hunt data model + store
+- [x] **3A.1** — Treasure hunt data model + store
   - Clue types: puzzle | navigate | question | action
   - Progress tracking in `event_participations.progress` JSONB
 
-- [ ] **3A.2** — Create Treasure Hunt Screen `app/events/hunt/[id].tsx`
+- [x] **3A.2** — Create Treasure Hunt Screen `app/events/hunt/[id].tsx`
   - 5-dot step progress indicator
   - Current clue card with puzzle or question
   - Text answer input, "Submit" button
   - Navigation prompt ("Go to Leaderboard screen")
   - Completion celebration (Reanimated confetti)
 
-- [ ] **3A.3** — Puzzle mini-components
+- [x] **3A.3** — Puzzle mini-components
   - `SudokuGrid.tsx` — interactive 9×9 grid with input
   - `WordScramble.tsx` — scrambled letters drag-and-drop
   - `MathPuzzle.tsx` — equation solve input
 
-- [ ] **3A.4** — Easter egg elements on screens
+- [x] **3A.4** — Easter egg elements on screens
   - Hidden tappable icons on Leaderboard, Profile (trigger hunt clues)
   - "Tap rank badge 3x" action listener
 
-- [ ] **3A.5** — Admin: Treasure Hunt Creator
+- [x] **3A.5** — Admin: Treasure Hunt Creator
   - JSON-based clue builder in admin dashboard
   - Test hunt functionality before publishing
 
@@ -1389,23 +1389,24 @@
 | 25 | 2026-04-22 | 2D | Completed 2D.1 to 2D.4 and closed Phase 2D | Added Expo push notifications (token registration + Android channel + deeplinks), Supabase migration for push prefs + snapshots, Edge Functions for streak/event pushes, and admin hook to broadcast when events go live; verified `collez-app` typecheck + `collez-admin` build. |
 | 26 | 2026-04-22 | 2E | Completed 2E.1 to 2E.2; started 2E.3 | Added streak shield system (DB fields + activation UI + server-side streak validation edge function), added city/state leaderboard materialized views + rankings tabs/store wiring, and verified `collez-app` typecheck/lints pass. |
 | 27 | 2026-04-22 | 2E | Completed 2E.3 to 2E.5 and closed Phase 2E | Optimized home/rankings re-render behavior with Zustand shallow selectors, added full Phase 2 integration test runbook, added Phase 2E release runbook for OTA/native deploy, and hardened migration dependency ordering by ensuring `events` table exists for Phase 2D. |
+| 28 | 2026-04-22 | 3A | Completed 3A.1 to 3A.5 and closed Phase 3A | Added treasure hunt config types + store progression logic, built `app/events/hunt/[id].tsx` with clue-step flow and completion XP awarding, added puzzle components (`SudokuGrid`, `WordScramble`, `MathPuzzle`), added hidden clue triggers on rankings/profile, and upgraded admin events page to support `treasure_hunt` creation with JSON clue template. |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 3A — Treasure Hunt Engine`
-**Next Step**: `3A.1 — Treasure hunt data model + store`
+**Active Phase**: `🔵 Phase 3B — Puzzle Rush`
+**Next Step**: `3B.1 — Sudoku mini-game screen`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 133
+- **Completed**: 138
 - **In Progress**: 0
-- **Remaining**: 65
-- **Overall Progress**: 67.2%
+- **Remaining**: 60
+- **Overall Progress**: 69.7%
 
 ---
 

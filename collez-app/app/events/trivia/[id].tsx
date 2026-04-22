@@ -16,6 +16,13 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 type Status = 'playing' | 'feedback' | 'results';
 
+function getTriviaQuestions(event: Event | null): TriviaQuestion[] {
+  if (!event?.config || typeof event.config !== 'object') return [];
+  const maybeQuestions = (event.config as { questions?: unknown }).questions;
+  if (!Array.isArray(maybeQuestions)) return [];
+  return maybeQuestions as TriviaQuestion[];
+}
+
 export default function TriviaEventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -37,8 +44,7 @@ export default function TriviaEventScreen() {
   const circumference = 2 * Math.PI * radius;
 
   const triviaQuestions = useMemo<TriviaQuestion[]>(() => {
-    if (!event?.config || !Array.isArray(event.config.questions)) return [];
-    return event.config.questions;
+    return getTriviaQuestions(event);
   }, [event]);
 
   const currentQuestion = triviaQuestions[questionIndex];

@@ -26,6 +26,7 @@ export default async function EventsPage() {
     "use server";
     const title = String(formData.get("title") ?? "").trim();
     const description = String(formData.get("description") ?? "").trim();
+    const eventType = String(formData.get("eventType") ?? "trivia").trim();
     const status = String(formData.get("status") ?? "upcoming");
     const startTime = String(formData.get("startTime") ?? "");
     const endTime = String(formData.get("endTime") ?? "");
@@ -39,7 +40,7 @@ export default async function EventsPage() {
     await supabaseAdmin.from("events").insert({
       title,
       description: description || null,
-      event_type: "trivia",
+      event_type: eventType,
       status,
       start_time: startTime,
       end_time: endTime,
@@ -77,9 +78,13 @@ export default async function EventsPage() {
       <p className="mt-2 text-sm text-slate-400">Create trivia events and control status transitions.</p>
 
       <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-4">
-        <h2 className="text-lg font-semibold">Create trivia event</h2>
+        <h2 className="text-lg font-semibold">Create event</h2>
         <form action={createEvent} className="mt-4 grid gap-3 md:grid-cols-2">
           <input name="title" required placeholder="Trivia title" className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+          <select name="eventType" className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm">
+            <option value="trivia">trivia</option>
+            <option value="treasure_hunt">treasure_hunt</option>
+          </select>
           <select name="status" className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm">
             <option value="upcoming">upcoming</option>
             <option value="live">live</option>
@@ -99,6 +104,49 @@ export default async function EventsPage() {
             required
             className="min-h-56 rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-xs md:col-span-2"
             defaultValue={`{
+  "clues": [
+    {
+      "id": "clue1",
+      "type": "puzzle",
+      "puzzle_type": "word_scramble",
+      "puzzle_data": { "scrambled": "ZLOLEC", "answer": "COLLEZ" },
+      "hint": "Unscramble the word"
+    },
+    {
+      "id": "clue2",
+      "type": "navigate",
+      "target_screen": "leaderboard",
+      "hidden_element_id": "diwali_lamp",
+      "hint": "Find the hidden lamp icon on rankings"
+    },
+    {
+      "id": "clue3",
+      "type": "question",
+      "question": "What is the COLLEZ app name?",
+      "answer": "COLLEZ",
+      "case_sensitive": false
+    },
+    {
+      "id": "clue4",
+      "type": "puzzle",
+      "puzzle_type": "math",
+      "puzzle_data": { "equation": "12 + 8", "answer": "20" }
+    },
+    {
+      "id": "clue5",
+      "type": "action",
+      "action": "tap_rank_badge_3x",
+      "hint": "Tap your rank badge three times"
+    }
+  ],
+  "total_clues": 5,
+  "completion_xp": 40,
+  "badge_name": "Treasure Hunter"
+}
+
+/*
+  Trivia template:
+{
   "questions": [
     {
       "id": "q1",
@@ -113,7 +161,9 @@ export default async function EventsPage() {
   "participation_xp": 5,
   "passing_score": 1,
   "badge_name": "Trivia Scholar"
-}`}
+}
+*/
+`}
           />
           <button className="rounded bg-indigo-600 px-3 py-2 text-sm md:col-span-2">Create event</button>
         </form>

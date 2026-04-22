@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useStreakStore } from '../../src/store/streakStore';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { RankRow } from '../../src/components/leaderboard/RankRow';
@@ -9,12 +10,27 @@ import { EmptyState } from '../../src/components/shared/EmptyState';
 import { ErrorState } from '../../src/components/shared/ErrorState';
 import { LeaderboardEntry, LeaderboardType, useLeaderboardStore } from '../../src/store/leaderboardStore';
 import { useAuthStore } from '../../src/store/authStore';
+import { useEventStore } from '../../src/store/eventStore';
 import { shallow } from 'zustand/shallow';
 
 export default function RankingsScreen() {
   const [activeTab, setActiveTab] = useState<LeaderboardType>('college');
   const [refreshing, setRefreshing] = useState(false);
   const userId = useAuthStore((state) => state.user?.id);
+  const { liveEvents, submitHuntResponse } = useEventStore(
+    (state) => ({ liveEvents: state.liveEvents, submitHuntResponse: state.submitHuntResponse }),
+    shallow
+  );
+  const triggerLeaderboardHiddenAction = useCallback(() => {
+    const huntEvent = liveEvents.find((item) => item.event_type === 'treasure_hunt');
+    if (!huntEvent) return;
+    void submitHuntResponse({
+      eventId: huntEvent.id,
+      clueId: 'clue2',
+      response: 'diwali_lamp',
+    });
+  }, [liveEvents, submitHuntResponse]);
+
   const {
     collegeBoard,
     cityBoard,
@@ -140,6 +156,9 @@ export default function RankingsScreen() {
   const listHeader = (
     <View style={styles.headerContainer}>
       <Text style={styles.title}>Leaderboard</Text>
+      <Pressable style={styles.hiddenTrigger} onPress={triggerLeaderboardHiddenAction}>
+        <MaterialIcons name="emoji-objects" size={14} color={Colors.onSurfaceVariant} />
+      </Pressable>
       <View style={styles.tabRow}>
         {tabButton('college', 'College')}
         {tabButton('city', 'City')}
@@ -209,6 +228,15 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.heading,
     fontSize: Typography.size.xxl,
     fontWeight: '700',
+  },
+  hiddenTrigger: {
+    alignSelf: 'flex-end',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: `${Colors.outline}33`,
+    backgroundColor: `${Colors.surfaceHigh}66`,
   },
   tabRow: {
     flexDirection: 'row',

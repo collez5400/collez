@@ -22,6 +22,7 @@ import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { useAuthStore } from '../../src/store/authStore';
 import { useUserStore } from '../../src/store/userStore';
 import { useCoordinatorStore } from '../../src/store/coordinatorStore';
+import { useEventStore } from '../../src/store/eventStore';
 import { getRankMeta, getRankTier } from '../../src/utils/rankCalculator';
 
 function getBadgeIcon(badgeType: string): keyof typeof MaterialIcons.glyphMap {
@@ -33,9 +34,11 @@ function getBadgeIcon(badgeType: string): keyof typeof MaterialIcons.glyphMap {
 
 export default function ProfileScreen() {
   const [editOpen, setEditOpen] = useState(false);
+  const [rankTapCount, setRankTapCount] = useState(0);
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const { signOut } = useAuthStore();
+  const { liveEvents, submitHuntResponse } = useEventStore();
   const {
     profile,
     badges,
@@ -106,6 +109,23 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const handleRankTap = () => {
+    const nextCount = rankTapCount + 1;
+    if (nextCount >= 3) {
+      const huntEvent = liveEvents.find((item) => item.event_type === 'treasure_hunt');
+      if (huntEvent) {
+        void submitHuntResponse({
+          eventId: huntEvent.id,
+          clueId: 'clue5',
+          response: 'tap_rank_badge_3x',
+        });
+      }
+      setRankTapCount(0);
+      return;
+    }
+    setRankTapCount(nextCount);
+  };
+
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -128,10 +148,12 @@ export default function ProfileScreen() {
         </GlassCard>
 
         <View style={styles.statsRow}>
-          <GlassCard style={styles.statCard}>
+          <Pressable onPress={handleRankTap} style={styles.statPressable}>
+            <GlassCard style={styles.statCard}>
             <Text style={styles.statLabel}>Rank</Text>
             <Text style={[styles.statValue, { color: rankMeta.color }]}>{rankMeta.label}</Text>
-          </GlassCard>
+            </GlassCard>
+          </Pressable>
           <GlassCard style={styles.statCard}>
             <Text style={styles.statLabel}>XP</Text>
             <Text style={styles.statValue}>{profile?.xp ?? 0}</Text>
@@ -320,6 +342,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
   },
+  statPressable: { flex: 1 },
   statLabel: {
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,

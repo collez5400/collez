@@ -18,6 +18,30 @@ export interface TriviaConfig {
   badge_name?: string;
 }
 
+export type HuntClueType = 'puzzle' | 'navigate' | 'question' | 'action';
+export type HuntPuzzleType = 'sudoku' | 'word_scramble' | 'math';
+
+export interface HuntClue {
+  id: string;
+  type: HuntClueType;
+  hint?: string;
+  puzzle_type?: HuntPuzzleType;
+  puzzle_data?: Record<string, unknown>;
+  target_screen?: string;
+  hidden_element_id?: string;
+  question?: string;
+  answer?: string;
+  case_sensitive?: boolean;
+  action?: string;
+}
+
+export interface TreasureHuntConfig {
+  clues: HuntClue[];
+  total_clues?: number;
+  completion_xp?: number;
+  badge_name?: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -29,7 +53,7 @@ export interface Event {
   xp_reward: number;
   badge_name: string | null;
   banner_image_url: string | null;
-  config: TriviaConfig | null;
+  config: TriviaConfig | TreasureHuntConfig | null;
   created_at: string;
 }
 

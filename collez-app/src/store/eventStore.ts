@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { supabase } from '../config/supabase';
-import type { Event, EventParticipation, TriviaConfig } from '../models/event';
+import type {
+  Event,
+  EventParticipation,
+  HuntClue,
+  TreasureHuntConfig,
+  TriviaConfig,
+} from '../models/event';
 import { useAuthStore } from './authStore';
 import { useStreakStore } from './streakStore';
 
@@ -17,6 +23,25 @@ interface SubmitTriviaAnswerPayload {
   isCorrect: boolean;
 }
 
+interface SubmitHuntResponsePayload {
+  eventId: string;
+  clueId: string;
+  response: string;
+}
+
+interface HuntProgressData {
+  currentClueIndex: number;
+  solvedClueIds: string[];
+  answers: Array<{ clueId: string; response: string; solved: boolean; submittedAt: string }>;
+}
+
+interface HuntSubmitResult {
+  solved: boolean;
+  completed: boolean;
+  currentClueIndex: number;
+  message: string;
+}
+
 interface EventStoreState {
   liveEvents: Event[];
   upcomingEvents: Event[];
@@ -29,6 +54,7 @@ interface EventStoreState {
   getParticipation: (eventId: string) => Promise<EventParticipation | null>;
   submitTriviaAnswer: (payload: SubmitTriviaAnswerPayload) => Promise<void>;
   submitTriviaResult: (payload: SubmitTriviaPayload) => Promise<{  xpAwarded: number; passed: boolean } | null>;
+  submitHuntResponse: (payload: SubmitHuntResponsePayload) => Promise<HuntSubmitResult | null>;
   clearError: () => void;
 }
 
@@ -38,7 +64,67 @@ function getAuthUserId() {
 
 function getTriviaConfig(event: Event): TriviaConfig | null {
   if (!event.config || typeof event.config !== 'object') return null;
+  if (!Array.isArray((event.config as TriviaConfig).questions)) return null;
   return event.config as TriviaConfig;
+}
+
+function getTreasureHuntConfig(event: Event): TreasureHuntConfig | null {
+  if (!event.config || typeof event.config !== 'object') return null;
+  if (!Array.isArray((event.config as TreasureHuntConfig).clues)) return null;
+  return event.config as TreasureHuntConfig;
+}
+
+function normalizeText(value: string, caseSensitive: boolean) {
+  const trimmed = value.trim();
+  return caseSensitive ? trimmed : trimmed.toLowerCase();
+}
+
+function evaluateClue(clue: HuntClue, response: string): boolean {
+  const answer = normalizeText(response, Boolean(clue.case_sensitive));
+  if (!answer) return false;
+
+  if (clue.type === 'question') {
+    if (!clue.answer) return false;
+    return answer === normalizeText(clue.answer, Boolean(clue.case_sensitive));
+  }
+
+  if (clue.type === 'action' || clue.type === 'navigate') {
+    const expected = clue.action ?? clue.hidden_element_id ?? clue.target_screen ?? clue.id;
+    return answer === normalizeText(expected, false);
+  }
+
+  if (clue.type === 'puzzle') {
+    const puzzleData = clue.puzzle_data ?? {};
+    const expected = typeof puzzleData.answer === 'string' ? puzzleData.answer : '';
+    if (!expected) return false;
+    return answer === normalizeText(expected, Boolean(clue.case_sensitive));
+  }
+
+  return false;
+}
+
+function getHuntProgress(participation: EventParticipation): HuntProgressData {
+  const baseProgress = (participation.progress ?? {}) as Record<string, unknown>;
+  return {
+    currentClueIndex:
+      typeof baseProgress.currentClueIndex === 'number' && Number.isFinite(baseProgress.currentClueIndex)
+        ? Math.max(0, baseProgress.currentClueIndex)
+        : 0,
+    solvedClueIds: Array.isArray(baseProgress.solvedClueIds)
+      ? baseProgress.solvedClueIds.filter((value): value is string => typeof value === 'string')
+      : [],
+    answers: Array.isArray(baseProgress.answers)
+      ? baseProgress.answers.filter(
+          (value): value is HuntProgressData['answers'][number] =>
+            Boolean(value) &&
+            typeof value === 'object' &&
+            typeof (value as { clueId?: unknown }).clueId === 'string' &&
+            typeof (value as { response?: unknown }).response === 'string' &&
+            typeof (value as { solved?: unknown }).solved === 'boolean' &&
+            typeof (value as { submittedAt?: unknown }).submittedAt === 'string'
+        )
+      : [],
+  };
 }
 
 export const useEventStore = create<EventStoreState>((set, get) => ({
@@ -60,7 +146,7 @@ export const useEventStore = create<EventStoreState>((set, get) => ({
         .order('start_time', { ascending: true });
 
       if (error) throw new Error(error.message);
-      const rows = ((data ?? []) as Event[]).filter((item) => item.event_type === 'trivia');
+      const rows = (data ?? []) as Event[];
 
       set({
         liveEvents: rows.filter((item) => item.status === 'live'),
@@ -95,7 +181,7 @@ export const useEventStore = create<EventStoreState>((set, get) => ({
           score: 0,
           xp_earned: 0,
           completed: false,
-          progress: { answers: [], totalAnswered: 0 },
+          progress: { answers: [], totalAnswered: 0, currentClueIndex: 0, solvedClueIds: [] },
         } as any)
         .select('id, event_id, user_id, score, xp_earned, completed, progress, started_at, completed_at')
         .single();
@@ -236,6 +322,85 @@ export const useEventStore = create<EventStoreState>((set, get) => ({
     }));
 
     return { xpAwarded, passed };
+  },
+
+  submitHuntResponse: async ({ eventId, clueId, response }) => {
+    const userId = getAuthUserId();
+    if (!userId) return null;
+
+    const event = [...get().liveEvents, ...get().upcomingEvents, ...get().pastEvents].find((item) => item.id === eventId);
+    if (!event || event.event_type !== 'treasure_hunt') {
+      set({ error: 'Treasure hunt event not found' });
+      return null;
+    }
+
+    const config = getTreasureHuntConfig(event);
+    if (!config || config.clues.length === 0) {
+      set({ error: 'Treasure hunt clues are not configured' });
+      return null;
+    }
+
+    const participation = get().participationsByEventId[eventId] ?? (await get().getParticipation(eventId));
+    if (!participation) {
+      set({ error: 'Join this event before submitting clues' });
+      return null;
+    }
+
+    const current = getHuntProgress(participation);
+    const clue = config.clues[current.currentClueIndex];
+    if (!clue || clue.id !== clueId) {
+      return {
+        solved: false,
+        completed: false,
+        currentClueIndex: current.currentClueIndex,
+        message: 'This clue is locked or already solved.',
+      };
+    }
+
+    const solved = evaluateClue(clue, response);
+    const now = new Date().toISOString();
+    const nextSolved = solved ? [...new Set([...current.solvedClueIds, clue.id])] : current.solvedClueIds;
+    const nextIndex = solved ? Math.min(current.currentClueIndex + 1, config.clues.length) : current.currentClueIndex;
+    const completed = solved && nextIndex >= config.clues.length;
+
+    const nextProgress = {
+      currentClueIndex: nextIndex,
+      solvedClueIds: nextSolved,
+      answers: [...current.answers, { clueId, response, solved, submittedAt: now }],
+    };
+
+    const { data, error } = await (supabase as any)
+      .from('event_participations')
+      .update({
+        progress: nextProgress,
+        completed,
+        completed_at: completed ? now : null,
+      } as any)
+      .eq('event_id', eventId)
+      .eq('user_id', userId)
+      .select('id, event_id, user_id, score, xp_earned, completed, progress, started_at, completed_at')
+      .single();
+
+    if (error || !data) {
+      set({ error: error?.message ?? 'Failed to submit treasure hunt response' });
+      return null;
+    }
+
+    const updatedParticipation = data as EventParticipation;
+    set((state) => ({
+      participationsByEventId: { ...state.participationsByEventId, [eventId]: updatedParticipation },
+    }));
+
+    return {
+      solved,
+      completed,
+      currentClueIndex: nextIndex,
+      message: solved
+        ? completed
+          ? 'Treasure hunt completed!'
+          : 'Clue solved. Next clue unlocked.'
+        : 'Incorrect answer. Try again.',
+    };
   },
 
   clearError: () => set({ error: null }),

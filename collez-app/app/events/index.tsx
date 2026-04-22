@@ -33,10 +33,15 @@ export default function EventsScreen() {
     [liveEvents.length, upcomingEvents.length, pastEvents.length]
   );
 
+  const getEventRoute = (eventType: string, eventId: string) => {
+    if (eventType === 'treasure_hunt') return `/events/hunt/${eventId}`;
+    return `/events/trivia/${eventId}`;
+  };
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Events</Text>
-      <Text style={styles.subtitle}>Compete in live trivia and earn XP rewards.</Text>
+      <Text style={styles.subtitle}>Compete in live events and earn XP rewards.</Text>
 
       {!hasAnyEvents && !isLoading ? (
         <EmptyState
@@ -47,20 +52,20 @@ export default function EventsScreen() {
       ) : null}
 
       {liveEvents.map((event) => (
-        <Pressable key={event.id} onPress={() => router.push(`/events/trivia/${event.id}`)} style={styles.cardPressable}>
+        <Pressable key={event.id} onPress={() => router.push(getEventRoute(event.event_type, event.id) as never)} style={styles.cardPressable}>
           {event.banner_image_url ? (
             <ImageBackground source={{ uri: event.banner_image_url }} style={styles.liveBanner} imageStyle={styles.bannerImage}>
               <View style={styles.liveOverlay}>
                 <Text style={styles.livePill}>LIVE</Text>
                 <Text style={styles.liveTitle}>{event.title}</Text>
-                <Text style={styles.liveDesc}>{event.description ?? 'Trivia challenge is live now.'}</Text>
+                <Text style={styles.liveDesc}>{event.description ?? 'Challenge is live now.'}</Text>
               </View>
             </ImageBackground>
           ) : (
             <GlassCard style={styles.liveFallback}>
               <Text style={styles.livePill}>LIVE</Text>
               <Text style={styles.liveTitle}>{event.title}</Text>
-              <Text style={styles.liveDesc}>{event.description ?? 'Trivia challenge is live now.'}</Text>
+              <Text style={styles.liveDesc}>{event.description ?? 'Challenge is live now.'}</Text>
             </GlassCard>
           )}
         </Pressable>

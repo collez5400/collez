@@ -39,6 +39,10 @@ function buildNewUserProfile(authUser: SupabaseAuthUser): Partial<User> {
     is_coordinator: false,
     is_banned: false,
     onboarding_complete: false,
+    push_token: null,
+    push_enabled: true,
+    push_streak_enabled: true,
+    push_event_enabled: true,
   };
 }
 

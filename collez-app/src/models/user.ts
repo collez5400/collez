@@ -15,6 +15,10 @@ export interface User {
   is_coordinator: boolean;
   is_banned: boolean;
   onboarding_complete: boolean;
+  push_token?: string | null;
+  push_enabled?: boolean;
+  push_streak_enabled?: boolean;
+  push_event_enabled?: boolean;
   created_at: string;
   updated_at: string;
 }

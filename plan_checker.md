@@ -1125,31 +1125,30 @@
 ---
 
 ## PHASE 2D: Push Notifications 🔔
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 3 days
 **Goal**: FCM push notifications for streaks and events.
 **Reference**: Section 20 (Retention Loops)
 
 ### Steps
 
-- [ ] **2D.1** — Set up Expo Push Notifications
-  - `expo-notifications` configuration
-  - Request permissions on first login
+- [x] **2D.1** — Set up Expo Push Notifications
+  - Added `expo-notifications` + Android channel setup
+  - Request permissions after first login / session restore (native only)
   - Store Expo push token in Supabase `users.push_token`
 
-- [ ] **2D.2** — Streak reminder notifications
-  - Supabase Edge Function (daily cron): find users with `last_active_date = 2 days ago` → send push
-  - 7-day inactive: "You've dropped X ranks!" push
-  - Use Expo Push API from server
+- [x] **2D.2** — Streak reminder notifications
+  - Edge Function `send-streak-reminders` (2-day + 7-day inactive) using Expo Push API
+  - Optional “dropped X ranks” via `user_rank_snapshots` (filled by `snapshot-ranks`)
 
-- [ ] **2D.3** — Event notifications
-  - When event status changes to 'live' → send push to all users
-  - "Event ends in 2 hours" cron push
+- [x] **2D.3** — Event notifications
+  - On status → `live`: admin calls Edge Function `notify-event-live` (sends once per event)
+  - Edge Function `send-event-ending-soon` (2-hour window) with sent-tracking columns
 
-- [ ] **2D.4** — Test notification delivery
-  - Android notification channels setup
-  - Deep link from notification → correct app screen
-  - Notification preferences toggle in Settings
+- [x] **2D.4** — Test notification delivery
+  - Android channel: `default`
+  - Deep link routing via notification `data.url`
+  - Settings toggles: global + streak + event
 
 ---
 
@@ -1387,23 +1386,24 @@
 | 22 | 2026-04-22 | 2B | Completed 2B.7 and closed Phase 2B | Added incremental trivia answer submission to Supabase (`event_participations.progress.answers`), logged `trivia` streak action on join, verified TypeScript build (`tsc --noEmit`) clean, and started Expo web preview (Metro running on localhost:8081). |
 | 23 | 2026-04-22 | 2C | Completed 2C.1 to 2C.4; pending 2C.5 | Added coordinator apply flow (eligibility gate + form + photo capture + Supabase insert), profile status component with apply CTA, admin coordinator review page (approve/reject + badge insert), and coordinator badge display. Expo web preview started on localhost:8082 (Metro). |
 | 24 | 2026-04-22 | 2C | Completed 2C.5 and closed Phase 2C | Added Supabase migration for `coordinator_applications` + leaderboard view columns; verified `collez-app` typecheck and `collez-admin` production build succeed; coordinator apply + admin approve path ready (requires bucket + SQL migration applied). |
+| 25 | 2026-04-22 | 2D | Completed 2D.1 to 2D.4 and closed Phase 2D | Added Expo push notifications (token registration + Android channel + deeplinks), Supabase migration for push prefs + snapshots, Edge Functions for streak/event pushes, and admin hook to broadcast when events go live; verified `collez-app` typecheck + `collez-admin` build. |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 2C — Coordinator System`
-**Next Step**: `2D.1 — Set up Expo Push Notifications`
+**Active Phase**: `🔵 Phase 2E — Phase 2 Polish`
+**Next Step**: `2E.1 — Streak Shield`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 124
+- **Completed**: 128
 - **In Progress**: 0
-- **Remaining**: 74
-- **Overall Progress**: 62.6%
+- **Remaining**: 70
+- **Overall Progress**: 64.6%
 
 ---
 

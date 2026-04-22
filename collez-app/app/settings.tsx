@@ -1,13 +1,36 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Typography } from '../src/config/theme';
 import { GlassCard } from '../src/components/shared/GlassCard';
+import { useAuthStore } from '../src/store/authStore';
+import { supabase } from '../src/config/supabase';
 
 const appVersion = Constants.expoConfig?.version ?? 'dev';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+
+  const pushEnabled = user?.push_enabled ?? true;
+  const pushStreakEnabled = user?.push_streak_enabled ?? true;
+  const pushEventEnabled = user?.push_event_enabled ?? true;
+
+  const updatePrefs = async (updates: Record<string, boolean>) => {
+    if (!user) return;
+    useAuthStore.setState({ user: { ...user, ...updates } });
+    const { error } = await supabase
+      .from('users')
+      // @ts-expect-error Supabase update typing (manual Database shim)
+      .update(updates)
+      .eq('id', user.id);
+    if (error) {
+      // Revert locally if write fails
+      useAuthStore.setState({ user });
+      Alert.alert('Update failed', error.message ?? 'Could not update notification preferences.');
+    }
+  };
+
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
@@ -31,6 +54,47 @@ export default function SettingsScreen() {
         <GlassCard style={styles.card}>
           <Text style={styles.rowTitle}>Change College</Text>
           <Text style={styles.rowText}>College changes require admin approval.</Text>
+        </GlassCard>
+
+        <GlassCard style={styles.card}>
+          <View style={styles.switchRow}>
+            <View style={styles.switchText}>
+              <Text style={styles.rowTitle}>Push Notifications</Text>
+              <Text style={styles.rowText}>Enable or disable all COLLEZ notifications.</Text>
+            </View>
+            <Switch
+              value={pushEnabled}
+              onValueChange={(value) => void updatePrefs({ push_enabled: value })}
+            />
+          </View>
+        </GlassCard>
+
+        <GlassCard style={styles.card}>
+          <View style={styles.switchRow}>
+            <View style={styles.switchText}>
+              <Text style={styles.rowTitle}>Streak Reminders</Text>
+              <Text style={styles.rowText}>Reminders when your streak is at risk.</Text>
+            </View>
+            <Switch
+              value={pushEnabled && pushStreakEnabled}
+              disabled={!pushEnabled}
+              onValueChange={(value) => void updatePrefs({ push_streak_enabled: value })}
+            />
+          </View>
+        </GlassCard>
+
+        <GlassCard style={styles.card}>
+          <View style={styles.switchRow}>
+            <View style={styles.switchText}>
+              <Text style={styles.rowTitle}>Event Alerts</Text>
+              <Text style={styles.rowText}>Notifies you when a trivia/event goes live.</Text>
+            </View>
+            <Switch
+              value={pushEnabled && pushEventEnabled}
+              disabled={!pushEnabled}
+              onValueChange={(value) => void updatePrefs({ push_event_enabled: value })}
+            />
+          </View>
         </GlassCard>
 
         <Pressable style={styles.linkCard} onPress={() => router.push('/terms')} accessibilityRole="button" accessibilityLabel="Terms of Service">
@@ -78,6 +142,16 @@ const styles = StyleSheet.create({
     borderColor: `${Colors.outline}33`,
     borderRadius: 12,
     padding: Spacing.md,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  },
+  switchText: {
+    flex: 1,
+    gap: 4,
   },
   rowTitle: {
     color: Colors.onSurface,

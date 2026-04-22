@@ -23,5 +23,6 @@ export function getServerEnv() {
       process.env.SUPABASE_SERVICE_ROLE_KEY,
     ),
     founderEmail: requireEnv("FOUNDER_EMAIL", process.env.FOUNDER_EMAIL),
+    cronSecret: requireEnv("CRON_SECRET", process.env.CRON_SECRET),
   };
 }

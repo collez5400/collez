@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { requireFounderUser } from "@/src/lib/auth";
 import { getSupabaseAdminClient } from "@/src/lib/supabase/admin";
+import { getServerEnv } from "@/src/lib/env";
 
 function safeParseConfig(configText: string) {
   try {
@@ -58,6 +59,14 @@ export default async function EventsPage() {
     if (!id || !status) return;
 
     await supabaseAdmin.from("events").update({ status }).eq("id", id);
+
+    if (status === "live") {
+      const serverEnv = getServerEnv();
+      await supabaseAdmin.functions.invoke("notify-event-live", {
+        body: { eventId: id },
+        headers: { "x-cron-secret": serverEnv.cronSecret },
+      });
+    }
     revalidatePath("/dashboard/events");
     revalidatePath("/dashboard");
   }

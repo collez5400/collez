@@ -11,6 +11,7 @@ import {
   ensureUserProfileFromAuthUser,
   updateUserProfile,
 } from '../services/authService';
+import { registerForPushNotifications } from '../services/notificationService';
 
 export type AuthStatus =
   | 'idle'
@@ -56,6 +57,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         status: isNew || !user.onboarding_complete ? 'onboarding' : 'authenticated',
         error: null,
       });
+
+      // Request notification permissions after first login (native only).
+      // Safe to call repeatedly; OS prompts at most once.
+      void registerForPushNotifications(user.id);
     } catch (err: any) {
       set({ status: 'unauthenticated', error: err.message ?? 'Sign in failed' });
     }
@@ -92,6 +97,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         user,
         status: user.onboarding_complete ? 'authenticated' : 'onboarding',
       });
+
+      void registerForPushNotifications(user.id);
     } catch {
       set({ status: 'unauthenticated' });
     }

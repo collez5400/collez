@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus, Platform, ToastAndroid } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Notifications from 'expo-notifications';
 import {
   useFonts,
   SpaceGrotesk_700Bold,
@@ -19,6 +20,10 @@ import { useStreakStore } from '../src/store/streakStore';
 import { useXpStore } from '../src/store/xpStore';
 import { XP_VALUES } from '../src/config/constants';
 import { AppErrorBoundary } from '../src/components/shared/AppErrorBoundary';
+import {
+  ensureAndroidNotificationChannel,
+  parseNotificationDeepLink,
+} from '../src/services/notificationService';
 
 const { initSQLite } =
   Platform.OS === 'web'
@@ -34,6 +39,7 @@ SplashScreen.preventAutoHideAsync();
 configureGoogleSignIn();
 
 export default function RootLayout() {
+  const router = useRouter();
   const [fontsLoaded, fontError] = useFonts({
     SpaceGrotesk_400Regular,
     SpaceGrotesk: SpaceGrotesk_700Bold,
@@ -74,6 +80,19 @@ export default function RootLayout() {
       return;
     }
 
+    ensureAndroidNotificationChannel();
+
+    const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const url = parseNotificationDeepLink(response);
+      if (url) router.push(url);
+    });
+
+    void (async () => {
+      const initial = await Notifications.getLastNotificationResponseAsync();
+      const url = initial ? parseNotificationDeepLink(initial) : null;
+      if (url) router.push(url);
+    })();
+
     const startAppOpenTimer = () => {
       if (appOpenTimerRef.current) clearTimeout(appOpenTimerRef.current);
       appOpenTimerRef.current = setTimeout(() => {
@@ -109,6 +128,7 @@ export default function RootLayout() {
     });
 
     return () => {
+      responseSub.remove();
       subscription.remove();
       if (appOpenTimerRef.current) clearTimeout(appOpenTimerRef.current);
     };

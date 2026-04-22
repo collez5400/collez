@@ -5,6 +5,7 @@ import { User } from '../models/user';
 import { supabase } from '../config/supabase';
 import {
   signInWithGoogle,
+  signInWithApple,
   signOut as authSignOut,
   restoreSession,
   fetchUserProfile,
@@ -13,6 +14,7 @@ import {
 } from '../services/authService';
 import { registerForPushNotifications } from '../services/notificationService';
 import { useVaultStore } from './vaultStore';
+import { useRemoteConfigStore } from './remoteConfigStore';
 
 export type AuthStatus =
   | 'idle'
@@ -28,7 +30,7 @@ interface AuthState {
   error: string | null;
 
   // Actions
-  signIn: () => Promise<void>;
+  signIn: (provider?: 'google' | 'apple') => Promise<void>;
   signOut: () => Promise<void>;
   restoreSession: () => Promise<void>;
   completeOnboarding: (profileUpdates: Partial<User>) => Promise<void>;
@@ -41,15 +43,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   error: null,
 
-  signIn: async () => {
+  signIn: async (provider = 'google') => {
     set({ status: 'loading', error: null });
     try {
+      if (Platform.OS === 'web' && provider !== 'google') {
+        throw new Error('Apple sign in is only available on iOS.');
+      }
+
       if (Platform.OS === 'web') {
         await signInWithGoogle();
         return;
       }
 
-      const { user, isNew } = await signInWithGoogle();
+      const { user, isNew } =
+        provider === 'apple' ? await signInWithApple() : await signInWithGoogle();
       const { data } = await supabase.auth.getSession();
 
       set({
@@ -63,6 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Safe to call repeatedly; OS prompts at most once.
       void registerForPushNotifications(user.id);
       void useVaultStore.getState().syncFromCloud();
+      void useRemoteConfigStore.getState().refreshConfig(true);
     } catch (err: any) {
       set({ status: 'unauthenticated', error: err.message ?? 'Sign in failed' });
     }
@@ -102,6 +110,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       void registerForPushNotifications(user.id);
       void useVaultStore.getState().syncFromCloud();
+      void useRemoteConfigStore.getState().refreshConfig(true);
     } catch {
       set({ status: 'unauthenticated' });
     }

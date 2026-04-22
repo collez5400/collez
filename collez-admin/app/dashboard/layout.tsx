@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 const navItems = [
   { href: "/dashboard", label: "Overview" },
+  { href: "/dashboard/analytics", label: "Analytics" },
   { href: "/dashboard/users", label: "Users" },
   { href: "/dashboard/colleges", label: "Colleges" },
   { href: "/dashboard/quotes", label: "Quotes" },
@@ -14,6 +15,7 @@ const navItems = [
   { href: "/dashboard/anti-cheat", label: "Anti-Cheat" },
   { href: "/dashboard/growth", label: "Growth" },
   { href: "/dashboard/bonus", label: "Bonus XP" },
+  { href: "/dashboard/experiments", label: "Experiments" },
 ];
 
 export default async function DashboardLayout({

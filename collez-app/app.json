@@ -14,6 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "usesAppleSignIn": true,
       "bundleIdentifier": "com.collez.app"
     },
     "android": {
@@ -33,6 +34,7 @@
     ],
     "plugins": [
       "expo-router",
+      "expo-apple-authentication",
       "expo-notifications",
       "expo-sqlite",
       "expo-secure-store",

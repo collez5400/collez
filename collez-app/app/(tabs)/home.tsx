@@ -31,6 +31,7 @@ import { useTaskStore } from '../../src/store/taskStore';
 import { useTimetableStore } from '../../src/store/timetableStore';
 import { useXpStore } from '../../src/store/xpStore';
 import { useEventStore } from '../../src/store/eventStore';
+import { useRemoteConfigStore } from '../../src/store/remoteConfigStore';
 import { shallow } from 'zustand/shallow';
 import { saveWidgetData } from '../../src/widgets/widgetData';
 import { requestWidgetUpdate } from 'react-native-android-widget';
@@ -77,8 +78,12 @@ export default function HomeScreen() {
   const { tasks, loadTasks } = useTaskStore();
   const [dailyQuote, setDailyQuote] = useState('Progress over perfection.');
   const [dailyQuoteAuthor, setDailyQuoteAuthor] = useState('COLLEZ');
+  const [quoteLayoutVariant, setQuoteLayoutVariant] = useState<'A' | 'B'>('A');
   const [isQuoteLoading, setIsQuoteLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const refreshRemoteConfig = useRemoteConfigStore((state) => state.refreshConfig);
+  const getExperiment = useRemoteConfigStore((state) => state.getVariant);
+  const isFeatureEnabled = useRemoteConfigStore((state) => state.isEnabled);
   const quoteLoggedRef = useRef(false);
   const prioritizedLiveEvent =
     liveEvents.find((event) => event.event_type === 'college_battle') ?? liveEvents[0] ?? null;
@@ -150,6 +155,17 @@ export default function HomeScreen() {
 
     void loadQuote();
   }, []);
+
+  useEffect(() => {
+    if (!authUser) return;
+    void (async () => {
+      await refreshRemoteConfig();
+      const variant = await getExperiment('home_quote_layout', authUser);
+      if (variant === 'A' || variant === 'B') {
+        setQuoteLayoutVariant(variant);
+      }
+    })();
+  }, [authUser, getExperiment, refreshRemoteConfig]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -260,7 +276,11 @@ export default function HomeScreen() {
             {isQuoteLoading ? (
               <ShimmerLoader height={170} />
             ) : (
-              <QuoteCard quote={dailyQuote} author={dailyQuoteAuthor} onViewed={handleQuoteLayout} />
+              <QuoteCard
+                quote={quoteLayoutVariant === 'B' ? `"${dailyQuote}"` : dailyQuote}
+                author={quoteLayoutVariant === 'B' ? `~ ${dailyQuoteAuthor}` : dailyQuoteAuthor}
+                onViewed={handleQuoteLayout}
+              />
             )}
           </View>
         </View>
@@ -270,7 +290,11 @@ export default function HomeScreen() {
           onAddTask={() => router.push('/(tabs)/vault/tasks')}
           onQuickNote={() => router.push('/(tabs)/vault/tasks')}
           onUploadPdf={() => router.push('/(tabs)/vault/pdfs')}
-          onCustomize={() => Alert.alert('Customize', 'Theme customization comes in a later phase.')}
+          onCustomize={() =>
+            isFeatureEnabled('premium_themes_v2', authUser)
+              ? router.push('/premium/themes')
+              : Alert.alert('Customize', 'Theme customization is currently disabled for your cohort.')
+          }
         />
 
         {(isStreakLoading || isXpLoading) && (

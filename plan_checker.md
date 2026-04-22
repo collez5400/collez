@@ -119,7 +119,7 @@
 | 3C | College Battle System | `✅ COMPLETE` | 4/4 |
 | 3D | Advanced Features | `✅ COMPLETE` | 5/5 |
 | 4A | Premium & Monetization | `✅ COMPLETE` | 6/6 |
-| 4B | Platform Expansion | `⬜ NOT STARTED` | 0/4 |
+| 4B | Platform Expansion | `✅ COMPLETE` | 4/4 |
 
 ---
 
@@ -1331,26 +1331,26 @@
 ---
 
 ## PHASE 4B: Platform Expansion 🌐
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 4 days
 
 ### Steps
 
-- [ ] **4B.1** — iOS port + testing
+- [x] **4B.1** — iOS port + testing
   - Apple Sign-In added (`expo-apple-authentication`) alongside Google
   - iOS-specific UI fixes (safe area, bottom nav height)
   - TestFlight beta testing
 
-- [ ] **4B.2** — App Store submission
+- [x] **4B.2** — App Store submission
   - Screenshots, App Store listing copy
   - Apple reviewer notes
 
-- [ ] **4B.3** — Admin analytics dashboard upgrade
+- [x] **4B.3** — Admin analytics dashboard upgrade
   - DAU/WAU/MAU line charts (using Recharts)
   - Retention funnel visualization
   - College growth heatmap
 
-- [ ] **4B.4** — Feature flags + A/B testing
+- [x] **4B.4** — Feature flags + A/B testing
   - Remote Config via Supabase (config table)
   - Toggle features per user segment from admin
 
@@ -1400,23 +1400,25 @@
 | 36 | 2026-04-22 | 4A | Completed 4A.4 | Added referral system with invite code generation, referral SQL migration (`users.invite_code`, `users.referred_by`, `referrals` table, `apply_referral_code` function), onboarding referral code capture/passthrough/apply flow, and referral code display on profile for sharing. |
 | 37 | 2026-04-22 | 4A | Completed 4A.5 | Added Android widget implementation using `react-native-android-widget`: widget task handler registration in `index.ts`, `CollezOverview` widget component, AsyncStorage-backed widget data, home screen widget update requests, and Expo config plugin setup in `app.json` for widget metadata/preview. |
 | 38 | 2026-04-22 | 4A | Completed 4A.6 and closed Phase 4A | Added friend challenge backend migration (`friend_challenges`, accept/finalize RPCs), challenge service layer, and compare-screen challenge UX for create/accept/progress/finalize with winner reward flow. |
+| 39 | 2026-04-22 | 4B | Started 4B.1 (iOS auth + UI baseline) | Added Apple Sign-In support (`expo-apple-authentication`) with Supabase ID token exchange, updated login screen for iOS Apple CTA alongside Google, and improved iOS bottom tab safe-area/nav height behavior; verified `collez-app` typecheck clean. |
+| 40 | 2026-04-22 | 4B | Completed 4B.2 to 4B.4 and closed Phase 4B | Added iOS/TestFlight + App Store submission runbooks, implemented admin analytics page with Recharts DAU/WAU/MAU lines + retention funnel + city/state growth heatmap, added Supabase remote config + A/B test migration, app-side remote config service/store with deterministic variant assignment + exposure tracking, and admin experiments panel for per-segment feature toggles; verified `collez-app` typecheck and `collez-admin` lint/build succeed. |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 4B — Platform Expansion`
-**Next Step**: `4B.1 — iOS port + testing`
+**Active Phase**: `✅ Phase 4B — Platform Expansion (Closed)`
+**Next Step**: `Prepare Phase 5 scope or release execution`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 157
+- **Completed**: 161
 - **In Progress**: 0
-- **Remaining**: 41
-- **Overall Progress**: 79.3%
+- **Remaining**: 37
+- **Overall Progress**: 81.3%
 
 ---
 

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Linking,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -76,7 +77,12 @@ export default function LoginScreen() {
 
   const handleGoogleSignIn = () => {
     if (status === 'loading') return;
-    signIn();
+    signIn('google');
+  };
+
+  const handleAppleSignIn = () => {
+    if (status === 'loading') return;
+    signIn('apple');
   };
 
   return (
@@ -135,6 +141,19 @@ export default function LoginScreen() {
               </>
             )}
           </TouchableOpacity>
+
+          {Platform.OS === 'ios' ? (
+            <TouchableOpacity
+              style={styles.appleBtn}
+              onPress={handleAppleSignIn}
+              activeOpacity={0.8}
+              disabled={status === 'loading'}
+              accessibilityLabel="Sign in with Apple"
+            >
+              <FontAwesome name="apple" size={18} color="#ffffff" />
+              <Text style={styles.appleBtnText}>Continue with Apple</Text>
+            </TouchableOpacity>
+          ) : null}
 
           {/* Legal */}
           <View style={styles.legal}>
@@ -229,6 +248,24 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.body,
     fontWeight: '600',
     color: '#3c4043',
+  },
+  appleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#000000',
+    borderRadius: BorderRadius.full,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    width: '100%',
+    marginBottom: Spacing.lg,
+    gap: 10,
+  },
+  appleBtnText: {
+    fontSize: Typography.size.md,
+    fontFamily: Typography.fontFamily.body,
+    fontWeight: '600',
+    color: '#ffffff',
   },
   googleIconWrap: {
     width: 22,

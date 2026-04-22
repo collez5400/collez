@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../config/theme';
-
-const { width } = Dimensions.get('window');
 
 type RouteName = 'home' | 'rankings' | 'friends' | 'vault' | 'profile';
 
@@ -19,9 +18,13 @@ const ICONS: Record<RouteName, { active: any; inactive: any }> = {
 };
 
 export const BottomNavBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
+  const insets = useSafeAreaInsets();
+  const bottomInset = Platform.OS === 'ios' ? Math.max(insets.bottom, Spacing.sm) : Spacing.md;
+  const barHeight = Platform.OS === 'ios' ? 68 : 64;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
+    <View style={[styles.container, { bottom: bottomInset }]}>
+      <View style={[styles.content, { height: barHeight, paddingBottom: Platform.OS === 'ios' ? 4 : 0 }]}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label =
@@ -117,7 +120,6 @@ const TabItem = ({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: Spacing.md,
     left: Spacing.md,
     right: Spacing.md,
     backgroundColor: `${Colors.surface}F2`,
@@ -133,7 +135,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    height: 64,
   },
   tabBtn: {
     flex: 1,

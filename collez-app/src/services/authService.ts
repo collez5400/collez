@@ -1,5 +1,6 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { Platform } from 'react-native';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import * as SecureStore from 'expo-secure-store';
 import { User as SupabaseAuthUser } from '@supabase/supabase-js';
 import { supabase } from '../config/supabase';
@@ -9,6 +10,19 @@ const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 const OAUTH_REDIRECT_URL = process.env.EXPO_PUBLIC_OAUTH_REDIRECT_URL;
 const SESSION_KEY = 'collez_session';
 let isGoogleConfigured = false;
+
+async function getOrCreateUserProfile(authUser: SupabaseAuthUser): Promise<{ user: User; isNew: boolean }> {
+  const existing = await fetchUserProfile(authUser.id);
+  if (existing) {
+    return { user: existing, isNew: false };
+  }
+
+  const created = await ensureUserProfileFromAuthUser(authUser);
+  if (!created) {
+    throw new Error('Failed to create user profile after authentication.');
+  }
+  return { user: created, isNew: true };
+}
 
 function deriveUsername(authUser: SupabaseAuthUser): string {
   const fromMetadata = (authUser.user_metadata?.user_name ?? authUser.user_metadata?.username ?? '')
@@ -113,52 +127,7 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
     if (error) throw new Error(`Supabase auth error: ${error.message}`);
     if (!data.user) throw new Error('No user returned from Supabase auth.');
 
-    // Check if user record exists in public.users
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', data.user.id)
-      .maybeSingle();
-
-    if (profile) {
-      return { user: profile as User, isNew: false };
-    }
-
-    // New user - create a minimal profile record
-    const newUser = buildNewUserProfile(data.user);
-
-    let { data: created, error: createError } = await supabase
-      .from('users')
-      // @ts-expect-error type shim limitations for Supabase
-      .insert(newUser)
-      .select()
-      .single();
-
-    // Fallback for stricter/older schemas that reject newer profile columns.
-    if (createError) {
-      const minimalUser = {
-        id: data.user.id,
-        email: data.user.email ?? '',
-        full_name: data.user.user_metadata?.full_name ?? '',
-        username: deriveUsername(data.user),
-        avatar_url: data.user.user_metadata?.avatar_url ?? null,
-      };
-      const fallbackResult = await supabase
-        .from('users')
-        // @ts-expect-error type shim limitations for Supabase
-        .insert(minimalUser)
-        .select()
-        .single();
-
-      created = fallbackResult.data;
-      createError = fallbackResult.error;
-    }
-
-    if (createError || !created) {
-      throw new Error(`Failed to create user: ${createError?.message ?? 'unknown error'}`);
-    }
-
-    return { user: created as User, isNew: true };
+    return await getOrCreateUserProfile(data.user);
   } catch (error: any) {
     if (error?.code === statusCodes.SIGN_IN_CANCELLED) {
       throw new Error('Google sign in was cancelled.');
@@ -171,6 +140,34 @@ export async function signInWithGoogle(): Promise<{ user: User; isNew: boolean }
     }
     throw error;
   }
+}
+
+/** Sign in with Apple (iOS only) and exchange identity token with Supabase. */
+export async function signInWithApple(): Promise<{ user: User; isNew: boolean }> {
+  if (Platform.OS !== 'ios') {
+    throw new Error('Apple sign in is only available on iOS.');
+  }
+
+  const credential = await AppleAuthentication.signInAsync({
+    requestedScopes: [
+      AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+      AppleAuthentication.AppleAuthenticationScope.EMAIL,
+    ],
+  });
+
+  if (!credential.identityToken) {
+    throw new Error('Apple Sign-In did not return an identity token.');
+  }
+
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: 'apple',
+    token: credential.identityToken,
+  });
+
+  if (error) throw new Error(`Supabase Apple auth error: ${error.message}`);
+  if (!data.user) throw new Error('No user returned from Supabase Apple auth.');
+
+  return await getOrCreateUserProfile(data.user);
 }
 
 /** Restore session from SecureStore on app launch. */

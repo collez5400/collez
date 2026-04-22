@@ -117,7 +117,7 @@
 | 3A | Treasure Hunt Engine | `✅ COMPLETE` | 5/5 |
 | 3B | Puzzle Rush | `✅ COMPLETE` | 4/4 |
 | 3C | College Battle System | `✅ COMPLETE` | 4/4 |
-| 3D | Advanced Features | `⬜ NOT STARTED` | 0/5 |
+| 3D | Advanced Features | `✅ COMPLETE` | 5/5 |
 | 4A | Premium & Monetization | `⬜ NOT STARTED` | 0/6 |
 | 4B | Platform Expansion | `⬜ NOT STARTED` | 0/4 |
 
@@ -1266,29 +1266,29 @@
 ---
 
 ## PHASE 3D: Advanced Features 🔧
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 5 days
 
 ### Steps
 
-- [ ] **3D.1** — Friend XP comparison screen
+- [x] **3D.1** — Friend XP comparison screen
   - Side-by-side stat comparison card
   - Streak count, XP total, rank tier, badges
 
-- [ ] **3D.2** — Streak marathon events
+- [x] **3D.2** — Streak marathon events
   - Special 30-day event with bonus XP tracking
   - Progress visible on home banner
 
-- [ ] **3D.3** — City/State coordinator system
+- [x] **3D.3** — City/State coordinator system
   - Admin-only promotion in dashboard
   - City Coordinator role visible on profile + leaderboard
 
-- [ ] **3D.4** — Advanced anti-cheat
+- [x] **3D.4** — Advanced anti-cheat
   - Velocity checks in Edge Function (>80 XP/hr → flag, >50 XP/5min → block)
   - Weekly cron pattern detection SQL query
   - Admin review queue for flagged accounts
 
-- [ ] **3D.5** — Admin growth tools
+- [x] **3D.5** — Admin growth tools
   - Featured students list for Instagram exports
   - Email export CSV (with consent field check)
   - Monthly leaderboard with auto-reset trigger
@@ -1392,23 +1392,25 @@
 | 28 | 2026-04-22 | 3A | Completed 3A.1 to 3A.5 and closed Phase 3A | Added treasure hunt config types + store progression logic, built `app/events/hunt/[id].tsx` with clue-step flow and completion XP awarding, added puzzle components (`SudokuGrid`, `WordScramble`, `MathPuzzle`), added hidden clue triggers on rankings/profile, and upgraded admin events page to support `treasure_hunt` creation with JSON clue template. |
 | 29 | 2026-04-22 | 3B | Completed 3B.1 to 3B.4 and closed Phase 3B | Added dedicated Puzzle Rush gameplay route with full Sudoku grid + number pad + timer + difficulty filters and drag-to-reorder word puzzle tiles; integrated `puzzle_rush` event routing with per-day completion caps (max 3), persisted puzzle completion state in participation progress, awarded +10 XP per solved puzzle through Edge Function source `puzzle_rush`, and extended admin event creator with `puzzle_rush` type + JSON template. |
 | 30 | 2026-04-22 | 3C | Completed 3C.1 to 3C.4 and closed Phase 3C | Added college battle model + standings flow, created battle screen and event routing/home prioritization, added Edge Functions (`get-college-battle-standings`, `finalize-college-battle`) for normalized scoring and reward distribution, and extended admin events management for `college_battle` creation with auto-finalization on status set to ended. |
+| 31 | 2026-04-22 | 3D | Completed 3D.1 and started Phase 3D | Added friend comparison route `app/friends/compare/[id].tsx` with side-by-side XP/streak/rank/badges, wired compare CTA from Friends list and Other User Profile, and gated access to confirmed friendships only. |
+| 32 | 2026-04-22 | 3D | Completed 3D.2 to 3D.5 and closed Phase 3D | Added streak marathon route + home/events wiring, city/state coordinator promotions in admin with coordinator role visibility on profile/leaderboards, anti-cheat velocity flag/block + review queue + weekly suspicious-pattern cron, and growth tools page with featured users, consent-only CSV export, and monthly leaderboard support. |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 3D — Advanced Features`
-**Next Step**: `3D.1 — Friend XP comparison screen`
+**Active Phase**: `🔵 Phase 4A — Premium & Monetization`
+**Next Step**: `4A.1 — Premium themes (React Native IAP)`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 146
+- **Completed**: 151
 - **In Progress**: 0
-- **Remaining**: 52
-- **Overall Progress**: 73.7%
+- **Remaining**: 47
+- **Overall Progress**: 76.3%
 
 ---
 

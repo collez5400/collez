@@ -95,6 +95,7 @@ export default async function EventsPage() {
             <option value="treasure_hunt">treasure_hunt</option>
             <option value="puzzle_rush">puzzle_rush</option>
             <option value="college_battle">college_battle</option>
+            <option value="streak_marathon">streak_marathon</option>
           </select>
           <select name="status" className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm">
             <option value="upcoming">upcoming</option>
@@ -191,6 +192,14 @@ export default async function EventsPage() {
   "daily_limit": 3,
   "xp_per_puzzle": 10,
   "badge_name": "Puzzle Sprinter"
+}
+
+/*
+  Streak marathon template:
+{
+  "target_days": 30,
+  "bonus_xp": 60,
+  "badge_name": "Marathon Finisher"
 }
 
 /*

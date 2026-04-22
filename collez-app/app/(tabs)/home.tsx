@@ -79,12 +79,23 @@ export default function HomeScreen() {
   const quoteLoggedRef = useRef(false);
   const prioritizedLiveEvent =
     liveEvents.find((event) => event.event_type === 'college_battle') ?? liveEvents[0] ?? null;
+  const marathonTargetDays = prioritizedLiveEvent?.event_type === 'streak_marathon'
+    ? Number((prioritizedLiveEvent.config as Record<string, unknown> | null)?.target_days ?? 30)
+    : 30;
   const homeEvent = prioritizedLiveEvent
     ? {
         id: prioritizedLiveEvent.id,
-        title: prioritizedLiveEvent.title,
+        title:
+          prioritizedLiveEvent.event_type === 'streak_marathon'
+            ? `${prioritizedLiveEvent.title} • Day ${Math.min(streakCount, marathonTargetDays)}/${marathonTargetDays}`
+            : prioritizedLiveEvent.title,
         imageUrl: prioritizedLiveEvent.banner_image_url ?? undefined,
-        ctaLabel: prioritizedLiveEvent.event_type === 'college_battle' ? 'View Battle' : 'Join Now',
+        ctaLabel:
+          prioritizedLiveEvent.event_type === 'college_battle'
+            ? 'View Battle'
+            : prioritizedLiveEvent.event_type === 'streak_marathon'
+              ? 'Track Progress'
+              : 'Join Now',
       }
     : null;
   const isOffline = useOffline();
@@ -192,6 +203,10 @@ export default function HomeScreen() {
           onJoin={() => {
             if (prioritizedLiveEvent?.event_type === 'college_battle') {
               router.push(`/events/battle/${prioritizedLiveEvent.id}`);
+              return;
+            }
+            if (prioritizedLiveEvent?.event_type === 'streak_marathon') {
+              router.push(`/events/marathon/${prioritizedLiveEvent.id}`);
               return;
             }
             router.push('/events');

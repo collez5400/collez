@@ -21,6 +21,8 @@ export interface LeaderboardEntry {
   streak_count: number;
   rank_tier: string | null;
   is_coordinator?: boolean | null;
+  coordinator_type?: string | null;
+  coordinator_region?: string | null;
   college_rank: number | null;
   city_rank?: number | null;
   state_rank?: number | null;
@@ -85,6 +87,8 @@ const mapCollegeOrNationalRow = (
   streak_count: Number(row.streak_count ?? 0),
   rank_tier: row.rank_tier ?? null,
   is_coordinator: row.is_coordinator ?? null,
+  coordinator_type: row.coordinator_type ?? null,
+  coordinator_region: row.coordinator_region ?? null,
   college_rank: row.college_rank != null ? Number(row.college_rank) : null,
   city_rank: row.city_rank != null ? Number(row.city_rank) : null,
   state_rank: row.state_rank != null ? Number(row.state_rank) : null,
@@ -111,6 +115,8 @@ const mapWeeklyRow = (row: Record<string, any>, fallbackPosition: number): Leade
   streak_count: Number(row.streak_count ?? 0),
   rank_tier: row.rank_tier ?? null,
   is_coordinator: row.is_coordinator ?? null,
+  coordinator_type: row.coordinator_type ?? null,
+  coordinator_region: row.coordinator_region ?? null,
   college_rank: null,
   national_rank: null,
   position: fallbackPosition,
@@ -188,7 +194,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       const { data, error } = await supabaseClient
         .from('mv_college_leaderboard')
         .select(
-          'id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, college_name, college_rank, national_rank, college_id'
+          'id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, coordinator_type, coordinator_region, college_name, college_rank, national_rank, college_id'
         )
         .eq('college_id', authUser.college_id)
         .order('college_rank', { ascending: true })
@@ -283,7 +289,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       const to = from + LEADERBOARD_PAGE_SIZE - 1;
       const { data, error } = await supabaseClient
         .from('mv_city_leaderboard')
-        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, college_name, city_name, city_rank')
+        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, coordinator_type, coordinator_region, college_name, city_name, city_rank')
         .eq('city_name', userCollege.city)
         .order('city_rank', { ascending: true })
         .range(from, to);
@@ -337,7 +343,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       const to = from + LEADERBOARD_PAGE_SIZE - 1;
       const { data, error } = await supabaseClient
         .from('mv_state_leaderboard')
-        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, college_name, state_name, state_rank')
+        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, coordinator_type, coordinator_region, college_name, state_name, state_rank')
         .eq('state_name', userCollege.state)
         .order('state_rank', { ascending: true })
         .range(from, to);
@@ -381,7 +387,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       const to = from + LEADERBOARD_PAGE_SIZE - 1;
       const { data, error } = await supabaseClient
         .from('mv_college_leaderboard')
-        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, college_name, college_rank, national_rank')
+        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, coordinator_type, coordinator_region, college_name, college_rank, national_rank')
         .order('national_rank', { ascending: true })
         .range(from, to);
 
@@ -438,7 +444,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       const to = from + LEADERBOARD_PAGE_SIZE - 1;
       const { data, error } = await supabaseClient
         .from('mv_weekly_leaderboard')
-        .select('id, full_name, username, avatar_url, weekly_xp, college_name')
+        .select('id, full_name, username, avatar_url, weekly_xp, is_coordinator, coordinator_type, coordinator_region, college_name')
         .order('weekly_xp', { ascending: false })
         .range(from, to);
 

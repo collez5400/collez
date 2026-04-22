@@ -80,6 +80,12 @@ export default async function CoordinatorsPage() {
   const supabaseAdmin = getSupabaseAdminClient();
 
   const pending = await fetchPendingApps();
+  const { data: coordinators } = await supabaseAdmin
+    .from("users")
+    .select("id,full_name,username,email,xp,streak_count,coordinator_type,coordinator_region,colleges(name,city,state)")
+    .eq("is_coordinator", true)
+    .order("xp", { ascending: false })
+    .limit(300);
 
   async function approve(formData: FormData) {
     "use server";
@@ -91,7 +97,10 @@ export default async function CoordinatorsPage() {
       .update({ status: "approved", reviewed_at: new Date().toISOString(), admin_notes: null })
       .eq("id", applicationId);
 
-    await supabaseAdmin.from("users").update({ is_coordinator: true }).eq("id", userId);
+    await supabaseAdmin
+      .from("users")
+      .update({ is_coordinator: true, coordinator_type: "college", coordinator_region: null })
+      .eq("id", userId);
 
     await supabaseAdmin.from("badges").insert({
       user_id: userId,
@@ -120,6 +129,27 @@ export default async function CoordinatorsPage() {
 
     revalidatePath("/dashboard/coordinators");
     revalidatePath("/dashboard");
+  }
+
+  async function promoteCoordinator(formData: FormData) {
+    "use server";
+    const userId = String(formData.get("userId") ?? "");
+    const targetType = String(formData.get("targetType") ?? "");
+    const targetRegion = String(formData.get("targetRegion") ?? "").trim();
+    if (!userId || !["college", "city", "state"].includes(targetType)) return;
+    if ((targetType === "city" || targetType === "state") && !targetRegion) return;
+
+    await supabaseAdmin
+      .from("users")
+      .update({
+        is_coordinator: true,
+        coordinator_type: targetType,
+        coordinator_region: targetType === "college" ? null : targetRegion,
+      })
+      .eq("id", userId);
+
+    revalidatePath("/dashboard/coordinators");
+    revalidatePath("/dashboard/users");
   }
 
   return (
@@ -201,6 +231,75 @@ export default async function CoordinatorsPage() {
               </div>
             </div>
           ))
+        )}
+      </section>
+
+      <section className="mt-10 space-y-4">
+        <h2 className="text-xl font-semibold">Coordinator Role Management</h2>
+        <p className="text-sm text-slate-400">Promote existing coordinators to city/state roles (admin-only).</p>
+        {(coordinators ?? []).length === 0 ? (
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-300">
+            No coordinators found.
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-xl border border-slate-800">
+            <table className="w-full min-w-[960px] bg-slate-900 text-sm">
+              <thead className="bg-slate-800/80 text-left text-slate-300">
+                <tr>
+                  <th className="px-3 py-2">Coordinator</th>
+                  <th className="px-3 py-2">College</th>
+                  <th className="px-3 py-2">Current Role</th>
+                  <th className="px-3 py-2">Promote / Update</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(coordinators ?? []).map((row) => {
+                  const college = Array.isArray(row.colleges) ? row.colleges[0] : row.colleges;
+                  const role =
+                    row.coordinator_type === "city"
+                      ? `City • ${row.coordinator_region ?? "—"}`
+                      : row.coordinator_type === "state"
+                        ? `State • ${row.coordinator_region ?? "—"}`
+                        : "College";
+                  return (
+                    <tr key={row.id} className="border-t border-slate-800 align-top">
+                      <td className="px-3 py-3">
+                        <p className="font-medium">{row.full_name}</p>
+                        <p className="text-slate-400">@{row.username}</p>
+                        <p className="text-xs text-slate-500">XP {row.xp ?? 0} · Streak {row.streak_count ?? 0}d</p>
+                      </td>
+                      <td className="px-3 py-3 text-xs text-slate-300">
+                        <p>{college?.name ?? "—"}</p>
+                        <p>{college?.city ?? ""} {college?.state ?? ""}</p>
+                      </td>
+                      <td className="px-3 py-3 text-sm">{role}</td>
+                      <td className="px-3 py-3">
+                        <form action={promoteCoordinator} className="flex flex-wrap items-center gap-2">
+                          <input type="hidden" name="userId" value={row.id} />
+                          <select
+                            name="targetType"
+                            defaultValue={row.coordinator_type ?? "college"}
+                            className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs"
+                          >
+                            <option value="college">college</option>
+                            <option value="city">city</option>
+                            <option value="state">state</option>
+                          </select>
+                          <input
+                            name="targetRegion"
+                            defaultValue={row.coordinator_region ?? ""}
+                            placeholder="Region for city/state"
+                            className="w-48 rounded border border-slate-700 bg-slate-950 px-2 py-1 text-xs"
+                          />
+                          <button className="rounded border border-indigo-600 px-2 py-1 text-xs text-indigo-300">Save role</button>
+                        </form>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

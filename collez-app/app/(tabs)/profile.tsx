@@ -79,6 +79,16 @@ export default function ProfileScreen() {
     () => getRankMeta(getRankTier(profile?.xp ?? 0)),
     [profile?.xp]
   );
+  const coordinatorRoleLabel = useMemo(() => {
+    if (!profile?.is_coordinator) return null;
+    if (profile.coordinator_type === 'city') {
+      return `Official City Coordinator${profile.coordinator_region ? ` • ${profile.coordinator_region}` : ''}`;
+    }
+    if (profile.coordinator_type === 'state') {
+      return `Official State Coordinator${profile.coordinator_region ? ` • ${profile.coordinator_region}` : ''}`;
+    }
+    return 'Official College Coordinator';
+  }, [profile?.coordinator_region, profile?.coordinator_type, profile?.is_coordinator]);
 
   const handlePickAvatar = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -168,7 +178,7 @@ export default function ProfileScreen() {
           <GlassCard style={styles.coordinatorCard}>
             <BadgeIcon type="coordinator" iconName="verified" color={Colors.secondary} />
             <View>
-              <Text style={styles.coordinatorTitle}>Official College Coordinator</Text>
+              <Text style={styles.coordinatorTitle}>{coordinatorRoleLabel}</Text>
               <Text style={styles.coordinatorText}>You are representing your campus.</Text>
             </View>
           </GlassCard>

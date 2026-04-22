@@ -11,6 +11,8 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_ANON_KEY) {
 
 const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const DAILY_CAP = 100;
+const HOURLY_FLAG_THRESHOLD = 80;
+const FIVE_MIN_BLOCK_THRESHOLD = 50;
 const XP_SOURCES = new Set(['daily_login', 'trivia', 'treasure_hunt', 'puzzle_rush', 'event', 'weekly_streak', 'bonus']);
 const RANK_THRESHOLDS = [
   { minXp: 150000, tier: 'national_icon' },
@@ -138,6 +140,49 @@ Deno.serve(async (req) => {
     const lastResetDate = user.last_xp_reset_date ?? '';
     const currentDaily = lastResetDate === todayIst ? user.daily_xp_earned ?? 0 : 0;
     const bypassDailyCap = body.bypassDailyCap === true || body.source === 'bonus';
+
+    const now = new Date();
+    const fiveMinAgoIso = new Date(now.getTime() - 5 * 60 * 1000).toISOString();
+    const oneHourAgoIso = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+    const { data: velocityRows, error: velocityError } = await adminClient
+      .from('xp_transactions')
+      .select('amount, created_at')
+      .eq('user_id', body.userId)
+      .gte('created_at', oneHourAgoIso);
+    if (velocityError) {
+      throw new Error(velocityError.message || 'Failed to validate XP velocity');
+    }
+    const hourXp = (velocityRows ?? []).reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+    const fiveMinXp = (velocityRows ?? [])
+      .filter((row: { created_at?: string }) => typeof row.created_at === 'string' && row.created_at >= fiveMinAgoIso)
+      .reduce((sum, row) => sum + Number(row.amount ?? 0), 0);
+
+    if (!bypassDailyCap && fiveMinXp + body.amount > FIVE_MIN_BLOCK_THRESHOLD) {
+      return new Response(
+        JSON.stringify({
+          error: 'XP temporarily blocked due to unusually high activity. Please try again shortly.',
+          code: 'ANTI_CHEAT_BLOCK_5MIN',
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    if (!bypassDailyCap && hourXp + body.amount > HOURLY_FLAG_THRESHOLD) {
+      await adminClient.from('anti_cheat_flags').insert({
+        user_id: body.userId,
+        flag_type: 'xp_velocity_hour',
+        severity: 'medium',
+        reason: `XP velocity exceeded ${HOURLY_FLAG_THRESHOLD}/hour`,
+        metadata: {
+          projected_hour_xp: hourXp + body.amount,
+          threshold: HOURLY_FLAG_THRESHOLD,
+          source: body.source,
+        },
+      });
+    }
     const awardedXp = bypassDailyCap ? body.amount : Math.min(body.amount, Math.max(0, DAILY_CAP - currentDaily));
     const capped = !bypassDailyCap && awardedXp < body.amount;
 

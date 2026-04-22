@@ -204,33 +204,42 @@ export default function FriendsScreen() {
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
           renderItem={({ item }) => (
-            <Pressable
-              onPress={() => router.push(`/profile/${item.id}`)}
-              style={styles.friendRow}
-              accessibilityLabel={`Open friend profile for ${item.username}`}
-            >
-              <GlassCard style={styles.friendCard}>
-                {item.avatar_url ? (
-                  <Image source={{ uri: item.avatar_url }} style={styles.avatar} contentFit="cover" />
-                ) : (
-                  <View style={[styles.avatar, styles.avatarFallback]}>
-                    <MaterialIcons name="person" size={18} color={Colors.onSurfaceVariant} />
+            <View style={styles.friendRow}>
+              <Pressable
+                onPress={() => router.push(`/profile/${item.id}`)}
+                accessibilityLabel={`Open friend profile for ${item.username}`}
+              >
+                <GlassCard style={styles.friendCard}>
+                  {item.avatar_url ? (
+                    <Image source={{ uri: item.avatar_url }} style={styles.avatar} contentFit="cover" />
+                  ) : (
+                    <View style={[styles.avatar, styles.avatarFallback]}>
+                      <MaterialIcons name="person" size={18} color={Colors.onSurfaceVariant} />
+                    </View>
+                  )}
+                  <View style={styles.grow}>
+                    <Text style={styles.name} numberOfLines={1}>
+                      {item.full_name}
+                    </Text>
+                    <Text style={styles.meta} numberOfLines={1}>
+                      @{item.username} · {item.college_name ?? 'No college'}
+                    </Text>
                   </View>
-                )}
-                <View style={styles.grow}>
-                  <Text style={styles.name} numberOfLines={1}>
-                    {item.full_name}
-                  </Text>
-                  <Text style={styles.meta} numberOfLines={1}>
-                    @{item.username} · {item.college_name ?? 'No college'}
-                  </Text>
-                </View>
-                <View style={styles.badgePill}>
-                  <MaterialIcons name="local-fire-department" size={16} color={Colors.secondary} />
-                  <Text style={styles.badgeText}>{item.streak_count ?? 0}d</Text>
-                </View>
-              </GlassCard>
-            </Pressable>
+                  <View style={styles.badgePill}>
+                    <MaterialIcons name="local-fire-department" size={16} color={Colors.secondary} />
+                    <Text style={styles.badgeText}>{item.streak_count ?? 0}d</Text>
+                  </View>
+                </GlassCard>
+              </Pressable>
+              <Pressable
+                style={styles.compareBtn}
+                onPress={() => router.push(`/friends/compare/${item.id}`)}
+                accessibilityLabel={`Compare stats with ${item.username}`}
+              >
+                <MaterialIcons name="compare-arrows" size={16} color={Colors.primary} />
+                <Text style={styles.compareText}>Compare</Text>
+              </Pressable>
+            </View>
           )}
           ListEmptyComponent={
             hasContent ? (
@@ -315,6 +324,7 @@ const styles = StyleSheet.create({
   friendRow: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
+    gap: Spacing.xs,
   },
   friendCard: {
     flexDirection: 'row',
@@ -397,5 +407,23 @@ const styles = StyleSheet.create({
   },
   emptyFriendsWrap: {
     padding: Spacing.lg,
+  },
+  compareBtn: {
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: `${Colors.primary}55`,
+    backgroundColor: `${Colors.primary}18`,
+  },
+  compareText: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.sm,
+    fontWeight: '700',
   },
 });

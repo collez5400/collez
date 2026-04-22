@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
@@ -12,6 +12,7 @@ import { useAuthStore } from '../../src/store/authStore';
 import { getRankMeta, getRankTier } from '../../src/utils/rankCalculator';
 
 export default function OtherUserProfileScreen() {
+  const router = useRouter();
   const params = useLocalSearchParams<{ id: string }>();
   const { profile, isLoading, fetchProfile } = useUserStore();
   const {
@@ -57,6 +58,16 @@ export default function OtherUserProfileScreen() {
     if (delta > 0) return `They’re +${delta} days ahead.`;
     return `You’re +${Math.abs(delta)} days ahead.`;
   }, [myStreakCount, profile?.streak_count]);
+  const coordinatorRoleLabel = useMemo(() => {
+    if (!profile?.is_coordinator) return null;
+    if (profile.coordinator_type === 'city') {
+      return `Official City Coordinator${profile.coordinator_region ? ` • ${profile.coordinator_region}` : ''}`;
+    }
+    if (profile.coordinator_type === 'state') {
+      return `Official State Coordinator${profile.coordinator_region ? ` • ${profile.coordinator_region}` : ''}`;
+    }
+    return 'Official College Coordinator';
+  }, [profile?.coordinator_region, profile?.coordinator_type, profile?.is_coordinator]);
 
   const friendButton = useMemo(() => {
     if (!profile?.id) return { label: 'Add Friend', sub: '', disabled: true };
@@ -138,6 +149,16 @@ export default function OtherUserProfileScreen() {
             <MaterialIcons name="local-fire-department" size={18} color={Colors.secondary} />
             <Text style={styles.socialText}>{streakDeltaText}</Text>
           </View>
+          {relationship.kind === 'friends' && profile?.id ? (
+            <Pressable
+              style={styles.compareBtn}
+              onPress={() => router.push(`/friends/compare/${profile.id}`)}
+              accessibilityLabel="Compare friend stats"
+            >
+              <MaterialIcons name="compare-arrows" size={16} color={Colors.primary} />
+              <Text style={styles.compareText}>Compare Stats</Text>
+            </Pressable>
+          ) : null}
         </GlassCard>
 
         <Pressable
@@ -151,7 +172,7 @@ export default function OtherUserProfileScreen() {
         {profile?.is_coordinator ? (
           <GlassCard style={styles.coordinatorCard}>
             <BadgeIcon type="coordinator" iconName="verified" color={Colors.secondary} />
-            <Text style={styles.coordinatorText}>Official College Coordinator</Text>
+            <Text style={styles.coordinatorText}>{coordinatorRoleLabel}</Text>
           </GlassCard>
         ) : null}
       </ScrollView>
@@ -253,6 +274,25 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,
+  },
+  compareBtn: {
+    marginTop: Spacing.xs,
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: `${Colors.primary}55`,
+    backgroundColor: `${Colors.primary}18`,
+  },
+  compareText: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.sm,
+    fontWeight: '700',
   },
   reportBtn: {
     alignSelf: 'flex-start',

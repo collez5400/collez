@@ -11,6 +11,8 @@ const navItems = [
   { href: "/dashboard/quotes", label: "Quotes" },
   { href: "/dashboard/events", label: "Events" },
   { href: "/dashboard/coordinators", label: "Coordinators" },
+  { href: "/dashboard/anti-cheat", label: "Anti-Cheat" },
+  { href: "/dashboard/growth", label: "Growth" },
   { href: "/dashboard/bonus", label: "Bonus XP" },
 ];
 

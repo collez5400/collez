@@ -13,8 +13,11 @@ export interface User {
   longest_streak: number;
   last_active_date: string | null; // ISO date string
   is_coordinator: boolean;
+  coordinator_type?: 'college' | 'city' | 'state' | null;
+  coordinator_region?: string | null;
   is_banned: boolean;
   onboarding_complete: boolean;
+  marketing_consent?: boolean;
   push_token?: string | null;
   push_enabled?: boolean;
   push_streak_enabled?: boolean;

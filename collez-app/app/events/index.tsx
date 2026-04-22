@@ -37,6 +37,7 @@ export default function EventsScreen() {
     if (eventType === 'treasure_hunt') return `/events/hunt/${eventId}`;
     if (eventType === 'puzzle_rush') return `/events/puzzle/${eventId}`;
     if (eventType === 'college_battle') return `/events/battle/${eventId}`;
+    if (eventType === 'streak_marathon') return `/events/marathon/${eventId}`;
     return `/events/trivia/${eventId}`;
   };
 

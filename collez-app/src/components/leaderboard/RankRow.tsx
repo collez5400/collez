@@ -20,6 +20,15 @@ const getRankDisplay = (position: number): string => {
 };
 
 export function RankRow({ entry, isCurrentUser, showCollege = true, xpLabel = 'XP' }: RankRowProps) {
+  const coordinatorRoleLabel =
+    entry.coordinator_type === 'city'
+      ? `City Coordinator${entry.coordinator_region ? ` • ${entry.coordinator_region}` : ''}`
+      : entry.coordinator_type === 'state'
+        ? `State Coordinator${entry.coordinator_region ? ` • ${entry.coordinator_region}` : ''}`
+        : entry.is_coordinator
+          ? 'College Coordinator'
+          : null;
+
   return (
     <View style={[styles.container, isCurrentUser && styles.currentUserContainer]}>
       <Text style={styles.rank}>{getRankDisplay(entry.position)}</Text>
@@ -46,6 +55,11 @@ export function RankRow({ entry, isCurrentUser, showCollege = true, xpLabel = 'X
           @{entry.username}
           {showCollege && entry.college_name ? ` • ${entry.college_name}` : ''}
         </Text>
+        {coordinatorRoleLabel ? (
+          <Text style={styles.roleMeta} numberOfLines={1}>
+            {coordinatorRoleLabel}
+          </Text>
+        ) : null}
       </View>
 
       <View style={styles.rightInfo}>
@@ -112,6 +126,13 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.xs,
+  },
+  roleMeta: {
+    marginTop: 2,
+    color: Colors.secondary,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.xs,
+    fontWeight: '700',
   },
   rightInfo: {
     alignItems: 'flex-end',

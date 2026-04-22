@@ -9,6 +9,7 @@
 import type { User } from './user';
 import type { College, CollegeRequest } from './college';
 import type { FriendRequest, Friendship } from './friend';
+import type { Event, EventParticipation } from './event';
 
 export interface XpTransaction {
   id: string;
@@ -34,6 +35,22 @@ export interface Badge {
   earned_at: string;
 }
 
+export interface CoordinatorApplicationRow {
+  id: string;
+  user_id: string;
+  college_id: string;
+  full_name: string;
+  whatsapp_number: string;
+  email: string;
+  reason: string;
+  college_id_photo_url: string;
+  selfie_url: string;
+  status: 'pending' | 'approved' | 'rejected';
+  admin_notes: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
+
 export type FriendRequestRow = FriendRequest;
 export type FriendshipRow = Friendship;
 
@@ -56,6 +73,9 @@ export type Database = {
       badges: TableDef<Badge>;
       friend_requests: TableDef<FriendRequestRow>;
       friendships: TableDef<FriendshipRow>;
+      events: TableDef<Event>;
+      event_participations: TableDef<EventParticipation>;
+      coordinator_applications: TableDef<CoordinatorApplicationRow>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -20,6 +20,7 @@ export interface LeaderboardEntry {
   weekly_xp: number | null;
   streak_count: number;
   rank_tier: string | null;
+  is_coordinator?: boolean | null;
   college_rank: number | null;
   national_rank: number | null;
   position: number;
@@ -73,6 +74,7 @@ const mapCollegeOrNationalRow = (
   weekly_xp: null,
   streak_count: Number(row.streak_count ?? 0),
   rank_tier: row.rank_tier ?? null,
+  is_coordinator: row.is_coordinator ?? null,
   college_rank: row.college_rank != null ? Number(row.college_rank) : null,
   national_rank: row.national_rank != null ? Number(row.national_rank) : null,
   position:
@@ -91,6 +93,7 @@ const mapWeeklyRow = (row: Record<string, any>, fallbackPosition: number): Leade
   weekly_xp: Number(row.weekly_xp ?? 0),
   streak_count: Number(row.streak_count ?? 0),
   rank_tier: row.rank_tier ?? null,
+  is_coordinator: row.is_coordinator ?? null,
   college_rank: null,
   national_rank: null,
   position: fallbackPosition,
@@ -158,7 +161,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       const { data, error } = await supabaseClient
         .from('mv_college_leaderboard')
         .select(
-          'id, full_name, username, avatar_url, xp, streak_count, rank_tier, college_name, college_rank, national_rank, college_id'
+          'id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, college_name, college_rank, national_rank, college_id'
         )
         .eq('college_id', authUser.college_id)
         .order('college_rank', { ascending: true })
@@ -235,7 +238,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       const to = from + LEADERBOARD_PAGE_SIZE - 1;
       const { data, error } = await supabaseClient
         .from('mv_college_leaderboard')
-        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, college_name, college_rank, national_rank')
+        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, college_name, college_rank, national_rank')
         .order('national_rank', { ascending: true })
         .range(from, to);
 

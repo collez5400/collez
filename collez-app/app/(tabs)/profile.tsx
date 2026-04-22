@@ -21,6 +21,7 @@ import { GlassCard } from '../../src/components/shared/GlassCard';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { useAuthStore } from '../../src/store/authStore';
 import { useUserStore } from '../../src/store/userStore';
+import { useCoordinatorStore } from '../../src/store/coordinatorStore';
 import { getRankMeta, getRankTier } from '../../src/utils/rankCalculator';
 
 function getBadgeIcon(badgeType: string): keyof typeof MaterialIcons.glyphMap {
@@ -50,9 +51,18 @@ export default function ProfileScreen() {
     clearError,
   } = useUserStore();
 
+  const {
+    application: coordinatorApplication,
+    eligibility: coordinatorEligibility,
+    fetchMyApplication,
+    refreshEligibility,
+  } = useCoordinatorStore();
+
   useEffect(() => {
     void fetchProfile();
     void fetchBadges();
+    void fetchMyApplication();
+    void refreshEligibility();
   }, [fetchBadges, fetchProfile]);
 
   useEffect(() => {
@@ -140,7 +150,47 @@ export default function ProfileScreen() {
               <Text style={styles.coordinatorText}>You are representing your campus.</Text>
             </View>
           </GlassCard>
-        ) : null}
+        ) : (
+          <GlassCard style={styles.coordinatorCard}>
+            <View style={{ flex: 1, gap: 6 }}>
+              <Text style={styles.coordinatorTitle}>Coordinator Program</Text>
+              {coordinatorApplication ? (
+                <Text style={styles.coordinatorText}>
+                  Status:{' '}
+                  {coordinatorApplication.status === 'approved'
+                    ? 'Approved'
+                    : coordinatorApplication.status === 'rejected'
+                      ? 'Rejected'
+                      : 'Under Review'}
+                </Text>
+              ) : (
+                <Text style={styles.coordinatorText}>Apply to represent your campus and help grow COLLEZ.</Text>
+              )}
+              {coordinatorApplication?.status === 'rejected' && coordinatorApplication.admin_notes ? (
+                <Text style={styles.coordinatorText}>Reason: {coordinatorApplication.admin_notes}</Text>
+              ) : null}
+              {coordinatorEligibility && !coordinatorEligibility.ok ? (
+                <Text style={styles.coordinatorText}>
+                  Not eligible yet: {coordinatorEligibility.reasons.join(', ')}
+                </Text>
+              ) : null}
+            </View>
+            <View style={{ justifyContent: 'center' }}>
+              <Pressable
+                style={[
+                  styles.coordinatorApplyBtn,
+                  (coordinatorApplication?.status === 'pending' || (coordinatorEligibility && !coordinatorEligibility.ok)) && styles.coordinatorApplyBtnDisabled,
+                ]}
+                disabled={coordinatorApplication?.status === 'pending' || (coordinatorEligibility ? !coordinatorEligibility.ok : true)}
+                onPress={() => router.push('/coordinator/apply')}
+              >
+                <Text style={styles.coordinatorApplyText}>
+                  {coordinatorApplication?.status === 'rejected' ? 'Re-Apply' : 'Apply'}
+                </Text>
+              </Pressable>
+            </View>
+          </GlassCard>
+        )}
 
         <GlassCard>
           <Text style={styles.sectionTitle}>Badges</Text>
@@ -296,6 +346,21 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,
+  },
+  coordinatorApplyBtn: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+  },
+  coordinatorApplyBtnDisabled: {
+    opacity: 0.5,
+  },
+  coordinatorApplyText: {
+    color: Colors.background,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.sm,
+    fontWeight: '700',
   },
   sectionTitle: {
     color: Colors.onSurface,

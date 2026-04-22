@@ -2,11 +2,19 @@ import { create } from 'zustand';
 import { supabase } from '../config/supabase';
 import type { Event, EventParticipation, TriviaConfig } from '../models/event';
 import { useAuthStore } from './authStore';
+import { useStreakStore } from './streakStore';
 
 interface SubmitTriviaPayload {
   event: Event;
   score: number;
   totalQuestions: number;
+}
+
+interface SubmitTriviaAnswerPayload {
+  eventId: string;
+  questionId: string;
+  selectedIndex: number; // -1 = timed out / unanswered
+  isCorrect: boolean;
 }
 
 interface EventStoreState {
@@ -19,6 +27,7 @@ interface EventStoreState {
   fetchEvents: () => Promise<void>;
   joinEvent: (eventId: string) => Promise<EventParticipation | null>;
   getParticipation: (eventId: string) => Promise<EventParticipation | null>;
+  submitTriviaAnswer: (payload: SubmitTriviaAnswerPayload) => Promise<void>;
   submitTriviaResult: (payload: SubmitTriviaPayload) => Promise<{  xpAwarded: number; passed: boolean } | null>;
   clearError: () => void;
 }
@@ -73,7 +82,10 @@ export const useEventStore = create<EventStoreState>((set, get) => ({
 
     try {
       const existing = get().participationsByEventId[eventId] ?? (await get().getParticipation(eventId));
-      if (existing) return existing;
+      if (existing) {
+        void useStreakStore.getState().logStreakAction('trivia');
+        return existing;
+      }
 
       const { data, error } = await supabase
         .from('event_participations')
@@ -93,11 +105,14 @@ export const useEventStore = create<EventStoreState>((set, get) => ({
       set((state) => ({
         participationsByEventId: { ...state.participationsByEventId, [eventId]: participation },
       }));
+      void useStreakStore.getState().logStreakAction('trivia');
       return participation;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to join event';
       if (message.toLowerCase().includes('duplicate key value')) {
-        return get().getParticipation(eventId);
+        const participation = await get().getParticipation(eventId);
+        if (participation) void useStreakStore.getState().logStreakAction('trivia');
+        return participation;
       }
       set({ error: message });
       return null;
@@ -126,6 +141,49 @@ export const useEventStore = create<EventStoreState>((set, get) => ({
       participationsByEventId: { ...state.participationsByEventId, [eventId]: participation },
     }));
     return participation;
+  },
+
+  submitTriviaAnswer: async ({ eventId, questionId, selectedIndex, isCorrect }) => {
+    const userId = getAuthUserId();
+    if (!userId) return;
+    const existing = get().participationsByEventId[eventId] ?? (await get().getParticipation(eventId));
+    if (!existing) return;
+
+    const prevProgress = (existing.progress ?? {}) as Record<string, unknown>;
+    const prevAnswers = (Array.isArray(prevProgress.answers) ? prevProgress.answers : []) as unknown[];
+    const answers = [
+      ...prevAnswers,
+      {
+        questionId,
+        selectedIndex,
+        isCorrect,
+        answeredAt: new Date().toISOString(),
+      },
+    ];
+
+    const nextProgress = {
+      ...prevProgress,
+      answers,
+      totalAnswered: answers.length,
+    };
+
+    const { data, error } = await (supabase as any)
+      .from('event_participations')
+      .update({ progress: nextProgress } as any)
+      .eq('event_id', eventId)
+      .eq('user_id', userId)
+      .select('id, event_id, user_id, score, xp_earned, completed, progress, started_at, completed_at')
+      .single();
+
+    if (error || !data) {
+      set({ error: error?.message ?? 'Failed to submit trivia answer' });
+      return;
+    }
+
+    const participation = data as EventParticipation;
+    set((state) => ({
+      participationsByEventId: { ...state.participationsByEventId, [eventId]: participation },
+    }));
   },
 
   submitTriviaResult: async ({ event, score, totalQuestions }) => {

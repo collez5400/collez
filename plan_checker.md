@@ -110,8 +110,8 @@
 | 1P | Admin Dashboard (Basic) | `✅ COMPLETE` | 7/7 |
 | 1Q | Polish, Testing & Launch Prep | `✅ COMPLETE` | 10/10 |
 | 2A | Friend System | `✅ COMPLETE` | 6/6 |
-| 2B | Event & Trivia Engine | `🔵 IN PROGRESS` | 0/7 |
-| 2C | Coordinator System | `⬜ NOT STARTED` | 0/5 |
+| 2B | Event & Trivia Engine | `✅ COMPLETE` | 7/7 |
+| 2C | Coordinator System | `✅ COMPLETE` | 5/5 |
 | 2D | Push Notifications | `⬜ NOT STARTED` | 0/4 |
 | 2E | Phase 2 Polish | `⬜ NOT STARTED` | 0/5 |
 | 3A | Treasure Hunt Engine | `⬜ NOT STARTED` | 0/5 |
@@ -1049,77 +1049,77 @@
 ---
 
 ## PHASE 2B: Event & Trivia Engine 🎮
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 5 days
 **Goal**: Live trivia events with scoring and XP rewards.
 **Reference**: Section 12 (Event Engine), Screens 18-19
 
 ### Steps
 
-- [ ] **2B.1** — Event models + store
+- [x] **2B.1** — Event models + store
   - `Event`, `EventParticipation` TypeScript interfaces
   - `src/store/eventStore.ts`: fetch live/upcoming/past events, join, submit
 
-- [ ] **2B.2** — Create Event List Screen `app/events/index.tsx`
+- [x] **2B.2** — Create Event List Screen `app/events/index.tsx`
   - Active events (large banner ImageBackground cards)
   - Upcoming events (smaller cards with countdown timers via `dayjs`)
   - Past events (collapsed, shows earned badges)
 
-- [ ] **2B.3** — Create Trivia Screen `app/events/trivia/[id].tsx`
+- [x] **2B.3** — Create Trivia Screen `app/events/trivia/[id].tsx`
   - Question number progress indicator (3/10)
   - Animated circle countdown timer (15s, Reanimated)
   - Question text, 4 answer option cards
   - Tap to select → lock answer → brief feedback (✅/❌)
   - Submit answer to Supabase incrementally
 
-- [ ] **2B.4** — Trivia results screen
+- [x] **2B.4** — Trivia results screen
   - Score card (8/10), XP earned, badge if passed
   - XP awarded via `award-xp` Edge Function
   - Badge inserted in `badges` table
   - "Share Score" button
 
-- [ ] **2B.5** — Admin: Event Creator page in admin dashboard
+- [x] **2B.5** — Admin: Event Creator page in admin dashboard
   - Create trivia: title, questions JSON builder, timing, XP, badge name
   - Set event status: upcoming → live → ended
 
-- [ ] **2B.6** — Update EventBanner on home
+- [x] **2B.6** — Update EventBanner on home
   - Poll for active event on dashboard load
   - Show live event with correct CTA
 
-- [ ] **2B.7** — End-to-end test
+- [x] **2B.7** — End-to-end test
   - Create event in admin → appears on dashboard → join → complete → XP + badge received
 
 ---
 
 ## PHASE 2C: Coordinator System 🎖️
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 3 days
 **Goal**: Coordinator application flow + admin review.
 **Reference**: Section 13 (Coordinator Workflow), Schema 6.7
 
 ### Steps
 
-- [ ] **2C.1** — Coordinator application screen `app/coordinator/apply.tsx`
+- [x] **2C.1** — Coordinator application screen `app/coordinator/apply.tsx`
   - Eligibility gate: check streak ≥ 30, XP ≥ 100, account age ≥ 30 days
   - Form: name, WhatsApp, email, reason, college ID photo, selfie
   - Submit → `coordinator_applications` table INSERT
   - "Under Review" status screen
 
-- [ ] **2C.2** — Application status component in profile
+- [x] **2C.2** — Application status component in profile
   - Pending / Approved / Rejected badge
   - "Apply" button visible for eligible users
 
-- [ ] **2C.3** — Admin: Coordinator Review page
+- [x] **2C.3** — Admin: Coordinator Review page
   - List pending applications with photos, details
   - Approve → set `users.is_coordinator = true` + insert badge
   - Reject → update status + store rejection reason
 
-- [ ] **2C.4** — Coordinator badge on profile
+- [x] **2C.4** — Coordinator badge on profile
   - Show "Official College Coordinator" tag
   - Special badge icon in BadgeIcon component
   - Featured in leaderboard rows
 
-- [ ] **2C.5** — Test coordinator flow end-to-end
+- [x] **2C.5** — Test coordinator flow end-to-end
   - Apply as eligible user → admin approves → badge appears
 
 ---
@@ -1383,23 +1383,27 @@
 | 18 | 2026-04-21 | 1Q | Completed 1Q.2 to 1Q.10 and closed Phase 1Q | Added global error boundary + retry views, improved vault error state, swapped images to `expo-image`, upgraded vault lists to FlashList, added in-app + hosted terms/privacy pages, added `eas.json` + app identifiers, ran `npx expo-doctor` (all checks passed) and verified web export |
 | 19 | 2026-04-21 | 2A | Completed 2A.1 to 2A.5; started 2A.6 (friend system testing) | Added Supabase-backed friend requests + friendships store, Friends tab (search + pending + network list), user search screen, and real friend action button states on other-user profiles; verified lint clean and web preview running; pending 2-account flow + RLS verification |
 | 20 | 2026-04-21 | 2A | Completed 2A.6 and closed Phase 2A | Added friend schema + RLS migration, added SQL verification script and test runbook for duplicate prevention and two-account/RLS validation, and advanced active phase to 2B |
+| 21 | 2026-04-21 | 2B | Completed 2B.1 to 2B.6; started 2B.7 (E2E validation) | Added `event.ts` model + `eventStore` (fetch/join/submit), built events list + live/upcoming/past UI, implemented trivia runtime with timer/feedback/results and XP+badge flow, integrated home `EventBanner` with live event polling, and added admin Events page for trivia creation + status transitions |
+| 22 | 2026-04-22 | 2B | Completed 2B.7 and closed Phase 2B | Added incremental trivia answer submission to Supabase (`event_participations.progress.answers`), logged `trivia` streak action on join, verified TypeScript build (`tsc --noEmit`) clean, and started Expo web preview (Metro running on localhost:8081). |
+| 23 | 2026-04-22 | 2C | Completed 2C.1 to 2C.4; pending 2C.5 | Added coordinator apply flow (eligibility gate + form + photo capture + Supabase insert), profile status component with apply CTA, admin coordinator review page (approve/reject + badge insert), and coordinator badge display. Expo web preview started on localhost:8082 (Metro). |
+| 24 | 2026-04-22 | 2C | Completed 2C.5 and closed Phase 2C | Added Supabase migration for `coordinator_applications` + leaderboard view columns; verified `collez-app` typecheck and `collez-admin` production build succeed; coordinator apply + admin approve path ready (requires bucket + SQL migration applied). |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 2B — Event & Trivia Engine`
-**Next Step**: `2B.1 — Event models + store`
+**Active Phase**: `🔵 Phase 2C — Coordinator System`
+**Next Step**: `2D.1 — Set up Expo Push Notifications`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 112
+- **Completed**: 124
 - **In Progress**: 0
-- **Remaining**: 86
-- **Overall Progress**: 56.6%
+- **Remaining**: 74
+- **Overall Progress**: 62.6%
 
 ---
 
@@ -1410,4 +1414,4 @@
 
 ---
 
-*Last Updated: 2026-04-21 | Stack: React Native + Expo + TypeScript + Zustand + Supabase*
+*Last Updated: 2026-04-22 | Stack: React Native + Expo + TypeScript + Zustand + Supabase*

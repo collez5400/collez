@@ -29,6 +29,7 @@ import { useStreakStore } from '../../src/store/streakStore';
 import { useTaskStore } from '../../src/store/taskStore';
 import { useTimetableStore } from '../../src/store/timetableStore';
 import { useXpStore } from '../../src/store/xpStore';
+import { useEventStore } from '../../src/store/eventStore';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function HomeScreen() {
   } = useStreakStore();
   const { totalXp, rankTier, fetchXpData, isLoading: isXpLoading } = useXpStore();
   const { fetchCollegeBoard } = useLeaderboardStore();
+  const { liveEvents, fetchEvents } = useEventStore();
   const { entries, selectedDay, fetchEntries } = useTimetableStore();
   const { tasks, loadTasks } = useTaskStore();
   const [dailyQuote, setDailyQuote] = useState('Progress over perfection.');
@@ -50,7 +52,13 @@ export default function HomeScreen() {
   const [isQuoteLoading, setIsQuoteLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const quoteLoggedRef = useRef(false);
-  const homeEvent = null;
+  const homeEvent = liveEvents.length
+    ? {
+        id: liveEvents[0].id,
+        title: liveEvents[0].title,
+        imageUrl: liveEvents[0].banner_image_url ?? undefined,
+      }
+    : null;
   const isOffline = useOffline();
 
   useEffect(() => {
@@ -59,7 +67,8 @@ export default function HomeScreen() {
     void fetchCollegeBoard();
     void fetchEntries();
     void loadTasks();
-  }, [fetchCollegeBoard, fetchEntries, fetchStreakData, fetchXpData, loadTasks]);
+    void fetchEvents();
+  }, [fetchCollegeBoard, fetchEntries, fetchEvents, fetchStreakData, fetchXpData, loadTasks]);
 
   useEffect(() => {
     const loadQuote = async () => {
@@ -81,6 +90,7 @@ export default function HomeScreen() {
       fetchCollegeBoard({ refresh: true }),
       fetchEntries(),
       loadTasks(),
+      fetchEvents(),
       (async () => {
         const quote = await fetchTodayQuote({ forceRefresh: true });
         setDailyQuote(quote.text);

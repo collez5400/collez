@@ -35,6 +35,12 @@ export function RankRow({ entry, isCurrentUser, showCollege = true, xpLabel = 'X
       <View style={styles.userInfo}>
         <Text style={styles.name} numberOfLines={1}>
           {entry.full_name}
+          {entry.is_coordinator ? (
+            <Text style={styles.verified}>
+              {' '}
+              <MaterialIcons name="verified" size={14} color={Colors.secondary} />
+            </Text>
+          ) : null}
         </Text>
         <Text style={styles.meta} numberOfLines={1}>
           @{entry.username}
@@ -97,6 +103,9 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.heading,
     fontSize: Typography.size.sm,
     fontWeight: '700',
+  },
+  verified: {
+    color: Colors.secondary,
   },
   meta: {
     marginTop: 2,

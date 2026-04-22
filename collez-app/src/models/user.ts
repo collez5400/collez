@@ -19,6 +19,8 @@ export interface User {
   push_enabled?: boolean;
   push_streak_enabled?: boolean;
   push_event_enabled?: boolean;
+  streak_shields?: number;
+  streak_shield_active?: boolean;
   created_at: string;
   updated_at: string;
 }

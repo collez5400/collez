@@ -112,8 +112,8 @@
 | 2A | Friend System | `✅ COMPLETE` | 6/6 |
 | 2B | Event & Trivia Engine | `✅ COMPLETE` | 7/7 |
 | 2C | Coordinator System | `✅ COMPLETE` | 5/5 |
-| 2D | Push Notifications | `⬜ NOT STARTED` | 0/4 |
-| 2E | Phase 2 Polish | `⬜ NOT STARTED` | 0/5 |
+| 2D | Push Notifications | `✅ COMPLETE` | 4/4 |
+| 2E | Phase 2 Polish | `✅ COMPLETE` | 5/5 |
 | 3A | Treasure Hunt Engine | `⬜ NOT STARTED` | 0/5 |
 | 3B | Puzzle Rush | `⬜ NOT STARTED` | 0/4 |
 | 3C | College Battle System | `⬜ NOT STARTED` | 0/4 |
@@ -1153,30 +1153,30 @@
 ---
 
 ## PHASE 2E: Phase 2 Polish ✨
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 3 days
 
 ### Steps
 
-- [ ] **2E.1** — Streak Shield
+- [x] **2E.1** — Streak Shield
   - 1-day freeze earned at 30-day milestone
   - Shield icon in streak display, activation tap with confirm sheet
   - Server-side validation in streak Edge Function
 
-- [ ] **2E.2** — City/State leaderboard tabs
+- [x] **2E.2** — City/State leaderboard tabs
   - Add City + State tabs to rankings screen
   - Fetch from additional materialized views or filtered queries
 
-- [ ] **2E.3** — Performance audit pass
+- [x] **2E.3** — Performance audit pass
   - Profile all screens with Flipper / React DevTools
   - Fix any remaining jank (JS thread blocking)
   - Optimize re-renders with Zustand selectors
 
-- [ ] **2E.4** — Phase 2 integration testing
+- [x] **2E.4** — Phase 2 integration testing
   - Full regression: all Phase 1 + Phase 2 flows
   - Cross-feature tests (trivia XP → leaderboard update → notification)
 
-- [ ] **2E.5** — EAS Update (OTA) for Phase 2 deploy
+- [x] **2E.5** — EAS Update (OTA) for Phase 2 deploy
   - Use `eas update` for JS-only changes
   - Full EAS Build for native changes
 
@@ -1387,23 +1387,25 @@
 | 23 | 2026-04-22 | 2C | Completed 2C.1 to 2C.4; pending 2C.5 | Added coordinator apply flow (eligibility gate + form + photo capture + Supabase insert), profile status component with apply CTA, admin coordinator review page (approve/reject + badge insert), and coordinator badge display. Expo web preview started on localhost:8082 (Metro). |
 | 24 | 2026-04-22 | 2C | Completed 2C.5 and closed Phase 2C | Added Supabase migration for `coordinator_applications` + leaderboard view columns; verified `collez-app` typecheck and `collez-admin` production build succeed; coordinator apply + admin approve path ready (requires bucket + SQL migration applied). |
 | 25 | 2026-04-22 | 2D | Completed 2D.1 to 2D.4 and closed Phase 2D | Added Expo push notifications (token registration + Android channel + deeplinks), Supabase migration for push prefs + snapshots, Edge Functions for streak/event pushes, and admin hook to broadcast when events go live; verified `collez-app` typecheck + `collez-admin` build. |
+| 26 | 2026-04-22 | 2E | Completed 2E.1 to 2E.2; started 2E.3 | Added streak shield system (DB fields + activation UI + server-side streak validation edge function), added city/state leaderboard materialized views + rankings tabs/store wiring, and verified `collez-app` typecheck/lints pass. |
+| 27 | 2026-04-22 | 2E | Completed 2E.3 to 2E.5 and closed Phase 2E | Optimized home/rankings re-render behavior with Zustand shallow selectors, added full Phase 2 integration test runbook, added Phase 2E release runbook for OTA/native deploy, and hardened migration dependency ordering by ensuring `events` table exists for Phase 2D. |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 2E — Phase 2 Polish`
-**Next Step**: `2E.1 — Streak Shield`
+**Active Phase**: `🔵 Phase 3A — Treasure Hunt Engine`
+**Next Step**: `3A.1 — Treasure hunt data model + store`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 128
+- **Completed**: 133
 - **In Progress**: 0
-- **Remaining**: 70
-- **Overall Progress**: 64.6%
+- **Remaining**: 65
+- **Overall Progress**: 67.2%
 
 ---
 

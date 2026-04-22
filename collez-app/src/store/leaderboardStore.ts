@@ -8,7 +8,7 @@ const LEADERBOARD_PAGE_SIZE = 20;
 const LEADERBOARD_CACHE_KEY = 'leaderboard_cache_v1';
 const LEADERBOARD_CACHE_TTL_MS = CACHE_DURATIONS.MEDIUM;
 
-export type LeaderboardType = 'college' | 'national' | 'weekly';
+export type LeaderboardType = 'college' | 'city' | 'state' | 'national' | 'weekly';
 
 export interface LeaderboardEntry {
   id: string;
@@ -22,6 +22,8 @@ export interface LeaderboardEntry {
   rank_tier: string | null;
   is_coordinator?: boolean | null;
   college_rank: number | null;
+  city_rank?: number | null;
+  state_rank?: number | null;
   national_rank: number | null;
   position: number;
 }
@@ -37,6 +39,8 @@ export interface UserRankSummary {
 interface LeaderboardCachePayload {
   updatedAt: number;
   collegeBoard: LeaderboardEntry[];
+  cityBoard: LeaderboardEntry[];
+  stateBoard: LeaderboardEntry[];
   nationalBoard: LeaderboardEntry[];
   weeklyBoard: LeaderboardEntry[];
   userCollegeRank: number | null;
@@ -44,6 +48,8 @@ interface LeaderboardCachePayload {
 
 interface LeaderboardState {
   collegeBoard: LeaderboardEntry[];
+  cityBoard: LeaderboardEntry[];
+  stateBoard: LeaderboardEntry[];
   nationalBoard: LeaderboardEntry[];
   weeklyBoard: LeaderboardEntry[];
   userCollegeRank: number | null;
@@ -51,9 +57,13 @@ interface LeaderboardState {
   isRefreshing: boolean;
   error: string | null;
   hasMoreCollege: boolean;
+  hasMoreCity: boolean;
+  hasMoreState: boolean;
   hasMoreNational: boolean;
   hasMoreWeekly: boolean;
   fetchCollegeBoard: (opts?: { refresh?: boolean }) => Promise<void>;
+  fetchCityBoard: (opts?: { refresh?: boolean }) => Promise<void>;
+  fetchStateBoard: (opts?: { refresh?: boolean }) => Promise<void>;
   fetchNationalBoard: (opts?: { refresh?: boolean }) => Promise<void>;
   fetchWeeklyBoard: (opts?: { refresh?: boolean }) => Promise<void>;
   refreshAllBoards: () => Promise<void>;
@@ -62,7 +72,7 @@ interface LeaderboardState {
 
 const mapCollegeOrNationalRow = (
   row: Record<string, any>,
-  type: 'college' | 'national',
+  type: 'college' | 'city' | 'state' | 'national',
   fallbackPosition: number
 ): LeaderboardEntry => ({
   id: String(row.id),
@@ -76,11 +86,18 @@ const mapCollegeOrNationalRow = (
   rank_tier: row.rank_tier ?? null,
   is_coordinator: row.is_coordinator ?? null,
   college_rank: row.college_rank != null ? Number(row.college_rank) : null,
+  city_rank: row.city_rank != null ? Number(row.city_rank) : null,
+  state_rank: row.state_rank != null ? Number(row.state_rank) : null,
   national_rank: row.national_rank != null ? Number(row.national_rank) : null,
-  position:
+  position: Number(
     type === 'college'
-      ? Number(row.college_rank ?? fallbackPosition)
-      : Number(row.national_rank ?? fallbackPosition),
+      ? row.college_rank ?? fallbackPosition
+      : type === 'city'
+        ? row.city_rank ?? fallbackPosition
+        : type === 'state'
+          ? row.state_rank ?? fallbackPosition
+          : row.national_rank ?? fallbackPosition
+  ),
 });
 
 const mapWeeklyRow = (row: Record<string, any>, fallbackPosition: number): LeaderboardEntry => ({
@@ -112,6 +129,8 @@ const readCachePayload = async (): Promise<LeaderboardCachePayload | null> => {
 
 export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
   collegeBoard: [],
+  cityBoard: [],
+  stateBoard: [],
   nationalBoard: [],
   weeklyBoard: [],
   userCollegeRank: null,
@@ -119,6 +138,8 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
   isRefreshing: false,
   error: null,
   hasMoreCollege: true,
+  hasMoreCity: true,
+  hasMoreState: true,
   hasMoreNational: true,
   hasMoreWeekly: true,
 
@@ -134,12 +155,18 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     if (!refresh && currentLength === 0) {
       const parsed = await readCachePayload();
       if (parsed && shouldUseCache(parsed.updatedAt) && parsed.collegeBoard.length > 0) {
+        const cachedCityBoard = parsed.cityBoard ?? [];
+        const cachedStateBoard = parsed.stateBoard ?? [];
         set({
           collegeBoard: parsed.collegeBoard,
+          cityBoard: cachedCityBoard,
+          stateBoard: cachedStateBoard,
           nationalBoard: parsed.nationalBoard,
           weeklyBoard: parsed.weeklyBoard,
           userCollegeRank: parsed.userCollegeRank,
           hasMoreCollege: parsed.collegeBoard.length >= LEADERBOARD_PAGE_SIZE,
+          hasMoreCity: cachedCityBoard.length >= LEADERBOARD_PAGE_SIZE,
+          hasMoreState: cachedStateBoard.length >= LEADERBOARD_PAGE_SIZE,
           hasMoreNational: parsed.nationalBoard.length >= LEADERBOARD_PAGE_SIZE,
           hasMoreWeekly: parsed.weeklyBoard.length >= LEADERBOARD_PAGE_SIZE,
           error: null,
@@ -190,6 +217,8 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       const payload: LeaderboardCachePayload = {
         updatedAt: Date.now(),
         collegeBoard: nextState.collegeBoard,
+        cityBoard: nextState.cityBoard,
+        stateBoard: nextState.stateBoard,
         nationalBoard: nextState.nationalBoard,
         weeklyBoard: nextState.weeklyBoard,
         userCollegeRank: nextState.userCollegeRank,
@@ -198,12 +227,18 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     } catch (error) {
       const parsed = await readCachePayload();
       if (parsed?.collegeBoard?.length) {
+        const cachedCityBoard = parsed.cityBoard ?? [];
+        const cachedStateBoard = parsed.stateBoard ?? [];
         set({
           collegeBoard: parsed.collegeBoard,
+          cityBoard: cachedCityBoard,
+          stateBoard: cachedStateBoard,
           nationalBoard: parsed.nationalBoard,
           weeklyBoard: parsed.weeklyBoard,
           userCollegeRank: parsed.userCollegeRank,
           hasMoreCollege: parsed.collegeBoard.length >= LEADERBOARD_PAGE_SIZE,
+          hasMoreCity: cachedCityBoard.length >= LEADERBOARD_PAGE_SIZE,
+          hasMoreState: cachedStateBoard.length >= LEADERBOARD_PAGE_SIZE,
           hasMoreNational: parsed.nationalBoard.length >= LEADERBOARD_PAGE_SIZE,
           hasMoreWeekly: parsed.weeklyBoard.length >= LEADERBOARD_PAGE_SIZE,
           isLoading: false,
@@ -214,6 +249,114 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       }
       set({
         error: error instanceof Error ? error.message : 'Failed fetching college leaderboard',
+        isLoading: false,
+        isRefreshing: false,
+      });
+    }
+  },
+
+  fetchCityBoard: async (opts) => {
+    const refresh = opts?.refresh ?? false;
+    const current = get();
+    const authUser = useAuthStore.getState().user;
+    if (!authUser?.college_id) return;
+    const currentLength = refresh ? 0 : current.cityBoard.length;
+    if (!refresh && !current.hasMoreCity) return;
+
+    set({
+      isLoading: !refresh && currentLength === 0,
+      isRefreshing: refresh,
+      error: null,
+    });
+
+    try {
+      const supabaseClient = supabase as any;
+      const { data: userCollege, error: collegeError } = await supabaseClient
+        .from('colleges')
+        .select('city')
+        .eq('id', authUser.college_id)
+        .single();
+      if (collegeError || !userCollege?.city) {
+        throw new Error(collegeError?.message || 'Failed loading city context');
+      }
+      const from = currentLength;
+      const to = from + LEADERBOARD_PAGE_SIZE - 1;
+      const { data, error } = await supabaseClient
+        .from('mv_city_leaderboard')
+        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, college_name, city_name, city_rank')
+        .eq('city_name', userCollege.city)
+        .order('city_rank', { ascending: true })
+        .range(from, to);
+      if (error) throw new Error(error.message || 'Failed fetching city leaderboard');
+
+      const incoming = (data ?? []).map((row: Record<string, any>, index: number) =>
+        mapCollegeOrNationalRow(row, 'city', from + index + 1)
+      );
+      const merged = refresh ? incoming : [...current.cityBoard, ...incoming];
+      set({
+        cityBoard: merged,
+        hasMoreCity: incoming.length === LEADERBOARD_PAGE_SIZE,
+        isLoading: false,
+        isRefreshing: false,
+        error: null,
+      });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed fetching city leaderboard',
+        isLoading: false,
+        isRefreshing: false,
+      });
+    }
+  },
+
+  fetchStateBoard: async (opts) => {
+    const refresh = opts?.refresh ?? false;
+    const current = get();
+    const authUser = useAuthStore.getState().user;
+    if (!authUser?.college_id) return;
+    const currentLength = refresh ? 0 : current.stateBoard.length;
+    if (!refresh && !current.hasMoreState) return;
+
+    set({
+      isLoading: !refresh && currentLength === 0,
+      isRefreshing: refresh,
+      error: null,
+    });
+
+    try {
+      const supabaseClient = supabase as any;
+      const { data: userCollege, error: collegeError } = await supabaseClient
+        .from('colleges')
+        .select('state')
+        .eq('id', authUser.college_id)
+        .single();
+      if (collegeError || !userCollege?.state) {
+        throw new Error(collegeError?.message || 'Failed loading state context');
+      }
+      const from = currentLength;
+      const to = from + LEADERBOARD_PAGE_SIZE - 1;
+      const { data, error } = await supabaseClient
+        .from('mv_state_leaderboard')
+        .select('id, full_name, username, avatar_url, xp, streak_count, rank_tier, is_coordinator, college_name, state_name, state_rank')
+        .eq('state_name', userCollege.state)
+        .order('state_rank', { ascending: true })
+        .range(from, to);
+      if (error) throw new Error(error.message || 'Failed fetching state leaderboard');
+
+      const incoming = (data ?? []).map((row: Record<string, any>, index: number) =>
+        mapCollegeOrNationalRow(row, 'state', from + index + 1)
+      );
+      const merged = refresh ? incoming : [...current.stateBoard, ...incoming];
+      set({
+        stateBoard: merged,
+        hasMoreState: incoming.length === LEADERBOARD_PAGE_SIZE,
+        isLoading: false,
+        isRefreshing: false,
+        error: null,
+      });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed fetching state leaderboard',
         isLoading: false,
         isRefreshing: false,
       });
@@ -337,6 +480,8 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
   refreshAllBoards: async () => {
     await Promise.all([
       get().fetchCollegeBoard({ refresh: true }),
+      get().fetchCityBoard({ refresh: true }),
+      get().fetchStateBoard({ refresh: true }),
       get().fetchNationalBoard({ refresh: true }),
       get().fetchWeeklyBoard({ refresh: true }),
     ]);
@@ -358,6 +503,26 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
 
     if (type === 'national') {
       const entry = get().nationalBoard.find((item) => item.id === authUser.id);
+      return {
+        type,
+        rank: entry?.position ?? null,
+        xp: authUser.xp ?? entry?.xp ?? 0,
+        collegeName: entry?.college_name ?? null,
+      };
+    }
+
+    if (type === 'city') {
+      const entry = get().cityBoard.find((item) => item.id === authUser.id);
+      return {
+        type,
+        rank: entry?.position ?? null,
+        xp: authUser.xp ?? entry?.xp ?? 0,
+        collegeName: entry?.college_name ?? null,
+      };
+    }
+
+    if (type === 'state') {
+      const entry = get().stateBoard.find((item) => item.id === authUser.id);
       return {
         type,
         rank: entry?.position ?? null,

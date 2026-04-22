@@ -10,6 +10,8 @@ export interface StreakData {
   count: number;
   lastActiveDate: string | null;
   longestStreak: number;
+  shields: number;
+  shieldActive: boolean;
 }
 
 export interface StreakMilestone {

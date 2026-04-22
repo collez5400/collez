@@ -10,6 +10,8 @@ interface UserRankCardProps {
 
 const getTypeLabel = (type: LeaderboardType): string => {
   if (type === 'college') return 'College';
+  if (type === 'city') return 'City';
+  if (type === 'state') return 'State';
   if (type === 'national') return 'National';
   return 'Weekly';
 };

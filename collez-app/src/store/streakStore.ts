@@ -6,6 +6,7 @@ import {
   isStreakLoggedToday,
   logStreakAction,
   LogStreakResult,
+  setStreakShieldActive,
 } from '../services/streakService';
 import { StreakActionType, StreakMilestone } from '../models/streak';
 import { CACHE_DURATIONS } from '../config/constants';
@@ -16,11 +17,14 @@ interface StreakState {
   longestStreak: number;
   isLoggedToday: boolean;
   badges: StreakMilestone[];
+  shields: number;
+  shieldActive: boolean;
   lastMilestone: StreakMilestone | null;
   isLoading: boolean;
   error: string | null;
   logStreakAction: (actionType: StreakActionType) => Promise<LogStreakResult | null>;
   fetchStreakData: (options?: { forceRefresh?: boolean }) => Promise<void>;
+  activateStreakShield: () => Promise<boolean>;
   clearLastMilestone: () => void;
 }
 
@@ -29,6 +33,8 @@ export const useStreakStore = create<StreakState>((set, get) => ({
   longestStreak: 0,
   isLoggedToday: false,
   badges: [],
+  shields: 0,
+  shieldActive: false,
   lastMilestone: null,
   isLoading: false,
   error: null,
@@ -46,6 +52,8 @@ export const useStreakStore = create<StreakState>((set, get) => ({
         longestStreak: number;
         isLoggedToday: boolean;
         badges: StreakMilestone[];
+        shields?: number;
+        shieldActive?: boolean;
       }>(cacheKey);
       if (cached) {
         set({
@@ -53,6 +61,8 @@ export const useStreakStore = create<StreakState>((set, get) => ({
           longestStreak: cached.longestStreak,
           isLoggedToday: cached.isLoggedToday,
           badges: cached.badges,
+          shields: cached.shields ?? 0,
+          shieldActive: cached.shieldActive ?? false,
           error: null,
         });
         return;
@@ -65,7 +75,7 @@ export const useStreakStore = create<StreakState>((set, get) => ({
       const loggedToday = await isStreakLoggedToday();
       const { data: userRow, error: userError } = await supabaseClient
         .from('users')
-        .select('streak_count, longest_streak')
+        .select('streak_count, longest_streak, streak_shields, streak_shield_active')
         .eq('id', userId)
         .single();
 
@@ -79,6 +89,8 @@ export const useStreakStore = create<StreakState>((set, get) => ({
         longestStreak: userRow.longest_streak ?? 0,
         isLoggedToday: loggedToday,
         badges,
+        shields: userRow.streak_shields ?? 0,
+        shieldActive: Boolean(userRow.streak_shield_active),
       };
       await setCachedValue(cacheKey, nextCache, CACHE_DURATIONS.SHORT);
       await markFetched(`streak_${userId}`);
@@ -92,6 +104,8 @@ export const useStreakStore = create<StreakState>((set, get) => ({
         longestStreak: number;
         isLoggedToday: boolean;
         badges: StreakMilestone[];
+        shields?: number;
+        shieldActive?: boolean;
       }>(cacheKey);
       if (cached) {
         set({
@@ -118,6 +132,8 @@ export const useStreakStore = create<StreakState>((set, get) => ({
         streakCount: result.streakCount,
         longestStreak: result.longestStreak,
         isLoggedToday: result.isLoggedToday,
+        shields: result.shields ?? get().shields,
+        shieldActive: result.shieldActive ?? get().shieldActive,
         badges: result.milestone
           ? (() => {
               const existing = get().badges;
@@ -132,6 +148,8 @@ export const useStreakStore = create<StreakState>((set, get) => ({
         streakCount: result.streakCount,
         longestStreak: result.longestStreak,
         isLoggedToday: result.isLoggedToday,
+        shields: result.shields ?? get().shields,
+        shieldActive: result.shieldActive ?? get().shieldActive,
         lastMilestone: result.milestone ?? get().lastMilestone,
         error: null,
       });
@@ -151,6 +169,40 @@ export const useStreakStore = create<StreakState>((set, get) => ({
         error: error instanceof Error ? error.message : 'Failed to log streak action',
       });
       return null;
+    }
+  },
+
+  activateStreakShield: async () => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return false;
+    try {
+      const next = await setStreakShieldActive(userId, true);
+      set({
+        shields: next.shields,
+        shieldActive: next.shieldActive,
+        error: null,
+      });
+      const cached = await getCachedValue<{
+        streakCount: number;
+        longestStreak: number;
+        isLoggedToday: boolean;
+        badges: StreakMilestone[];
+        shields?: number;
+        shieldActive?: boolean;
+      }>(`streak:${userId}`);
+      if (cached) {
+        await setCachedValue(
+          `streak:${userId}`,
+          { ...cached, shields: next.shields, shieldActive: next.shieldActive },
+          CACHE_DURATIONS.SHORT
+        );
+      }
+      return true;
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to activate streak shield',
+      });
+      return false;
     }
   },
 

@@ -4,6 +4,22 @@
 
 begin;
 
+-- Ensure events table exists (some environments were created before Phase 2B SQL was applied)
+create table if not exists public.events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  event_type text not null default 'trivia',
+  status text not null default 'upcoming' check (status in ('upcoming', 'live', 'ended')),
+  start_time timestamptz not null default now(),
+  end_time timestamptz not null default now(),
+  xp_reward integer not null default 0,
+  badge_name text,
+  banner_image_url text,
+  config jsonb,
+  created_at timestamptz not null default now()
+);
+
 -- 1) Users: push token + prefs
 alter table public.users
   add column if not exists push_token text,

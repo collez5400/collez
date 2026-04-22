@@ -30,19 +30,44 @@ import { useTaskStore } from '../../src/store/taskStore';
 import { useTimetableStore } from '../../src/store/timetableStore';
 import { useXpStore } from '../../src/store/xpStore';
 import { useEventStore } from '../../src/store/eventStore';
+import { shallow } from 'zustand/shallow';
 
 export default function HomeScreen() {
   const router = useRouter();
   const authUser = useAuthStore((state) => state.user);
   const {
     streakCount,
+    shields,
+    shieldActive,
+    activateStreakShield,
     fetchStreakData,
     logStreakAction,
     lastMilestone,
     clearLastMilestone,
-    isLoading: isStreakLoading,
-  } = useStreakStore();
-  const { totalXp, rankTier, fetchXpData, isLoading: isXpLoading } = useXpStore();
+    isStreakLoading,
+  } = useStreakStore(
+    (state) => ({
+      streakCount: state.streakCount,
+      shields: state.shields,
+      shieldActive: state.shieldActive,
+      activateStreakShield: state.activateStreakShield,
+      fetchStreakData: state.fetchStreakData,
+      logStreakAction: state.logStreakAction,
+      lastMilestone: state.lastMilestone,
+      clearLastMilestone: state.clearLastMilestone,
+      isStreakLoading: state.isLoading,
+    }),
+    shallow
+  );
+  const { totalXp, rankTier, fetchXpData, isXpLoading } = useXpStore(
+    (state) => ({
+      totalXp: state.totalXp,
+      rankTier: state.rankTier,
+      fetchXpData: state.fetchXpData,
+      isXpLoading: state.isLoading,
+    }),
+    shallow
+  );
   const { fetchCollegeBoard } = useLeaderboardStore();
   const { liveEvents, fetchEvents } = useEventStore();
   const { entries, selectedDay, fetchEntries } = useTimetableStore();
@@ -130,7 +155,31 @@ export default function HomeScreen() {
           streak={streakCount}
           xp={totalXp}
           rank={rankTier.replace('_', ' ')}
-          onPressStreak={() => router.push('/(tabs)/rankings')}
+          streakShieldCount={shields}
+          streakShieldActive={shieldActive}
+          onPressStreak={() => {
+            if (shieldActive) {
+              Alert.alert('Streak Shield active', 'Your next missed day is protected.');
+              return;
+            }
+            if (shields > 0) {
+              Alert.alert(
+                'Activate Streak Shield?',
+                'Use one shield to protect a single missed day. This works only for one-day gaps.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Activate',
+                    onPress: () => {
+                      void activateStreakShield();
+                    },
+                  },
+                ]
+              );
+              return;
+            }
+            router.push('/(tabs)/rankings');
+          }}
           onPressXp={() => router.push('/(tabs)/rankings')}
           onPressRank={() => router.push('/(tabs)/rankings')}
         />

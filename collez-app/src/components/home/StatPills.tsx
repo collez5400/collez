@@ -7,6 +7,8 @@ interface StatPillsProps {
   streak: number;
   xp: number;
   rank: string;
+  streakShieldCount?: number;
+  streakShieldActive?: boolean;
   onPressStreak: () => void;
   onPressXp: () => void;
   onPressRank: () => void;
@@ -50,10 +52,20 @@ function Pill({
   );
 }
 
-export function StatPills({ streak, xp, rank, onPressStreak, onPressXp, onPressRank }: StatPillsProps) {
+export function StatPills({
+  streak,
+  xp,
+  rank,
+  streakShieldCount = 0,
+  streakShieldActive = false,
+  onPressStreak,
+  onPressXp,
+  onPressRank,
+}: StatPillsProps) {
+  const streakValue = `${streak} days${streakShieldCount > 0 ? ` · ${streakShieldActive ? 'Shield ON' : `x${streakShieldCount} shield`}` : ''}`;
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-      <Pill icon="local-fire-department" label="Streak" value={`${streak} days`} onPress={onPressStreak} />
+      <Pill icon="local-fire-department" label="Streak" value={streakValue} onPress={onPressStreak} />
       <Pill icon="bolt" label="XP" value={xp.toLocaleString()} onPress={onPressXp} />
       <Pill icon="military-tech" label="Rank" value={rank} onPress={onPressRank} />
     </ScrollView>

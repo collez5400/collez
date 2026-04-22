@@ -39,6 +39,10 @@ export interface LogStreakResult {
   streakCount: number;
   longestStreak: number;
   isLoggedToday: boolean;
+  shields: number;
+  shieldActive: boolean;
+  shieldUsed?: boolean;
+  shieldEarned?: boolean;
   milestone?: StreakMilestone;
 }
 
@@ -86,7 +90,7 @@ export async function logStreakAction(userId: string, actionType: StreakActionTy
 
   const { data: userRow, error: userError } = await supabaseClient
     .from('users')
-    .select('streak_count, longest_streak, last_active_date')
+    .select('streak_count, longest_streak, last_active_date, streak_shields, streak_shield_active')
     .eq('id', userId)
     .single();
 
@@ -100,6 +104,33 @@ export async function logStreakAction(userId: string, actionType: StreakActionTy
       streakCount: userRow.streak_count ?? 0,
       longestStreak: userRow.longest_streak ?? 0,
       isLoggedToday: true,
+      shields: userRow.streak_shields ?? 0,
+      shieldActive: Boolean(userRow.streak_shield_active),
+    };
+  }
+
+  const { data: edgeData, error: edgeError } = await supabase.functions.invoke('log-streak-action', {
+    body: { actionType },
+  });
+  if (edgeError) {
+    throw new Error(edgeError.message || 'Failed validating streak update');
+  }
+  if (edgeData && typeof edgeData.streakCount === 'number') {
+    const milestone = buildMilestone(edgeData.streakCount);
+    if (milestone) {
+      await ensureMilestoneBadge(userId, milestone);
+    }
+    await AsyncStorage.setItem(storageKey, '1');
+    return {
+      didLog: Boolean(edgeData.didLog),
+      streakCount: Number(edgeData.streakCount ?? 0),
+      longestStreak: Number(edgeData.longestStreak ?? 0),
+      isLoggedToday: Boolean(edgeData.isLoggedToday),
+      shields: Number(edgeData.shields ?? 0),
+      shieldActive: Boolean(edgeData.shieldActive),
+      shieldUsed: Boolean(edgeData.shieldUsed),
+      shieldEarned: Boolean(edgeData.shieldEarned),
+      milestone,
     };
   }
 
@@ -145,8 +176,36 @@ export async function logStreakAction(userId: string, actionType: StreakActionTy
     streakCount: nextStreakCount,
     longestStreak: nextLongestStreak,
     isLoggedToday: true,
+    shields: userRow.streak_shields ?? 0,
+    shieldActive: Boolean(userRow.streak_shield_active),
     milestone,
   };
+}
+
+export async function setStreakShieldActive(userId: string, active: boolean): Promise<{ shields: number; shieldActive: boolean }> {
+  const { data: row, error } = await supabaseClient
+    .from('users')
+    .select('streak_shields, streak_shield_active')
+    .eq('id', userId)
+    .single();
+  if (error || !row) {
+    throw new Error(error?.message || 'Failed loading streak shield state');
+  }
+  const shields = Number(row.streak_shields ?? 0);
+  if (active && shields <= 0) {
+    throw new Error('No streak shields available yet');
+  }
+  const { error: updateError } = await supabaseClient
+    .from('users')
+    .update({
+      streak_shield_active: active,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+  if (updateError) {
+    throw new Error(updateError.message || 'Failed updating streak shield');
+  }
+  return { shields, shieldActive: active };
 }
 
 export async function fetchStreakBadges(userId: string): Promise<StreakMilestone[]> {

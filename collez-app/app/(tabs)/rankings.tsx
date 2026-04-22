@@ -9,44 +9,79 @@ import { EmptyState } from '../../src/components/shared/EmptyState';
 import { ErrorState } from '../../src/components/shared/ErrorState';
 import { LeaderboardEntry, LeaderboardType, useLeaderboardStore } from '../../src/store/leaderboardStore';
 import { useAuthStore } from '../../src/store/authStore';
+import { shallow } from 'zustand/shallow';
 
 export default function RankingsScreen() {
   const [activeTab, setActiveTab] = useState<LeaderboardType>('college');
   const [refreshing, setRefreshing] = useState(false);
-  const { user } = useAuthStore();
+  const userId = useAuthStore((state) => state.user?.id);
   const {
     collegeBoard,
+    cityBoard,
+    stateBoard,
     nationalBoard,
     weeklyBoard,
     error,
     hasMoreCollege,
+    hasMoreCity,
+    hasMoreState,
     hasMoreNational,
     hasMoreWeekly,
     isLoading,
     fetchCollegeBoard,
+    fetchCityBoard,
+    fetchStateBoard,
     fetchNationalBoard,
     fetchWeeklyBoard,
     getUserRankSummary,
-  } = useLeaderboardStore();
+  } = useLeaderboardStore(
+    (state) => ({
+      collegeBoard: state.collegeBoard,
+      cityBoard: state.cityBoard,
+      stateBoard: state.stateBoard,
+      nationalBoard: state.nationalBoard,
+      weeklyBoard: state.weeklyBoard,
+      error: state.error,
+      hasMoreCollege: state.hasMoreCollege,
+      hasMoreCity: state.hasMoreCity,
+      hasMoreState: state.hasMoreState,
+      hasMoreNational: state.hasMoreNational,
+      hasMoreWeekly: state.hasMoreWeekly,
+      isLoading: state.isLoading,
+      fetchCollegeBoard: state.fetchCollegeBoard,
+      fetchCityBoard: state.fetchCityBoard,
+      fetchStateBoard: state.fetchStateBoard,
+      fetchNationalBoard: state.fetchNationalBoard,
+      fetchWeeklyBoard: state.fetchWeeklyBoard,
+      getUserRankSummary: state.getUserRankSummary,
+    }),
+    shallow
+  );
 
   useEffect(() => {
     void useStreakStore.getState().logStreakAction('leaderboard_view');
     void fetchCollegeBoard();
+    void fetchCityBoard();
+    void fetchStateBoard();
     void fetchNationalBoard();
     void fetchWeeklyBoard();
-  }, [fetchCollegeBoard, fetchNationalBoard, fetchWeeklyBoard]);
+  }, [fetchCityBoard, fetchCollegeBoard, fetchNationalBoard, fetchStateBoard, fetchWeeklyBoard]);
 
   const data = useMemo<LeaderboardEntry[]>(() => {
     if (activeTab === 'college') return collegeBoard;
+    if (activeTab === 'city') return cityBoard;
+    if (activeTab === 'state') return stateBoard;
     if (activeTab === 'national') return nationalBoard;
     return weeklyBoard;
-  }, [activeTab, collegeBoard, nationalBoard, weeklyBoard]);
+  }, [activeTab, cityBoard, collegeBoard, nationalBoard, stateBoard, weeklyBoard]);
 
   const hasMore = useMemo(() => {
     if (activeTab === 'college') return hasMoreCollege;
+    if (activeTab === 'city') return hasMoreCity;
+    if (activeTab === 'state') return hasMoreState;
     if (activeTab === 'national') return hasMoreNational;
     return hasMoreWeekly;
-  }, [activeTab, hasMoreCollege, hasMoreNational, hasMoreWeekly]);
+  }, [activeTab, hasMoreCity, hasMoreCollege, hasMoreNational, hasMoreState, hasMoreWeekly]);
 
   const xpLabel = activeTab === 'weekly' ? 'Weekly XP' : 'XP';
   const summary = getUserRankSummary(activeTab);
@@ -54,33 +89,37 @@ export default function RankingsScreen() {
   const fetchNextPage = useCallback(async () => {
     if (!hasMore || isLoading) return;
     if (activeTab === 'college') await fetchCollegeBoard();
+    if (activeTab === 'city') await fetchCityBoard();
+    if (activeTab === 'state') await fetchStateBoard();
     if (activeTab === 'national') await fetchNationalBoard();
     if (activeTab === 'weekly') await fetchWeeklyBoard();
-  }, [activeTab, fetchCollegeBoard, fetchNationalBoard, fetchWeeklyBoard, hasMore, isLoading]);
+  }, [activeTab, fetchCityBoard, fetchCollegeBoard, fetchNationalBoard, fetchStateBoard, fetchWeeklyBoard, hasMore, isLoading]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await Promise.all([
         fetchCollegeBoard({ refresh: true }),
+        fetchCityBoard({ refresh: true }),
+        fetchStateBoard({ refresh: true }),
         fetchNationalBoard({ refresh: true }),
         fetchWeeklyBoard({ refresh: true }),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [fetchCollegeBoard, fetchNationalBoard, fetchWeeklyBoard]);
+  }, [fetchCityBoard, fetchCollegeBoard, fetchNationalBoard, fetchStateBoard, fetchWeeklyBoard]);
 
   const renderItem = useCallback(
     ({ item }: { item: LeaderboardEntry }) => (
       <RankRow
         entry={item}
-        isCurrentUser={item.id === user?.id}
+        isCurrentUser={item.id === userId}
         showCollege={activeTab !== 'college'}
         xpLabel={xpLabel}
       />
     ),
-    [activeTab, user?.id, xpLabel]
+    [activeTab, userId, xpLabel]
   );
 
   const keyExtractor = useCallback(
@@ -103,6 +142,8 @@ export default function RankingsScreen() {
       <Text style={styles.title}>Leaderboard</Text>
       <View style={styles.tabRow}>
         {tabButton('college', 'College')}
+        {tabButton('city', 'City')}
+        {tabButton('state', 'State')}
         {tabButton('national', 'National')}
         {tabButton('weekly', 'Weekly')}
       </View>

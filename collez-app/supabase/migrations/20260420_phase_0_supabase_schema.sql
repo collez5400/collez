@@ -102,6 +102,41 @@ create table if not exists public.quotes (
 
 create index if not exists idx_quotes_date on public.quotes(scheduled_date);
 
+create table if not exists public.events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  event_type text not null default 'trivia',
+  status text not null default 'upcoming' check (status in ('upcoming', 'live', 'ended')),
+  start_time timestamptz not null default now(),
+  end_time timestamptz not null default now(),
+  xp_reward integer not null default 0,
+  badge_name text,
+  banner_image_url text,
+  config jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_events_status on public.events(status);
+create index if not exists idx_events_type on public.events(event_type);
+create index if not exists idx_events_time on public.events(start_time);
+
+create table if not exists public.event_participations (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  user_id uuid not null references public.users(id) on delete cascade,
+  score integer not null default 0,
+  xp_earned integer not null default 0,
+  completed boolean not null default false,
+  progress jsonb,
+  started_at timestamptz not null default now(),
+  completed_at timestamptz,
+  unique(event_id, user_id)
+);
+
+create index if not exists idx_event_part_user on public.event_participations(user_id);
+create index if not exists idx_event_part_event on public.event_participations(event_id);
+
 -- Leaderboard materialized views
 drop materialized view if exists public.mv_college_leaderboard;
 create materialized view public.mv_college_leaderboard as

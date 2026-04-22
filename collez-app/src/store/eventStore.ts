@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '../config/supabase';
 import type {
+  CollegeBattleStanding,
+  CollegeBattleConfig,
   Event,
   EventParticipation,
   HuntClue,
@@ -64,6 +66,7 @@ interface EventStoreState {
     eventCompleted: boolean;
     message: string;
   } | null>;
+  fetchCollegeBattleStandings: (eventId: string) => Promise<CollegeBattleStanding[]>;
   clearError: () => void;
 }
 
@@ -87,6 +90,13 @@ function getPuzzleRushConfig(event: Event): PuzzleRushConfig | null {
   if (!event.config || typeof event.config !== 'object') return null;
   if (!Array.isArray((event.config as PuzzleRushConfig).puzzles)) return null;
   return event.config as PuzzleRushConfig;
+}
+
+function getCollegeBattleConfig(event: Event): CollegeBattleConfig | null {
+  if (!event.config || typeof event.config !== 'object') return null;
+  const maybe = event.config as CollegeBattleConfig;
+  if (maybe.battle_type && maybe.battle_type !== 'xp_race') return null;
+  return maybe;
 }
 
 function getIstDateString(date = new Date()) {
@@ -529,6 +539,31 @@ export const useEventStore = create<EventStoreState>((set, get) => ({
       eventCompleted,
       message: eventCompleted ? 'Puzzle rush completed!' : 'Puzzle completed successfully.',
     };
+  },
+
+  fetchCollegeBattleStandings: async (eventId) => {
+    const event = [...get().liveEvents, ...get().upcomingEvents, ...get().pastEvents].find((item) => item.id === eventId);
+    if (!event || event.event_type !== 'college_battle') {
+      set({ error: 'College battle event not found' });
+      return [];
+    }
+    const config = getCollegeBattleConfig(event);
+    if (!config) {
+      set({ error: 'College battle configuration is invalid' });
+      return [];
+    }
+
+    const { data, error } = await (supabase as any).functions.invoke('get-college-battle-standings', {
+      body: { eventId },
+    });
+    if (error) {
+      set({ error: error.message ?? 'Failed to fetch college battle standings' });
+      return [];
+    }
+    if (!Array.isArray(data?.standings)) {
+      return [];
+    }
+    return data.standings as CollegeBattleStanding[];
   },
 
   clearError: () => set({ error: null }),

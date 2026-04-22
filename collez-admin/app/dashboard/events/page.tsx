@@ -57,6 +57,7 @@ export default async function EventsPage() {
     "use server";
     const id = String(formData.get("id") ?? "");
     const status = String(formData.get("status") ?? "");
+    const eventType = String(formData.get("eventType") ?? "");
     if (!id || !status) return;
 
     await supabaseAdmin.from("events").update({ status }).eq("id", id);
@@ -64,6 +65,14 @@ export default async function EventsPage() {
     if (status === "live") {
       const serverEnv = getServerEnv();
       await supabaseAdmin.functions.invoke("notify-event-live", {
+        body: { eventId: id },
+        headers: { "x-cron-secret": serverEnv.cronSecret },
+      });
+    }
+
+    if (status === "ended" && eventType === "college_battle") {
+      const serverEnv = getServerEnv();
+      await supabaseAdmin.functions.invoke("finalize-college-battle", {
         body: { eventId: id },
         headers: { "x-cron-secret": serverEnv.cronSecret },
       });
@@ -85,6 +94,7 @@ export default async function EventsPage() {
             <option value="trivia">trivia</option>
             <option value="treasure_hunt">treasure_hunt</option>
             <option value="puzzle_rush">puzzle_rush</option>
+            <option value="college_battle">college_battle</option>
           </select>
           <select name="status" className="rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm">
             <option value="upcoming">upcoming</option>
@@ -143,6 +153,18 @@ export default async function EventsPage() {
   "total_clues": 5,
   "completion_xp": 40,
   "badge_name": "Treasure Hunter"
+}
+
+/*
+  College battle template:
+{
+  "battle_type": "xp_race",
+  "min_participants": 10,
+  "prizes": [
+    { "rank": 1, "xp_bonus": 100, "badge_name": "Battle Champion" },
+    { "rank": 2, "xp_bonus": 50, "badge_name": "Battle Runner-Up" },
+    { "rank": 3, "xp_bonus": 25, "badge_name": "Battle Contender" }
+  ]
 }
 
 /*
@@ -210,6 +232,7 @@ export default async function EventsPage() {
                 </div>
                 <form action={updateStatus} className="flex items-center gap-2">
                   <input type="hidden" name="id" value={event.id} />
+                  <input type="hidden" name="eventType" value={event.event_type} />
                   <select name="status" defaultValue={event.status} className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs">
                     <option value="upcoming">upcoming</option>
                     <option value="live">live</option>

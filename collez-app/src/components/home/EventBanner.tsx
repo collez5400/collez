@@ -15,6 +15,7 @@ export interface HomeEvent {
   id: string;
   title: string;
   imageUrl?: string;
+  ctaLabel?: string;
 }
 
 interface EventBannerProps {
@@ -44,7 +45,7 @@ export function EventBanner({ event, onJoin }: EventBannerProps) {
       </Animated.View>
       <Text style={styles.title}>{event.title}</Text>
       <GradientButton
-        title="Join Now"
+        title={event.ctaLabel ?? 'Join Now'}
         onPress={() => onJoin(event.id)}
         fullWidth={false}
         style={styles.cta}

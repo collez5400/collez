@@ -36,6 +36,7 @@ export default function EventsScreen() {
   const getEventRoute = (eventType: string, eventId: string) => {
     if (eventType === 'treasure_hunt') return `/events/hunt/${eventId}`;
     if (eventType === 'puzzle_rush') return `/events/puzzle/${eventId}`;
+    if (eventType === 'college_battle') return `/events/battle/${eventId}`;
     return `/events/trivia/${eventId}`;
   };
 

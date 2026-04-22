@@ -77,11 +77,14 @@ export default function HomeScreen() {
   const [isQuoteLoading, setIsQuoteLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const quoteLoggedRef = useRef(false);
-  const homeEvent = liveEvents.length
+  const prioritizedLiveEvent =
+    liveEvents.find((event) => event.event_type === 'college_battle') ?? liveEvents[0] ?? null;
+  const homeEvent = prioritizedLiveEvent
     ? {
-        id: liveEvents[0].id,
-        title: liveEvents[0].title,
-        imageUrl: liveEvents[0].banner_image_url ?? undefined,
+        id: prioritizedLiveEvent.id,
+        title: prioritizedLiveEvent.title,
+        imageUrl: prioritizedLiveEvent.banner_image_url ?? undefined,
+        ctaLabel: prioritizedLiveEvent.event_type === 'college_battle' ? 'View Battle' : 'Join Now',
       }
     : null;
   const isOffline = useOffline();
@@ -187,6 +190,10 @@ export default function HomeScreen() {
         <EventBanner
           event={homeEvent}
           onJoin={() => {
+            if (prioritizedLiveEvent?.event_type === 'college_battle') {
+              router.push(`/events/battle/${prioritizedLiveEvent.id}`);
+              return;
+            }
             router.push('/events');
           }}
         />

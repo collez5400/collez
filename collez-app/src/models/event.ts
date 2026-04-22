@@ -73,6 +73,32 @@ export interface PuzzleRushConfig {
   badge_name?: string;
 }
 
+export interface CollegeBattlePrizeConfig {
+  rank: number;
+  xp_bonus: number;
+  badge_name?: string;
+}
+
+export interface CollegeBattleConfig {
+  battle_type?: 'xp_race';
+  min_participants?: number;
+  prizes?: CollegeBattlePrizeConfig[];
+  rewards_distributed_at?: string;
+}
+
+export interface CollegeBattleStanding {
+  rank: number;
+  college_id: string;
+  college_name: string;
+  college_city: string | null;
+  college_state: string | null;
+  participant_count: number;
+  student_count: number;
+  total_xp_earned: number;
+  score: number;
+  eligible: boolean;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -84,7 +110,7 @@ export interface Event {
   xp_reward: number;
   badge_name: string | null;
   banner_image_url: string | null;
-  config: TriviaConfig | TreasureHuntConfig | PuzzleRushConfig | null;
+  config: TriviaConfig | TreasureHuntConfig | PuzzleRushConfig | CollegeBattleConfig | null;
   created_at: string;
 }
 

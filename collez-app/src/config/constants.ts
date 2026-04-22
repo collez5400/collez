@@ -7,6 +7,7 @@ export const XP_VALUES = {
   WEEKLY_STREAK: 25,
   EVENT_PARTICIPATION: 20,
   EVENT_BONUS: 50,
+  REFERRAL_BONUS: 20,
 };
 
 export const XP_LIMITS = {

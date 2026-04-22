@@ -3,7 +3,7 @@ import * as SQLite from 'expo-sqlite';
 let db: SQLite.SQLiteDatabase | null = null;
 
 // The current database schema version
-const CURRENT_VERSION = 3;
+const CURRENT_VERSION = 4;
 
 export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db;
@@ -104,6 +104,8 @@ export async function initSQLite() {
         filename TEXT NOT NULL,
         local_uri TEXT NOT NULL,
         folder_id TEXT,
+        cloud_path TEXT,
+        synced_at TEXT,
         size_bytes INTEGER NOT NULL,
         last_accessed_at TEXT,
         created_at TEXT NOT NULL
@@ -142,6 +144,16 @@ export async function initSQLite() {
         expires_at TEXT,
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
+      COMMIT;
+    `);
+    await database.execAsync(`PRAGMA user_version = ${CURRENT_VERSION}`);
+  }
+
+  if (currentVersion <= 3) {
+    await database.execAsync(`
+      BEGIN TRANSACTION;
+      ALTER TABLE pdf_files ADD COLUMN cloud_path TEXT;
+      ALTER TABLE pdf_files ADD COLUMN synced_at TEXT;
       COMMIT;
     `);
     await database.execAsync(`PRAGMA user_version = ${CURRENT_VERSION}`);

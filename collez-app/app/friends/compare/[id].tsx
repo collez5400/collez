@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -11,6 +11,13 @@ import { useAuthStore } from '../../../src/store/authStore';
 import { useFriendStore } from '../../../src/store/friendStore';
 import { supabase } from '../../../src/config/supabase';
 import { getRankMeta, getRankTier } from '../../../src/utils/rankCalculator';
+import {
+  acceptFriendChallenge,
+  createFriendChallenge,
+  fetchLatestFriendChallenge,
+  finalizeFriendChallenge,
+  FriendChallenge,
+} from '../../../src/services/friendChallengeService';
 
 type CompareProfile = {
   id: string;
@@ -39,6 +46,8 @@ export default function FriendCompareScreen() {
 
   const [friendProfile, setFriendProfile] = useState<CompareProfile | null>(null);
   const [badgeCounts, setBadgeCounts] = useState<ProfileBadgeCount>({});
+  const [challenge, setChallenge] = useState<FriendChallenge | null>(null);
+  const [challengeBusy, setChallengeBusy] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,7 +67,7 @@ export default function FriendCompareScreen() {
       setIsLoading(true);
       setError(null);
       try {
-        const [{ data: friend, error: friendError }, { data: myBadges, error: myBadgeError }, { data: friendBadges, error: friendBadgeError }] =
+        const [{ data: friend, error: friendError }, { data: myBadges, error: myBadgeError }, { data: friendBadges, error: friendBadgeError }, challengeRow] =
           await Promise.all([
             supabase
               .from('users')
@@ -67,6 +76,7 @@ export default function FriendCompareScreen() {
               .single(),
             supabase.from('badges').select('id').eq('user_id', me.id),
             supabase.from('badges').select('id').eq('user_id', friendId),
+            fetchLatestFriendChallenge(me.id, friendId),
           ]);
 
         if (friendError || !friend) {
@@ -81,6 +91,7 @@ export default function FriendCompareScreen() {
           [me.id]: (myBadges ?? []).length,
           [friendId]: (friendBadges ?? []).length,
         });
+        setChallenge(challengeRow);
       } catch (err) {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : 'Failed to compare stats.');
@@ -137,6 +148,74 @@ export default function FriendCompareScreen() {
   const badgeMine = badgeCounts[me.id] ?? 0;
   const badgeFriend = badgeCounts[friendProfile.id] ?? 0;
   const xpDiff = (me.xp ?? 0) - (friendProfile.xp ?? 0);
+  const myChallengeProgress = challenge
+    ? Math.max((me.xp ?? 0) - (challenge.creator_id === me.id ? challenge.creator_start_xp : challenge.opponent_start_xp), 0)
+    : 0;
+  const friendChallengeProgress = challenge
+    ? Math.max(
+        (friendProfile.xp ?? 0) -
+          (challenge.creator_id === friendProfile.id ? challenge.creator_start_xp : challenge.opponent_start_xp),
+        0
+      )
+    : 0;
+
+  const createChallenge = async () => {
+    if (!me?.id) return;
+    setChallengeBusy(true);
+    try {
+      const created = await createFriendChallenge({
+        creatorId: me.id,
+        opponentId: friendProfile.id,
+        targetXp: 80,
+        durationDays: 7,
+        creatorStartXp: me.xp ?? 0,
+        opponentStartXp: friendProfile.xp ?? 0,
+        rewardXp: 20,
+      });
+      setChallenge(created);
+      Alert.alert('Challenge sent', `Challenge invite sent to @${friendProfile.username}.`);
+    } catch (err) {
+      Alert.alert('Could not create challenge', err instanceof Error ? err.message : 'Try again.');
+    } finally {
+      setChallengeBusy(false);
+    }
+  };
+
+  const acceptChallenge = async () => {
+    if (!challenge) return;
+    setChallengeBusy(true);
+    try {
+      await acceptFriendChallenge(challenge.id);
+      const refreshed = await fetchLatestFriendChallenge(me.id, friendProfile.id);
+      setChallenge(refreshed);
+    } catch (err) {
+      Alert.alert('Could not accept challenge', err instanceof Error ? err.message : 'Try again.');
+    } finally {
+      setChallengeBusy(false);
+    }
+  };
+
+  const finalizeChallenge = async () => {
+    if (!challenge) return;
+    setChallengeBusy(true);
+    try {
+      const result = await finalizeFriendChallenge(challenge.id);
+      const refreshed = await fetchLatestFriendChallenge(me.id, friendProfile.id);
+      setChallenge(refreshed);
+      if (result?.status === 'completed') {
+        if (result.winner_id) {
+          const winnerLabel = result.winner_id === me.id ? 'You won! +20 XP' : `@${friendProfile.username} won this round.`;
+          Alert.alert('Challenge completed', winnerLabel);
+        } else {
+          Alert.alert('Challenge completed', 'It ended in a tie.');
+        }
+      }
+    } catch (err) {
+      Alert.alert('Could not finalize challenge', err instanceof Error ? err.message : 'Try again.');
+    } finally {
+      setChallengeBusy(false);
+    }
+  };
 
   return (
     <View style={styles.screen}>
@@ -202,6 +281,42 @@ export default function FriendCompareScreen() {
                 ? `You are ahead by ${xpDiff} XP.`
                 : `@${friendProfile.username} is ahead by ${Math.abs(xpDiff)} XP.`}
           </Text>
+        </GlassCard>
+
+        <GlassCard style={styles.challengeCard}>
+          <Text style={styles.summaryTitle}>Friend Challenge</Text>
+          {!challenge ? (
+            <>
+              <Text style={styles.summaryText}>Create a 7-day XP race to 80 XP. Winner earns +20 XP.</Text>
+              <Pressable style={styles.challengeBtn} onPress={() => void createChallenge()} disabled={challengeBusy}>
+                <Text style={styles.challengeBtnText}>{challengeBusy ? 'Creating...' : 'Create Challenge'}</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Text style={styles.summaryText}>
+                Status: {challenge.status.toUpperCase()} | Target: {challenge.target_xp} XP
+              </Text>
+              <Text style={styles.summaryText}>
+                Progress: You {myChallengeProgress}/{challenge.target_xp} vs {friendChallengeProgress}/{challenge.target_xp}
+              </Text>
+              {challenge.status === 'pending' && challenge.opponent_id === me.id ? (
+                <Pressable style={styles.challengeBtn} onPress={() => void acceptChallenge()} disabled={challengeBusy}>
+                  <Text style={styles.challengeBtnText}>{challengeBusy ? 'Accepting...' : 'Accept Challenge'}</Text>
+                </Pressable>
+              ) : null}
+              {challenge.status === 'active' ? (
+                <Pressable style={styles.challengeBtn} onPress={() => void finalizeChallenge()} disabled={challengeBusy}>
+                  <Text style={styles.challengeBtnText}>{challengeBusy ? 'Checking...' : 'Finalize / Check Winner'}</Text>
+                </Pressable>
+              ) : null}
+              {challenge.status === 'completed' ? (
+                <Text style={styles.summaryText}>
+                  Winner: {challenge.winner_id ? (challenge.winner_id === me.id ? 'You' : `@${friendProfile.username}`) : 'Tie'}
+                </Text>
+              ) : null}
+            </>
+          )}
         </GlassCard>
       </ScrollView>
     </View>
@@ -371,5 +486,24 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,
+  },
+  challengeCard: {
+    padding: Spacing.md,
+    gap: Spacing.xs,
+  },
+  challengeBtn: {
+    marginTop: Spacing.xs,
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: `${Colors.primary}66`,
+    backgroundColor: `${Colors.primary}20`,
+  },
+  challengeBtnText: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.sm,
+    fontWeight: '700',
   },
 });

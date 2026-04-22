@@ -1,5 +1,10 @@
 import { RankTier, getRankTier as resolveRankTier, xpToNextRank as getXpToNextRank } from '../utils/rankCalculator';
 
+export interface PremiumConfig {
+  active_theme?: string;
+  unlocked_themes?: string[];
+}
+
 export interface User {
   id: string;                      // UUID from Supabase Auth
   email: string;
@@ -24,6 +29,9 @@ export interface User {
   push_event_enabled?: boolean;
   streak_shields?: number;
   streak_shield_active?: boolean;
+  premium_config?: PremiumConfig | null;
+  invite_code?: string | null;
+  referred_by?: string | null;
   created_at: string;
   updated_at: string;
 }

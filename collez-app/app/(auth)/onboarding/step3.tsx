@@ -22,6 +22,7 @@ import { GlassCard } from '../../../src/components/shared/GlassCard';
 import { useAuthStore } from '../../../src/store/authStore';
 import { supabase } from '../../../src/config/supabase';
 import { XP_VALUES } from '../../../src/config/constants';
+import { applyReferralCode } from '../../../src/services/referralService';
 import {
   Colors, Typography, Spacing, BorderRadius,
 } from '../../../src/config/theme';
@@ -87,6 +88,7 @@ export default function OnboardingStep3() {
     avatarUri: string;
     collegeId?: string;
     collegeName: string;
+    referralCode?: string;
   }>();
 
   const { user, completeOnboarding } = useAuthStore();
@@ -167,6 +169,10 @@ export default function OnboardingStep3() {
         xp: XP_VALUES.DAILY_LOGIN,
         last_active_date: new Date().toISOString().split('T')[0],
       });
+
+      if (params.referralCode?.trim()) {
+        await applyReferralCode(user!.id, params.referralCode);
+      }
 
       router.replace('/(tabs)/home');
     } catch (err: any) {

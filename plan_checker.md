@@ -118,7 +118,7 @@
 | 3B | Puzzle Rush | `✅ COMPLETE` | 4/4 |
 | 3C | College Battle System | `✅ COMPLETE` | 4/4 |
 | 3D | Advanced Features | `✅ COMPLETE` | 5/5 |
-| 4A | Premium & Monetization | `⬜ NOT STARTED` | 0/6 |
+| 4A | Premium & Monetization | `✅ COMPLETE` | 6/6 |
 | 4B | Platform Expansion | `⬜ NOT STARTED` | 0/4 |
 
 ---
@@ -1296,35 +1296,35 @@
 ---
 
 ## PHASE 4A: Premium & Monetization 💰
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 5 days
 **Reference**: Section 16 Phase 4
 
 ### Steps
 
-- [ ] **4A.1** — Premium themes (React Native IAP)
+- [x] **4A.1** — Premium themes (React Native IAP)
   - `expo-in-app-purchases` or `react-native-iap`
   - Theme picker screen with preview
   - Unlocked themes stored in `users.premium_config` JSONB
 
-- [ ] **4A.2** — Animated badge cosmetics
+- [x] **4A.2** — Animated badge cosmetics
   - Lottie animations via `lottie-react-native`
   - Premium coordinator profile frames
 
-- [ ] **4A.3** — Vault Cloud Sync (Premium)
+- [x] **4A.3** — Vault Cloud Sync (Premium)
   - Upload PDFs to Supabase Storage (premium bucket)
   - Cross-device sync via download on login
 
-- [ ] **4A.4** — Referral system
+- [x] **4A.4** — Referral system
   - Generate unique invite code (stored in users table)
   - On signup with code → bonus XP for both
   - Referral tracking in separate table
 
-- [ ] **4A.5** — Android Home Screen Widget
+- [x] **4A.5** — Android Home Screen Widget
   - `expo-widgets` or `react-native-android-widget`
   - Shows streak count + next class
 
-- [ ] **4A.6** — Friend Challenge system
+- [x] **4A.6** — Friend Challenge system
   - Create XP challenge (duration, target)
   - Challenge invite → accept → track progress → winner reward
 
@@ -1394,23 +1394,29 @@
 | 30 | 2026-04-22 | 3C | Completed 3C.1 to 3C.4 and closed Phase 3C | Added college battle model + standings flow, created battle screen and event routing/home prioritization, added Edge Functions (`get-college-battle-standings`, `finalize-college-battle`) for normalized scoring and reward distribution, and extended admin events management for `college_battle` creation with auto-finalization on status set to ended. |
 | 31 | 2026-04-22 | 3D | Completed 3D.1 and started Phase 3D | Added friend comparison route `app/friends/compare/[id].tsx` with side-by-side XP/streak/rank/badges, wired compare CTA from Friends list and Other User Profile, and gated access to confirmed friendships only. |
 | 32 | 2026-04-22 | 3D | Completed 3D.2 to 3D.5 and closed Phase 3D | Added streak marathon route + home/events wiring, city/state coordinator promotions in admin with coordinator role visibility on profile/leaderboards, anti-cheat velocity flag/block + review queue + weekly suspicious-pattern cron, and growth tools page with featured users, consent-only CSV export, and monthly leaderboard support. |
+| 33 | 2026-04-22 | 4A | Completed 4A.1 and started Phase 4A | Added premium themes foundation: `users.premium_config` JSONB migration, `expo-in-app-purchases` integration, premium theme catalog/config, `premiumStore` with unlock/apply persistence, and new theme picker route `app/premium/themes.tsx` linked from Settings. |
+| 34 | 2026-04-22 | 4A | Completed 4A.2 | Added `lottie-react-native` with coordinator frame animation asset, upgraded `BadgeIcon` to support animated coordinator cosmetics, and integrated animated profile frames on own + other profile screens for coordinator users. |
+| 35 | 2026-04-22 | 4A | Completed 4A.3 | Added premium vault cloud sync foundation: migration for `premium_vault_files`, local SQLite sync columns, cloud sync service (`premium-vault` storage uploads/downloads), vault store sync methods, premium sync controls on PDF vault screen, and auto restore sync on authenticated session restore/login. |
+| 36 | 2026-04-22 | 4A | Completed 4A.4 | Added referral system with invite code generation, referral SQL migration (`users.invite_code`, `users.referred_by`, `referrals` table, `apply_referral_code` function), onboarding referral code capture/passthrough/apply flow, and referral code display on profile for sharing. |
+| 37 | 2026-04-22 | 4A | Completed 4A.5 | Added Android widget implementation using `react-native-android-widget`: widget task handler registration in `index.ts`, `CollezOverview` widget component, AsyncStorage-backed widget data, home screen widget update requests, and Expo config plugin setup in `app.json` for widget metadata/preview. |
+| 38 | 2026-04-22 | 4A | Completed 4A.6 and closed Phase 4A | Added friend challenge backend migration (`friend_challenges`, accept/finalize RPCs), challenge service layer, and compare-screen challenge UX for create/accept/progress/finalize with winner reward flow. |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 4A — Premium & Monetization`
-**Next Step**: `4A.1 — Premium themes (React Native IAP)`
+**Active Phase**: `🔵 Phase 4B — Platform Expansion`
+**Next Step**: `4B.1 — iOS port + testing`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 151
+- **Completed**: 157
 - **In Progress**: 0
-- **Remaining**: 47
-- **Overall Progress**: 76.3%
+- **Remaining**: 41
+- **Overall Progress**: 79.3%
 
 ---
 

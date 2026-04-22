@@ -74,6 +74,7 @@ export default function OnboardingStep2() {
     fullName: string;
     username: string;
     avatarUri: string;
+    referralCode?: string;
   }>();
 
   const [colleges, setColleges] = useState<College[]>([]);

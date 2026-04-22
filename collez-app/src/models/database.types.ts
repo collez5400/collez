@@ -51,6 +51,25 @@ export interface CoordinatorApplicationRow {
   created_at: string;
 }
 
+export interface PremiumVaultFileRow {
+  id: string;
+  user_id: string;
+  filename: string;
+  storage_path: string;
+  size_bytes: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReferralRow {
+  id: string;
+  inviter_id: string;
+  invitee_id: string;
+  invite_code: string;
+  bonus_xp: number;
+  created_at: string;
+}
+
 export type FriendRequestRow = FriendRequest;
 export type FriendshipRow = Friendship;
 
@@ -76,6 +95,8 @@ export type Database = {
       events: TableDef<Event>;
       event_participations: TableDef<EventParticipation>;
       coordinator_applications: TableDef<CoordinatorApplicationRow>;
+      premium_vault_files: TableDef<PremiumVaultFileRow>;
+      referrals: TableDef<ReferralRow>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import LottieView from 'lottie-react-native';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { BadgeIcon } from '../../src/components/shared/BadgeIcon';
 import { GlassCard } from '../../src/components/shared/GlassCard';
@@ -83,6 +84,14 @@ export default function OtherUserProfileScreen() {
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <GlassCard style={styles.header}>
+          {profile?.is_coordinator ? (
+            <LottieView
+              source={require('../../assets/animations/coordinator-frame.json')}
+              autoPlay
+              loop
+              style={styles.coordinatorFrame}
+            />
+          ) : null}
           {profile?.avatar_url ? (
             <Image source={{ uri: profile.avatar_url }} style={styles.avatar} contentFit="cover" />
           ) : (
@@ -171,7 +180,7 @@ export default function OtherUserProfileScreen() {
 
         {profile?.is_coordinator ? (
           <GlassCard style={styles.coordinatorCard}>
-            <BadgeIcon type="coordinator" iconName="verified" color={Colors.secondary} />
+            <BadgeIcon type="coordinator" iconName="verified" color={Colors.secondary} animated />
             <Text style={styles.coordinatorText}>{coordinatorRoleLabel}</Text>
           </GlassCard>
         ) : null}
@@ -192,16 +201,25 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     gap: 6,
+    position: 'relative',
   },
   avatar: {
     width: 92,
     height: 92,
     borderRadius: 46,
+    zIndex: 1,
   },
   avatarFallback: {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.surfaceHigh,
+  },
+  coordinatorFrame: {
+    position: 'absolute',
+    width: 118,
+    height: 118,
+    top: 10,
+    zIndex: 0,
   },
   name: {
     color: Colors.onSurface,

@@ -20,6 +20,7 @@ import { GradientButton } from '../../../src/components/shared/GradientButton';
 import { PdfFile, PdfFolderType, PdfSortOption } from '../../../src/models/pdf';
 import { useVaultStore } from '../../../src/store/vaultStore';
 import { ErrorState } from '../../../src/components/shared/ErrorState';
+import { useAuthStore } from '../../../src/store/authStore';
 
 const SORT_OPTIONS: PdfSortOption[] = ['date', 'name', 'size'];
 const FOLDER_TYPES: PdfFolderType[] = ['semester', 'subject', 'pyq', 'books', 'notes', 'important', 'custom'];
@@ -72,7 +73,11 @@ export default function PDFsScreen() {
     deleteFolder,
     setCurrentFolderId,
     setSearchQuery,
+    syncFromCloud,
+    syncToCloud,
   } = useVaultStore();
+  const premiumConfig = useAuthStore((s) => s.user?.premium_config);
+  const isPremiumUser = (premiumConfig?.unlocked_themes?.length ?? 0) > 1;
 
   const [sortBy, setSortBy] = useState<PdfSortOption>('date');
   const [folderModalVisible, setFolderModalVisible] = useState(false);
@@ -280,6 +285,19 @@ export default function PDFsScreen() {
         <Text style={styles.uploadText}>Upload PDF</Text>
         <MaterialIcons name="arrow-forward" size={18} color={Colors.background} />
       </TouchableOpacity>
+
+      {isPremiumUser ? (
+        <View style={styles.syncRow}>
+          <TouchableOpacity style={styles.syncBtn} onPress={() => void syncToCloud()}>
+            <MaterialIcons name="cloud-upload" size={16} color={Colors.primary} />
+            <Text style={styles.syncBtnText}>Sync to Cloud</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.syncBtn} onPress={() => void syncFromCloud()}>
+            <MaterialIcons name="cloud-download" size={16} color={Colors.primary} />
+            <Text style={styles.syncBtnText}>Restore from Cloud</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Folders</Text>
@@ -594,6 +612,30 @@ const styles = StyleSheet.create({
     color: Colors.background,
     fontFamily: Typography.fontFamily.heading,
     fontSize: Typography.size.md,
+    fontWeight: '700',
+  },
+  syncRow: {
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  syncBtn: {
+    flex: 1,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: `${Colors.primary}55`,
+    backgroundColor: `${Colors.primary}18`,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  syncBtnText: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.sm,
     fontWeight: '700',
   },
   sectionHeader: {

@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -31,6 +32,8 @@ import { useTimetableStore } from '../../src/store/timetableStore';
 import { useXpStore } from '../../src/store/xpStore';
 import { useEventStore } from '../../src/store/eventStore';
 import { shallow } from 'zustand/shallow';
+import { saveWidgetData } from '../../src/widgets/widgetData';
+import { requestWidgetUpdate } from 'react-native-android-widget';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -108,6 +111,33 @@ export default function HomeScreen() {
     void loadTasks();
     void fetchEvents();
   }, [fetchCollegeBoard, fetchEntries, fetchEvents, fetchStreakData, fetchXpData, loadTasks]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const dayEntries = entries[selectedDay] ?? [];
+    const nextEntry = dayEntries[0];
+    const nextClass = nextEntry
+      ? `${nextEntry.subject} ${nextEntry.start_time}-${nextEntry.end_time}`
+      : 'No class scheduled';
+
+    void (async () => {
+      try {
+        await saveWidgetData({ streakCount, nextClass });
+        await requestWidgetUpdate({
+          widgetName: 'CollezOverview',
+          renderWidget: async () => {
+            const { CollezOverviewWidget } = await import('../../src/widgets/CollezOverviewWidget');
+            const data = await import('../../src/widgets/widgetData').then((module) =>
+              module.getWidgetData()
+            );
+            return <CollezOverviewWidget {...data} />;
+          },
+        });
+      } catch {
+        // Widget updates are best-effort in non-dev-client environments.
+      }
+    })();
+  }, [entries, selectedDay, streakCount]);
 
   useEffect(() => {
     const loadQuote = async () => {

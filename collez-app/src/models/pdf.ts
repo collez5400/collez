@@ -23,6 +23,8 @@ export interface PdfFile {
   filename: string;
   localUri: string;
   folderId?: string;
+  cloudPath?: string;
+  syncedAt?: string;
   sizeBytes: number;
   lastAccessedAt?: string;
   createdAt: string;

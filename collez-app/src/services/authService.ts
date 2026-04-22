@@ -26,6 +26,7 @@ function deriveUsername(authUser: SupabaseAuthUser): string {
 }
 
 function buildNewUserProfile(authUser: SupabaseAuthUser): Partial<User> {
+  const inviteCode = `CLZ${authUser.id.replace(/-/g, '').slice(0, 6).toUpperCase()}`;
   return {
     id: authUser.id,
     email: authUser.email ?? '',
@@ -43,6 +44,7 @@ function buildNewUserProfile(authUser: SupabaseAuthUser): Partial<User> {
     push_enabled: true,
     push_streak_enabled: true,
     push_event_enabled: true,
+    invite_code: inviteCode,
   };
 }
 

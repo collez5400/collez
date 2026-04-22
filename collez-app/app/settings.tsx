@@ -55,6 +55,15 @@ export default function SettingsScreen() {
           <Text style={styles.rowTitle}>Change College</Text>
           <Text style={styles.rowText}>College changes require admin approval.</Text>
         </GlassCard>
+        <Pressable
+          style={styles.linkCard}
+          onPress={() => router.push('/premium/themes')}
+          accessibilityRole="button"
+          accessibilityLabel="Premium Themes"
+        >
+          <Text style={styles.rowTitle}>Premium Themes</Text>
+          <Text style={styles.rowText}>Unlock and apply premium app themes.</Text>
+        </Pressable>
 
         <GlassCard style={styles.card}>
           <View style={styles.switchRow}>

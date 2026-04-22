@@ -38,11 +38,30 @@
       "expo-secure-store",
       "expo-font",
       [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "CollezOverview",
+              "label": "COLLEZ Overview",
+              "minWidth": "320dp",
+              "minHeight": "120dp",
+              "targetCellWidth": 5,
+              "targetCellHeight": 2,
+              "description": "Shows your streak and next class",
+              "previewImage": "./assets/adaptive-icon.png",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ],
+      [
         "@react-native-google-signin/google-signin",
         {
           "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_REVERSED_CLIENT_ID"
         }
-      ]
+      ],
+      "expo-widgets"
     ],
     "scheme": "collez"
   }

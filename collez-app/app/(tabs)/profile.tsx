@@ -14,6 +14,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
+import LottieView from 'lottie-react-native';
 import { BadgeIcon } from '../../src/components/shared/BadgeIcon';
 import { ErrorState } from '../../src/components/shared/ErrorState';
 import { GradientButton } from '../../src/components/shared/GradientButton';
@@ -141,6 +142,14 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <GlassCard style={styles.headerCard}>
           <Pressable style={styles.avatarWrap} onPress={handlePickAvatar}>
+            {profile?.is_coordinator ? (
+              <LottieView
+                source={require('../../assets/animations/coordinator-frame.json')}
+                autoPlay
+                loop
+                style={styles.coordinatorFrame}
+              />
+            ) : null}
             {profile?.avatar_url ? (
               <Image source={{ uri: profile.avatar_url }} style={styles.avatar} contentFit="cover" />
             ) : (
@@ -176,7 +185,7 @@ export default function ProfileScreen() {
 
         {profile?.is_coordinator ? (
           <GlassCard style={styles.coordinatorCard}>
-            <BadgeIcon type="coordinator" iconName="verified" color={Colors.secondary} />
+            <BadgeIcon type="coordinator" iconName="verified" color={Colors.secondary} animated />
             <View>
               <Text style={styles.coordinatorTitle}>{coordinatorRoleLabel}</Text>
               <Text style={styles.coordinatorText}>You are representing your campus.</Text>
@@ -244,6 +253,14 @@ export default function ProfileScreen() {
           />
         </GlassCard>
 
+        <GlassCard style={styles.referralCard}>
+          <Text style={styles.sectionTitle}>Referral Code</Text>
+          <Text style={styles.referralCode}>{profile?.invite_code ?? 'Generating...'}</Text>
+          <Text style={styles.referralHint}>
+            Share this code with friends. When they join, both get bonus XP.
+          </Text>
+        </GlassCard>
+
         {error ? (
           <Pressable onPress={clearError}>
             <ErrorState
@@ -305,6 +322,8 @@ const styles = StyleSheet.create({
   },
   avatarWrap: {
     position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatar: {
     width: 96,
@@ -326,6 +345,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  coordinatorFrame: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    zIndex: 0,
   },
   name: {
     color: Colors.onSurface,
@@ -419,6 +444,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   emptyText: {
+    color: Colors.onSurfaceVariant,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.sm,
+  },
+  referralCard: {
+    gap: 6,
+  },
+  referralCode: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.lg,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  referralHint: {
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,

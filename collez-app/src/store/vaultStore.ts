@@ -7,12 +7,20 @@ import * as LegacyFileSystem from 'expo-file-system/legacy';
 
 import { getDb } from '../services/sqliteService';
 import { CreatePdfFolderInput, PdfFile, PdfFolder, PdfFolderType } from '../models/pdf';
+import { useAuthStore } from './authStore';
+import {
+  downloadVaultFileFromCloud,
+  listPremiumVaultCloudFiles,
+  uploadVaultFileToCloud,
+} from '../services/premiumVaultSyncService';
 
 type PdfFileRow = {
   id: string;
   filename: string;
   local_uri: string;
   folder_id: string | null;
+  cloud_path: string | null;
+  synced_at: string | null;
   size_bytes: number;
   last_accessed_at: string | null;
   created_at: string;
@@ -66,7 +74,14 @@ interface VaultState {
   deleteFolder: (folderId: string) => Promise<void>;
   setCurrentFolderId: (folderId?: string) => void;
   setSearchQuery: (query: string) => void;
+  syncFromCloud: () => Promise<void>;
+  syncToCloud: () => Promise<void>;
 }
+
+const isPremiumUser = () => {
+  const config = useAuthStore.getState().user?.premium_config;
+  return Array.isArray(config?.unlocked_themes) && config.unlocked_themes.length > 1;
+};
 
 export const useVaultStore = create<VaultState>((set, get) => ({
   files: [],
@@ -105,6 +120,8 @@ export const useVaultStore = create<VaultState>((set, get) => ({
         filename: row.filename,
         localUri: row.local_uri,
         folderId: row.folder_id ?? undefined,
+        cloudPath: row.cloud_path ?? undefined,
+        syncedAt: row.synced_at ?? undefined,
         sizeBytes: row.size_bytes,
         lastAccessedAt: row.last_accessed_at ?? undefined,
         createdAt: row.created_at,
@@ -198,10 +215,29 @@ export const useVaultStore = create<VaultState>((set, get) => ({
 
       await db.runAsync(
         `INSERT INTO pdf_files (
-          id, filename, local_uri, folder_id, size_bytes, last_accessed_at, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [fileId, asset.name, targetUri, folderId ?? null, asset.size ?? 0, now, now]
+          id, filename, local_uri, folder_id, cloud_path, synced_at, size_bytes, last_accessed_at, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [fileId, asset.name, targetUri, folderId ?? null, null, null, asset.size ?? 0, now, now]
       );
+
+      if (isPremiumUser()) {
+        const userId = useAuthStore.getState().user?.id;
+        if (userId) {
+          const cloudFile = await uploadVaultFileToCloud({
+            userId,
+            localUri: targetUri,
+            filename: asset.name,
+            sizeBytes: asset.size ?? 0,
+          });
+          if (cloudFile) {
+            await db.runAsync('UPDATE pdf_files SET cloud_path = ?, synced_at = ? WHERE id = ?', [
+              cloudFile.storage_path,
+              cloudFile.updated_at,
+              fileId,
+            ]);
+          }
+        }
+      }
 
       await get().loadFiles();
       await get().refreshStorageStats();
@@ -359,4 +395,86 @@ export const useVaultStore = create<VaultState>((set, get) => ({
 
   setCurrentFolderId: (folderId) => set({ currentFolderId: folderId }),
   setSearchQuery: (query) => set({ searchQuery: query }),
+
+  syncFromCloud: async () => {
+    const user = useAuthStore.getState().user;
+    if (!user?.id || !isPremiumUser()) return;
+
+    try {
+      const db = await getDb();
+      await LegacyFileSystem.makeDirectoryAsync(VAULT_DIR, { intermediates: true });
+
+      const cloudFiles = await listPremiumVaultCloudFiles(user.id);
+      const localRows = await db.getAllAsync<{ id: string; cloud_path: string | null }>(
+        'SELECT id, cloud_path FROM pdf_files'
+      );
+      const localCloudPathSet = new Set(
+        localRows.map((row) => row.cloud_path).filter((value): value is string => Boolean(value))
+      );
+
+      for (const cloudFile of cloudFiles) {
+        if (localCloudPathSet.has(cloudFile.storage_path)) continue;
+
+        const localUri = `${VAULT_DIR}/${uuidv4()}.pdf`;
+        await downloadVaultFileFromCloud({
+          storagePath: cloudFile.storage_path,
+          destinationUri: localUri,
+        });
+
+        await db.runAsync(
+          `INSERT INTO pdf_files (
+            id, filename, local_uri, folder_id, cloud_path, synced_at, size_bytes, last_accessed_at, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            uuidv4(),
+            cloudFile.filename,
+            localUri,
+            null,
+            cloudFile.storage_path,
+            cloudFile.updated_at,
+            cloudFile.size_bytes ?? 0,
+            cloudFile.updated_at,
+            cloudFile.created_at,
+          ]
+        );
+      }
+
+      await get().loadFiles();
+      await get().refreshStorageStats();
+    } catch (error) {
+      console.error('Failed cloud -> vault sync:', error);
+    }
+  },
+
+  syncToCloud: async () => {
+    const user = useAuthStore.getState().user;
+    if (!user?.id || !isPremiumUser()) return;
+
+    try {
+      const db = await getDb();
+      const unsyncedRows = await db.getAllAsync<PdfFileRow>(
+        'SELECT * FROM pdf_files WHERE cloud_path IS NULL'
+      );
+
+      for (const row of unsyncedRows) {
+        const cloudFile = await uploadVaultFileToCloud({
+          userId: user.id,
+          localUri: row.local_uri,
+          filename: row.filename,
+          sizeBytes: row.size_bytes,
+        });
+        if (!cloudFile) continue;
+
+        await db.runAsync('UPDATE pdf_files SET cloud_path = ?, synced_at = ? WHERE id = ?', [
+          cloudFile.storage_path,
+          cloudFile.updated_at,
+          row.id,
+        ]);
+      }
+
+      await get().loadFiles();
+    } catch (error) {
+      console.error('Failed vault -> cloud sync:', error);
+    }
+  },
 }));

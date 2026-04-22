@@ -42,6 +42,7 @@ export default function OnboardingStep1() {
   const [fullName, setFullName] = useState(user?.full_name ?? '');
   const [username, setUsername] = useState(user?.username ?? '');
   const [avatarUri, setAvatarUri] = useState<string | null>(user?.avatar_url ?? null);
+  const [referralCode, setReferralCode] = useState('');
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
@@ -109,6 +110,7 @@ export default function OnboardingStep1() {
           fullName: fullName.trim(),
           username: username.toLowerCase().trim(),
           avatarUri: avatarUri ?? '',
+          referralCode: referralCode.trim().toUpperCase(),
         },
       });
     } finally {
@@ -190,6 +192,23 @@ export default function OnboardingStep1() {
           {usernameError ? (
             <Text style={styles.errorText}>{usernameError}</Text>
           ) : null}
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Referral Code (Optional)</Text>
+          <View style={styles.inputRow}>
+            <Text style={styles.inputIcon}>🎁</Text>
+            <TextInput
+              style={styles.input}
+              value={referralCode}
+              onChangeText={(value) => setReferralCode(value.toUpperCase())}
+              placeholder="e.g. CLZ12AB"
+              placeholderTextColor={Colors.onSurfaceVariant}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              accessibilityLabel="Referral code input"
+            />
+          </View>
         </View>
 
         <View style={styles.btnWrap}>

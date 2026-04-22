@@ -12,6 +12,7 @@ import {
   updateUserProfile,
 } from '../services/authService';
 import { registerForPushNotifications } from '../services/notificationService';
+import { useVaultStore } from './vaultStore';
 
 export type AuthStatus =
   | 'idle'
@@ -61,6 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Request notification permissions after first login (native only).
       // Safe to call repeatedly; OS prompts at most once.
       void registerForPushNotifications(user.id);
+      void useVaultStore.getState().syncFromCloud();
     } catch (err: any) {
       set({ status: 'unauthenticated', error: err.message ?? 'Sign in failed' });
     }
@@ -99,6 +101,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       void registerForPushNotifications(user.id);
+      void useVaultStore.getState().syncFromCloud();
     } catch {
       set({ status: 'unauthenticated' });
     }

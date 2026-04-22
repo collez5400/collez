@@ -4,6 +4,7 @@ import type {
   Event,
   EventParticipation,
   HuntClue,
+  PuzzleRushConfig,
   TreasureHuntConfig,
   TriviaConfig,
 } from '../models/event';
@@ -15,6 +16,7 @@ interface SubmitTriviaPayload {
   score: number;
   totalQuestions: number;
 }
+
 
 interface SubmitTriviaAnswerPayload {
   eventId: string;
@@ -55,6 +57,13 @@ interface EventStoreState {
   submitTriviaAnswer: (payload: SubmitTriviaAnswerPayload) => Promise<void>;
   submitTriviaResult: (payload: SubmitTriviaPayload) => Promise<{  xpAwarded: number; passed: boolean } | null>;
   submitHuntResponse: (payload: SubmitHuntResponsePayload) => Promise<HuntSubmitResult | null>;
+  submitPuzzleRushCompletion: (payload: { eventId: string; puzzleId: string }) => Promise<{
+    accepted: boolean;
+    completedToday: number;
+    dailyLimit: number;
+    eventCompleted: boolean;
+    message: string;
+  } | null>;
   clearError: () => void;
 }
 
@@ -72,6 +81,21 @@ function getTreasureHuntConfig(event: Event): TreasureHuntConfig | null {
   if (!event.config || typeof event.config !== 'object') return null;
   if (!Array.isArray((event.config as TreasureHuntConfig).clues)) return null;
   return event.config as TreasureHuntConfig;
+}
+
+function getPuzzleRushConfig(event: Event): PuzzleRushConfig | null {
+  if (!event.config || typeof event.config !== 'object') return null;
+  if (!Array.isArray((event.config as PuzzleRushConfig).puzzles)) return null;
+  return event.config as PuzzleRushConfig;
+}
+
+function getIstDateString(date = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
 }
 
 function normalizeText(value: string, caseSensitive: boolean) {
@@ -400,6 +424,110 @@ export const useEventStore = create<EventStoreState>((set, get) => ({
           ? 'Treasure hunt completed!'
           : 'Clue solved. Next clue unlocked.'
         : 'Incorrect answer. Try again.',
+    };
+  },
+
+  submitPuzzleRushCompletion: async ({ eventId, puzzleId }) => {
+    const userId = getAuthUserId();
+    if (!userId) return null;
+
+    const event = [...get().liveEvents, ...get().upcomingEvents, ...get().pastEvents].find((item) => item.id === eventId);
+    if (!event || event.event_type !== 'puzzle_rush') {
+      set({ error: 'Puzzle rush event not found' });
+      return null;
+    }
+
+    const config = getPuzzleRushConfig(event);
+    if (!config || config.puzzles.length === 0) {
+      set({ error: 'Puzzle rush is not configured' });
+      return null;
+    }
+
+    const participation = get().participationsByEventId[eventId] ?? (await get().getParticipation(eventId));
+    if (!participation) {
+      set({ error: 'Join this event before submitting puzzle results' });
+      return null;
+    }
+
+    const todayIst = getIstDateString();
+    const dailyLimit = Math.max(1, config.daily_limit ?? 3);
+    const baseProgress = (participation.progress ?? {}) as Record<string, unknown>;
+    const completedByDate =
+      (baseProgress.puzzleRushCompletedByDate as Record<string, string[] | undefined> | undefined) ?? {};
+    const todayCompleted = Array.isArray(completedByDate[todayIst]) ? completedByDate[todayIst]! : [];
+
+    if (todayCompleted.includes(puzzleId)) {
+      return {
+        accepted: false,
+        completedToday: todayCompleted.length,
+        dailyLimit,
+        eventCompleted: Boolean(participation.completed),
+        message: 'This puzzle is already completed today.',
+      };
+    }
+
+    if (todayCompleted.length >= dailyLimit) {
+      return {
+        accepted: false,
+        completedToday: todayCompleted.length,
+        dailyLimit,
+        eventCompleted: Boolean(participation.completed),
+        message: 'Daily puzzle limit reached. Come back tomorrow.',
+      };
+    }
+
+    const puzzleAttempts = Array.isArray(baseProgress.puzzleRushAttempts)
+      ? (baseProgress.puzzleRushAttempts as Array<{ puzzleId: string; submittedAt: string; solved: boolean }>)
+      : [];
+    const solvedPuzzleIds = Array.isArray(baseProgress.puzzleRushSolvedPuzzleIds)
+      ? (baseProgress.puzzleRushSolvedPuzzleIds as string[])
+      : [];
+
+    const nextTodayCompleted = [...todayCompleted, puzzleId];
+    const nextSolvedPuzzleIds = Array.from(new Set([...solvedPuzzleIds, puzzleId]));
+    const eventCompleted = nextSolvedPuzzleIds.length >= config.puzzles.length;
+    const nowIso = new Date().toISOString();
+    const nextProgress = {
+      ...baseProgress,
+      puzzleRushCompletedByDate: {
+        ...completedByDate,
+        [todayIst]: nextTodayCompleted,
+      },
+      puzzleRushAttempts: [
+        ...puzzleAttempts,
+        { puzzleId, submittedAt: nowIso, solved: true },
+      ],
+      puzzleRushSolvedPuzzleIds: nextSolvedPuzzleIds,
+    };
+
+    const { data, error } = await (supabase as any)
+      .from('event_participations')
+      .update({
+        progress: nextProgress,
+        completed: eventCompleted,
+        completed_at: eventCompleted ? nowIso : null,
+      } as any)
+      .eq('event_id', eventId)
+      .eq('user_id', userId)
+      .select('id, event_id, user_id, score, xp_earned, completed, progress, started_at, completed_at')
+      .single();
+
+    if (error || !data) {
+      set({ error: error?.message ?? 'Failed to save puzzle rush progress' });
+      return null;
+    }
+
+    const updatedParticipation = data as EventParticipation;
+    set((state) => ({
+      participationsByEventId: { ...state.participationsByEventId, [eventId]: updatedParticipation },
+    }));
+
+    return {
+      accepted: true,
+      completedToday: nextTodayCompleted.length,
+      dailyLimit,
+      eventCompleted,
+      message: eventCompleted ? 'Puzzle rush completed!' : 'Puzzle completed successfully.',
     };
   },
 

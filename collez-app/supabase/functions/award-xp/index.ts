@@ -11,7 +11,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_ANON_KEY) {
 
 const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const DAILY_CAP = 100;
-const XP_SOURCES = new Set(['daily_login', 'trivia', 'treasure_hunt', 'event', 'weekly_streak', 'bonus']);
+const XP_SOURCES = new Set(['daily_login', 'trivia', 'treasure_hunt', 'puzzle_rush', 'event', 'weekly_streak', 'bonus']);
 const RANK_THRESHOLDS = [
   { minXp: 150000, tier: 'national_icon' },
   { minXp: 60000, tier: 'state_hero' },

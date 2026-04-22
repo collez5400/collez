@@ -3,6 +3,7 @@ export const XP_VALUES = {
   TRIVIA_CORRECT: 5,
   TASK_COMPLETE: 0, // tasks don't give XP, just maintain streak
   TREASURE_HUNT: 40,
+  PUZZLE_RUSH: 10,
   WEEKLY_STREAK: 25,
   EVENT_PARTICIPATION: 20,
   EVENT_BONUS: 50,

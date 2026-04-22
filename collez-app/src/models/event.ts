@@ -42,6 +42,37 @@ export interface TreasureHuntConfig {
   badge_name?: string;
 }
 
+export type PuzzleRushDifficulty = 'easy' | 'medium' | 'hard';
+export type PuzzleRushPuzzleType = 'sudoku' | 'word_scramble';
+
+export interface PuzzleRushPuzzleBase {
+  id: string;
+  type: PuzzleRushPuzzleType;
+  difficulty?: PuzzleRushDifficulty;
+  time_limit_seconds?: number;
+}
+
+export interface PuzzleRushSudokuPuzzle extends PuzzleRushPuzzleBase {
+  type: 'sudoku';
+  puzzle: string;
+  solution: string;
+}
+
+export interface PuzzleRushWordPuzzle extends PuzzleRushPuzzleBase {
+  type: 'word_scramble';
+  scrambled: string;
+  answer: string;
+}
+
+export type PuzzleRushPuzzle = PuzzleRushSudokuPuzzle | PuzzleRushWordPuzzle;
+
+export interface PuzzleRushConfig {
+  puzzles: PuzzleRushPuzzle[];
+  daily_limit?: number;
+  xp_per_puzzle?: number;
+  badge_name?: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -53,7 +84,7 @@ export interface Event {
   xp_reward: number;
   badge_name: string | null;
   banner_image_url: string | null;
-  config: TriviaConfig | TreasureHuntConfig | null;
+  config: TriviaConfig | TreasureHuntConfig | PuzzleRushConfig | null;
   created_at: string;
 }
 

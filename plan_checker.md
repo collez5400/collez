@@ -115,7 +115,7 @@
 | 2D | Push Notifications | `✅ COMPLETE` | 4/4 |
 | 2E | Phase 2 Polish | `✅ COMPLETE` | 5/5 |
 | 3A | Treasure Hunt Engine | `✅ COMPLETE` | 5/5 |
-| 3B | Puzzle Rush | `⬜ NOT STARTED` | 0/4 |
+| 3B | Puzzle Rush | `✅ COMPLETE` | 4/4 |
 | 3C | College Battle System | `⬜ NOT STARTED` | 0/4 |
 | 3D | Advanced Features | `⬜ NOT STARTED` | 0/5 |
 | 4A | Premium & Monetization | `⬜ NOT STARTED` | 0/6 |
@@ -1216,24 +1216,24 @@
 ---
 
 ## PHASE 3B: Puzzle Rush 🧩
-**Status**: `⬜ NOT STARTED`
+**Status**: `✅ COMPLETE`
 **Estimated Time**: 4 days
 
 ### Steps
 
-- [ ] **3B.1** — Sudoku mini-game screen
+- [x] **3B.1** — Sudoku mini-game screen
   - Full puzzle grid, number pad input
   - Timer, difficulty levels, validate on complete
 
-- [ ] **3B.2** — Word puzzle screen
+- [x] **3B.2** — Word puzzle screen
   - Word scramble, anagram, or mini-crossword
   - Letter tile UI with drag interaction
 
-- [ ] **3B.3** — Integrate Puzzle Rush event type
+- [x] **3B.3** — Integrate Puzzle Rush event type
   - Max 3 puzzles per day (capped)
   - +10 XP per puzzle completion via Edge Function
 
-- [ ] **3B.4** — Admin: Puzzle Rush event creation
+- [x] **3B.4** — Admin: Puzzle Rush event creation
   - Configure puzzle sets (JSON)
   - Set daily puzzle limit
 
@@ -1390,23 +1390,24 @@
 | 26 | 2026-04-22 | 2E | Completed 2E.1 to 2E.2; started 2E.3 | Added streak shield system (DB fields + activation UI + server-side streak validation edge function), added city/state leaderboard materialized views + rankings tabs/store wiring, and verified `collez-app` typecheck/lints pass. |
 | 27 | 2026-04-22 | 2E | Completed 2E.3 to 2E.5 and closed Phase 2E | Optimized home/rankings re-render behavior with Zustand shallow selectors, added full Phase 2 integration test runbook, added Phase 2E release runbook for OTA/native deploy, and hardened migration dependency ordering by ensuring `events` table exists for Phase 2D. |
 | 28 | 2026-04-22 | 3A | Completed 3A.1 to 3A.5 and closed Phase 3A | Added treasure hunt config types + store progression logic, built `app/events/hunt/[id].tsx` with clue-step flow and completion XP awarding, added puzzle components (`SudokuGrid`, `WordScramble`, `MathPuzzle`), added hidden clue triggers on rankings/profile, and upgraded admin events page to support `treasure_hunt` creation with JSON clue template. |
+| 29 | 2026-04-22 | 3B | Completed 3B.1 to 3B.4 and closed Phase 3B | Added dedicated Puzzle Rush gameplay route with full Sudoku grid + number pad + timer + difficulty filters and drag-to-reorder word puzzle tiles; integrated `puzzle_rush` event routing with per-day completion caps (max 3), persisted puzzle completion state in participation progress, awarded +10 XP per solved puzzle through Edge Function source `puzzle_rush`, and extended admin event creator with `puzzle_rush` type + JSON template. |
 
 ---
 
 ## 🎯 Current Focus
 
-**Active Phase**: `🔵 Phase 3B — Puzzle Rush`
-**Next Step**: `3B.1 — Sudoku mini-game screen`
+**Active Phase**: `🔵 Phase 3C — College Battle System`
+**Next Step**: `3C.1 — Battle data model + server logic`
 
 ---
 
 ## 📈 Completion Stats
 
 - **Total Steps**: 198
-- **Completed**: 138
+- **Completed**: 142
 - **In Progress**: 0
-- **Remaining**: 60
-- **Overall Progress**: 69.7%
+- **Remaining**: 56
+- **Overall Progress**: 71.7%
 
 ---
 

@@ -2,6 +2,7 @@ export type XpSource =
   | 'daily_login'
   | 'trivia'
   | 'treasure_hunt'
+  | 'puzzle_rush'
   | 'event'
   | 'weekly_streak'
   | 'bonus';

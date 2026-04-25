@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
 
 interface GreetingHeaderProps {
@@ -24,9 +25,17 @@ export function GreetingHeader({
   onLightningPress,
 }: GreetingHeaderProps) {
   const firstName = fullName.trim().split(' ')[0] ?? 'Scholar';
+  const glowOpacity = useSharedValue(0.25);
+  const boltY = useSharedValue(0);
+  glowOpacity.value = withRepeat(withSequence(withTiming(0.55, { duration: 900 }), withTiming(0.25, { duration: 900 })), -1, true);
+  boltY.value = withRepeat(withSequence(withTiming(-2, { duration: 300 }), withTiming(0, { duration: 300 })), -1, true);
+  const glowStyle = useAnimatedStyle(() => ({ opacity: glowOpacity.value }));
+  const boltStyle = useAnimatedStyle(() => ({ transform: [{ translateY: boltY.value }] }));
+
   return (
     <View style={styles.container}>
       <Pressable onPress={onAvatarPress} style={styles.avatarButton}>
+        <Animated.View style={[styles.avatarGlow, glowStyle]} />
         {avatarUrl ? (
           <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
         ) : (
@@ -38,11 +47,15 @@ export function GreetingHeader({
 
       <View style={styles.brandBlock}>
         <Text style={styles.brand}>COLLEZ</Text>
-        <Text style={styles.greeting}>{getGreeting()}, {firstName}!</Text>
+        <Animated.Text entering={FadeInDown.duration(260)} style={styles.greeting}>
+          {getGreeting()}, {firstName}!
+        </Animated.Text>
       </View>
 
       <Pressable onPress={onLightningPress} style={styles.actionButton}>
-        <MaterialIcons name="bolt" size={22} color={Colors.background} />
+        <Animated.View style={boltStyle}>
+          <MaterialIcons name="bolt" size={22} color={Colors.background} />
+        </Animated.View>
       </Pressable>
     </View>
   );
@@ -62,6 +75,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: `${Colors.outline}66`,
+    position: 'relative',
+  },
+  avatarGlow: {
+    position: 'absolute',
+    inset: -2,
+    borderRadius: BorderRadius.full,
+    borderWidth: 2,
+    borderColor: `${Colors.accentTeal}AA`,
   },
   avatarImage: {
     width: '100%',

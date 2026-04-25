@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 
 import { BorderRadius, Colors, Spacing, Typography } from '../../../src/config/theme';
 import { GlassCard } from '../../../src/components/shared/GlassCard';
@@ -225,7 +226,7 @@ export default function PDFsScreen() {
 
       {error ? <ErrorState message={error} onRetry={loadVaultData} compact /> : null}
 
-      <View style={styles.header}>
+      <Animated.View entering={FadeInUp.duration(260)} style={styles.header}>
         <View style={styles.titleGradient}>
           <Text style={styles.title}>Vault</Text>
         </View>
@@ -235,9 +236,10 @@ export default function PDFsScreen() {
             <View style={[styles.progressFill, { width: `${usagePercent}%` }]} />
           </View>
         </View>
-      </View>
+      </Animated.View>
 
-      <View style={styles.searchBar}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
+      <Animated.View entering={FadeInUp.delay(50).duration(260)} style={styles.searchBar}>
         <MaterialIcons name="search" size={20} color={Colors.outline} />
         <TextInput
           value={searchQuery}
@@ -251,7 +253,7 @@ export default function PDFsScreen() {
             <MaterialIcons name="close" size={20} color={Colors.outline} />
           </TouchableOpacity>
         ) : null}
-      </View>
+      </Animated.View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.breadcrumbRow}>
         {breadcrumb.map((segment, index) => (
@@ -307,6 +309,7 @@ export default function PDFsScreen() {
       </View>
 
       <FlatList
+        scrollEnabled={false}
         data={folderItems}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -356,6 +359,7 @@ export default function PDFsScreen() {
       </View>
 
       <FlashList
+        scrollEnabled={false}
         data={currentFiles}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.fileList}
@@ -403,6 +407,7 @@ export default function PDFsScreen() {
       </View>
 
       <FlashList
+        scrollEnabled={false}
         data={filteredRecentFiles}
         horizontal
         keyExtractor={(item) => `recent-${item.id}`}
@@ -423,6 +428,7 @@ export default function PDFsScreen() {
           </View>
         }
       />
+      </ScrollView>
 
       <TouchableOpacity style={styles.fab} onPress={() => void onUpload()}>
         <MaterialIcons name="upload" size={28} color="#fff" />
@@ -542,6 +548,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
+  },
+  pageContent: {
+    paddingBottom: 120,
   },
   searchInput: {
     flex: 1,

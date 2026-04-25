@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
+  LayoutAnimation,
   Modal,
   ScrollView,
   StatusBar,
@@ -502,13 +503,19 @@ export default function TasksScreen() {
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[styles.tabButton, contentMode === 'tasks' && styles.tabButtonActive]}
-          onPress={() => setContentMode('tasks')}
+          onPress={() => {
+            LayoutAnimation.spring();
+            setContentMode('tasks');
+          }}
         >
           <Text style={[styles.tabButtonText, contentMode === 'tasks' && styles.tabButtonTextActive]}>Tasks</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabButton, contentMode === 'notes' && styles.tabButtonActive]}
-          onPress={() => setContentMode('notes')}
+          onPress={() => {
+            LayoutAnimation.spring();
+            setContentMode('notes');
+          }}
         >
           <Text style={[styles.tabButtonText, contentMode === 'notes' && styles.tabButtonTextActive]}>Notes</Text>
         </TouchableOpacity>
@@ -533,7 +540,10 @@ export default function TasksScreen() {
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[styles.tabButton, !(contentMode === 'tasks' ? showArchived : showArchivedNotes) && styles.tabButtonActive]}
-          onPress={() => (contentMode === 'tasks' ? setShowArchived(false) : setShowArchivedNotes(false))}
+          onPress={() => {
+            LayoutAnimation.spring();
+            contentMode === 'tasks' ? setShowArchived(false) : setShowArchivedNotes(false);
+          }}
         >
           <Text
             style={[
@@ -546,7 +556,10 @@ export default function TasksScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tabButton, (contentMode === 'tasks' ? showArchived : showArchivedNotes) && styles.tabButtonActive]}
-          onPress={() => (contentMode === 'tasks' ? setShowArchived(true) : setShowArchivedNotes(true))}
+          onPress={() => {
+            LayoutAnimation.spring();
+            contentMode === 'tasks' ? setShowArchived(true) : setShowArchivedNotes(true);
+          }}
         >
           <Text
             style={[

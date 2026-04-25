@@ -1,5 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
 import { GlassCard } from '../shared/GlassCard';
 
@@ -8,6 +9,7 @@ type Action = {
   label: string;
   icon: keyof typeof MaterialIcons.glyphMap;
   onPress: () => void;
+  tint: string;
 };
 
 interface QuickActionsProps {
@@ -24,23 +26,44 @@ export function QuickActions({
   onCustomize,
 }: QuickActionsProps) {
   const actions: Action[] = [
-    { key: 'task', label: 'Add Task', icon: 'check-circle-outline', onPress: onAddTask },
-    { key: 'note', label: 'Quick Note', icon: 'edit-note', onPress: onQuickNote },
-    { key: 'pdf', label: 'Upload PDF', icon: 'upload-file', onPress: onUploadPdf },
-    { key: 'customize', label: 'Customize', icon: 'tune', onPress: onCustomize },
+    { key: 'task', label: 'Add Task', icon: 'check-circle-outline', onPress: onAddTask, tint: `${Colors.success}1E` },
+    { key: 'note', label: 'Quick Note', icon: 'edit-note', onPress: onQuickNote, tint: `${Colors.primary}20` },
+    { key: 'pdf', label: 'Upload PDF', icon: 'upload-file', onPress: onUploadPdf, tint: `${Colors.accentCoral}24` },
+    { key: 'customize', label: 'Customize', icon: 'tune', onPress: onCustomize, tint: `${Colors.accentGold}24` },
   ];
 
   return (
     <View style={styles.grid}>
-      {actions.map((action) => (
-        <Pressable key={action.key} style={styles.cell} onPress={action.onPress}>
-          <GlassCard style={styles.card}>
-            <MaterialIcons name={action.icon} size={20} color={Colors.primary} />
-            <Text style={styles.text}>{action.label}</Text>
-          </GlassCard>
-        </Pressable>
+      {actions.map((action, index) => (
+        <ActionCard key={action.key} action={action} index={index} />
       ))}
     </View>
+  );
+}
+
+function ActionCard({ action, index }: { action: Action; index: number }) {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={[styles.cell, animatedStyle]} entering={FadeInUp.delay(index * 70).duration(260)}>
+      <Pressable
+        onPress={action.onPress}
+        onPressIn={() => {
+          scale.value = withTiming(0.97, { duration: 110 });
+        }}
+        onPressOut={() => {
+          scale.value = withTiming(1, { duration: 110 });
+        }}
+      >
+        <GlassCard style={[styles.card, { backgroundColor: action.tint }]} variant="cool">
+            <MaterialIcons name={action.icon} size={20} color={Colors.primary} />
+            <Text style={styles.text}>{action.label}</Text>
+        </GlassCard>
+      </Pressable>
+    </Animated.View>
   );
 }
 

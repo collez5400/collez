@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { withLayoutContext } from 'expo-router';
 import { createMaterialTopTabNavigator, MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
-import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import Svg, { Defs, LinearGradient as SvgLinearGradient, Rect, Stop } from 'react-native-svg';
 import { BorderRadius, Colors, Spacing, Typography } from '../../../src/config/theme';
 
@@ -21,7 +21,7 @@ function VaultTabBar({ state, descriptors, navigation }: MaterialTopTabBarProps)
   return (
     <View style={styles.tabBarContainer}>
       <View style={styles.tabBarInner} onLayout={handleLayout}>
-        <Animated.View style={[styles.indicatorSlot, { width: tabWidth }, indicatorStyle]}>
+        <Animated.View entering={FadeIn.duration(220)} style={[styles.indicatorSlot, { width: tabWidth }, indicatorStyle]}>
           <Svg width="100%" height="100%">
             <Defs>
               <SvgLinearGradient id="vaultTabGradient" x1="0%" y1="0%" x2="100%" y2="100%">

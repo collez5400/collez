@@ -5,6 +5,9 @@ export const Colors = {
   surfaceHigh: '#26324D',
   primary: '#B4C5FF',
   primaryVariant: '#D0BCFF',
+  accentGold: '#F5C542',
+  accentCoral: '#FF6B6B',
+  accentTeal: '#2DD4BF',
   secondary: '#86EAD4',
   success: '#4ADE80',
   warning: '#FBBF24',
@@ -13,6 +16,12 @@ export const Colors = {
   onSurfaceVariant: '#C3C6D7',
   outline: '#8D90A0',
   transparent: 'transparent',
+};
+
+export const Gradients = {
+  cardWarm: ['#F5C54233', '#D0BCFF24'] as const,
+  cardCool: ['#2DD4BF2E', '#B4C5FF1F'] as const,
+  headerAccent: ['#B4C5FF', '#2DD4BF'] as const,
 };
 
 export const Typography = {
@@ -67,5 +76,15 @@ export const Shadows = {
     shadowOpacity: 0.5,
     shadowRadius: 30,
     elevation: 8,
+  },
+};
+
+export const AnimConfig = {
+  timingFast: { duration: 140 },
+  timingMedium: { duration: 220 },
+  springSoft: {
+    damping: 14,
+    stiffness: 170,
+    mass: 0.9,
   },
 };

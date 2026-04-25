@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
-import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../config/theme';
@@ -86,6 +86,10 @@ const TabItem = ({
     transform: [{ scaleX: withTiming(isFocused ? 1 : 0, { duration: 200 }) }],
   }));
 
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(isFocused ? 1.12 : 1, { damping: 12, stiffness: 240 }) }],
+  }));
+
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -103,12 +107,14 @@ const TabItem = ({
         />
       </Animated.View>
       
-      <MaterialIcons
-        name={iconName as any}
-        size={24}
-        color={isFocused ? Colors.primary : Colors.onSurfaceVariant}
-        style={styles.icon}
-      />
+      <Animated.View style={[styles.iconWrap, isFocused && styles.iconWrapFocused, iconStyle]}>
+        <MaterialIcons
+          name={iconName as any}
+          size={24}
+          color={isFocused ? Colors.primary : Colors.onSurfaceVariant}
+          style={styles.icon}
+        />
+      </Animated.View>
       
       <Animated.Text style={[styles.label, { color: isFocused ? Colors.primary : Colors.onSurfaceVariant }, animatedLabelStyle]}>
         {label}
@@ -143,6 +149,17 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginBottom: 2,
+  },
+  iconWrap: {
+    borderRadius: BorderRadius.full,
+    padding: 2,
+  },
+  iconWrapFocused: {
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   label: {
     fontSize: 10,

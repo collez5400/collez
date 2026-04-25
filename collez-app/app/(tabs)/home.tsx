@@ -20,6 +20,8 @@ import { StatPills } from '../../src/components/home/StatPills';
 import { TasksCard } from '../../src/components/home/TasksCard';
 import { TimetableCard } from '../../src/components/home/TimetableCard';
 import { ShimmerLoader } from '../../src/components/shared/ShimmerLoader';
+import { AnimatedCard } from '../../src/components/shared/AnimatedCard';
+import { AnimatedSection } from '../../src/components/shared/AnimatedSection';
 import { MilestoneCelebrationModal } from '../../src/components/streak/MilestoneCelebrationModal';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { fetchTodayQuote } from '../../src/services/quoteService';
@@ -204,45 +206,49 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <GreetingHeader
-          fullName={authUser?.full_name ?? 'Scholar'}
-          avatarUrl={authUser?.avatar_url}
-          onAvatarPress={() => router.push('/(tabs)/profile')}
-          onLightningPress={() => router.push('/(tabs)/rankings')}
-        />
+        <AnimatedCard index={0}>
+          <GreetingHeader
+            fullName={authUser?.full_name ?? 'Scholar'}
+            avatarUrl={authUser?.avatar_url}
+            onAvatarPress={() => router.push('/(tabs)/profile')}
+            onLightningPress={() => router.push('/(tabs)/rankings')}
+          />
+        </AnimatedCard>
 
-        <StatPills
-          streak={streakCount}
-          xp={totalXp}
-          rank={rankTier.replace('_', ' ')}
-          streakShieldCount={shields}
-          streakShieldActive={shieldActive}
-          onPressStreak={() => {
-            if (shieldActive) {
-              Alert.alert('Streak Shield active', 'Your next missed day is protected.');
-              return;
-            }
-            if (shields > 0) {
-              Alert.alert(
-                'Activate Streak Shield?',
-                'Use one shield to protect a single missed day. This works only for one-day gaps.',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Activate',
-                    onPress: () => {
-                      void activateStreakShield();
+        <AnimatedCard index={1}>
+          <StatPills
+            streak={streakCount}
+            xp={totalXp}
+            rank={rankTier.replace('_', ' ')}
+            streakShieldCount={shields}
+            streakShieldActive={shieldActive}
+            onPressStreak={() => {
+              if (shieldActive) {
+                Alert.alert('Streak Shield active', 'Your next missed day is protected.');
+                return;
+              }
+              if (shields > 0) {
+                Alert.alert(
+                  'Activate Streak Shield?',
+                  'Use one shield to protect a single missed day. This works only for one-day gaps.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Activate',
+                      onPress: () => {
+                        void activateStreakShield();
+                      },
                     },
-                  },
-                ]
-              );
-              return;
-            }
-            router.push('/(tabs)/rankings');
-          }}
-          onPressXp={() => router.push('/(tabs)/rankings')}
-          onPressRank={() => router.push('/(tabs)/rankings')}
-        />
+                  ]
+                );
+                return;
+              }
+              router.push('/(tabs)/rankings');
+            }}
+            onPressXp={() => router.push('/(tabs)/rankings')}
+            onPressRank={() => router.push('/(tabs)/rankings')}
+          />
+        </AnimatedCard>
 
         <EventBanner
           event={homeEvent}
@@ -285,17 +291,18 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <QuickActions
-          onAddTask={() => router.push('/(tabs)/vault/tasks')}
-          onQuickNote={() => router.push('/(tabs)/vault/tasks')}
-          onUploadPdf={() => router.push('/(tabs)/vault/pdfs')}
-          onCustomize={() =>
-            isFeatureEnabled('premium_themes_v2', authUser)
-              ? router.push('/premium/themes')
-              : Alert.alert('Customize', 'Theme customization is currently disabled for your cohort.')
-          }
-        />
+        <AnimatedSection title="Quick Actions" index={7}>
+          <QuickActions
+            onAddTask={() => router.push('/(tabs)/vault/tasks')}
+            onQuickNote={() => router.push('/(tabs)/vault/tasks')}
+            onUploadPdf={() => router.push('/(tabs)/vault/pdfs')}
+            onCustomize={() =>
+              isFeatureEnabled('premium_themes_v2', authUser)
+                ? router.push('/premium/themes')
+                : Alert.alert('Customize', 'Theme customization is currently disabled for your cohort.')
+            }
+          />
+        </AnimatedSection>
 
         {(isStreakLoading || isXpLoading) && (
           <View style={styles.loadingRow}>
@@ -354,9 +361,11 @@ const styles = StyleSheet.create({
   },
   bentoWide: {
     flex: 2,
+    minHeight: 1,
   },
   bentoNarrow: {
     flex: 1,
+    minHeight: 1,
   },
   bentoHalf: {
     flex: 1,

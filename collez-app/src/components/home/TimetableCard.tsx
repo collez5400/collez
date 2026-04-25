@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { TimetableEntry } from '../../models/timetable';
 import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
 import { GlassCard } from '../shared/GlassCard';
@@ -16,14 +17,25 @@ function toMinuteValue(time: string) {
 }
 
 export function TimetableCard({ entries, onPress }: TimetableCardProps) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const now = dayjs();
   const currentMinutes = now.hour() * 60 + now.minute();
   const sorted = [...entries].sort((a, b) => toMinuteValue(a.start_time) - toMinuteValue(b.start_time));
   const upcoming = sorted.filter((item) => toMinuteValue(item.end_time) >= currentMinutes).slice(0, 2);
 
   return (
-    <Pressable onPress={onPress}>
-      <GlassCard style={styles.card}>
+    <Animated.View entering={FadeInUp.duration(280)} style={animStyle}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => {
+          scale.value = withTiming(0.98, { duration: 100 });
+        }}
+        onPressOut={() => {
+          scale.value = withTiming(1, { duration: 110 });
+        }}
+      >
+      <GlassCard style={styles.card} variant="cool">
         <View style={styles.headerRow}>
           <Text style={styles.title}>Today's Timetable</Text>
           <MaterialIcons name="calendar-month" size={18} color={Colors.primary} />
@@ -46,7 +58,8 @@ export function TimetableCard({ entries, onPress }: TimetableCardProps) {
           </View>
         )}
       </GlassCard>
-    </Pressable>
+      </Pressable>
+    </Animated.View>
   );
 }
 

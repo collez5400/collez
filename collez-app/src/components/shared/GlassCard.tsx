@@ -9,6 +9,7 @@ interface GlassCardProps extends ViewProps {
   style?: ViewStyle | ViewStyle[];
   borderRadius?: number;
   padding?: number;
+  variant?: 'default' | 'warm' | 'cool' | 'accent';
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({
@@ -17,14 +18,23 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   style,
   borderRadius = BorderRadius.md,
   padding = 16,
+  variant = 'default',
   ...rest
 }) => {
+  const variantStyle = {
+    default: styles.defaultBg,
+    warm: styles.warmBg,
+    cool: styles.coolBg,
+    accent: styles.accentBg,
+  }[variant];
+
   return (
     <BlurView
       intensity={intensity}
       tint="dark"
       style={[
         styles.container,
+        variantStyle,
         {
           borderRadius,
           padding,
@@ -40,10 +50,22 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: `${Colors.surfaceHigh}99`, // semi-transparent
     borderColor: `${Colors.onSurfaceVariant}33`,
     borderWidth: 1,
     overflow: 'hidden',
     ...Shadows.glass,
+  },
+  defaultBg: {
+    backgroundColor: `${Colors.surfaceHigh}99`,
+  },
+  warmBg: {
+    backgroundColor: `${Colors.accentGold}22`,
+  },
+  coolBg: {
+    backgroundColor: `${Colors.accentTeal}1F`,
+  },
+  accentBg: {
+    backgroundColor: `${Colors.primary}25`,
+    borderColor: `${Colors.primary}55`,
   },
 });

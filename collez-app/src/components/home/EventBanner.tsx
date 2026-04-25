@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { ImageBackground, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
+  FadeIn,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -55,17 +56,19 @@ export function EventBanner({ event, onJoin }: EventBannerProps) {
   );
 
   if (!event.imageUrl) {
-    return <View style={[styles.banner, styles.fallbackBanner]}>{content}</View>;
+    return (
+      <Animated.View entering={FadeIn.delay(200).duration(300)} style={[styles.banner, styles.fallbackBanner]}>
+        {content}
+      </Animated.View>
+    );
   }
 
   return (
-    <ImageBackground
-      source={{ uri: event.imageUrl }}
-      imageStyle={styles.image}
-      style={styles.banner}
-    >
-      {content}
-    </ImageBackground>
+    <Animated.View entering={FadeIn.delay(200).duration(300)}>
+      <ImageBackground source={{ uri: event.imageUrl }} imageStyle={styles.image} style={styles.banner}>
+        {content}
+      </ImageBackground>
+    </Animated.View>
   );
 }
 

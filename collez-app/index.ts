@@ -1,5 +1,10 @@
-import { registerWidgetTaskHandler } from 'react-native-android-widget';
-import { widgetTaskHandler } from './src/widgets/widgetTaskHandler';
+import { Platform } from 'react-native';
 
-registerWidgetTaskHandler(widgetTaskHandler);
+if (Platform.OS === 'android') {
+  // Avoid initializing Android headless task APIs on web.
+  // Using require keeps web bundle from eagerly evaluating widget modules.
+  const { registerWidgetTaskHandler } = require('react-native-android-widget');
+  const { widgetTaskHandler } = require('./src/widgets/widgetTaskHandler');
+  registerWidgetTaskHandler(widgetTaskHandler);
+}
 import 'expo-router/entry';

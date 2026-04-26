@@ -11,13 +11,14 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome } from '@expo/vector-icons';
-import { GlassCard } from '../../src/components/shared/GlassCard';
 import { useAuthStore } from '../../src/store/authStore';
 import { Colors, Typography, Spacing, BorderRadius } from '../../src/config/theme';
+import { HalftoneOverlay } from '../../src/components/shared/HalftoneOverlay';
 
 const { width, height } = Dimensions.get('window');
+const LOGO_URI =
+  'file:///C:/Users/Two Stars HQ/.cursor/projects/c-Users-Two-Stars-HQ-Desktop-collez/assets/c__Users_Two_Stars_HQ_AppData_Roaming_Cursor_User_workspaceStorage_c7123c16d2cecfaee064142bf6d2e0b7_images_ChatGPT_Image_Apr_26__2026__05_15_11_PM-57d29549-c004-4b2a-a725-f208aadbdf07.png';
 
 // Floating ambient blob
 function AmbientBlob({
@@ -87,32 +88,26 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.root}>
+      <HalftoneOverlay dotColor="#110e05" spacing={10} opacity={0.25} />
       {/* Ambient blobs */}
       <AmbientBlob x={-60} y={100} size={260} color={Colors.primary} delay={0} />
       <AmbientBlob x={width - 180} y={height * 0.35} size={300} color={Colors.primaryVariant} delay={400} />
       <AmbientBlob x={40} y={height * 0.65} size={200} color={Colors.secondary} delay={600} />
 
       {/* Main card */}
-      <Animated.View
-        style={[
-          styles.cardWrap,
-          { opacity: cardOpacity, transform: [{ translateY: cardTranslateY }] },
-        ]}
-      >
-        <GlassCard style={styles.card} padding={32}>
-          {/* Brand mark */}
-          <LinearGradient
-            colors={[Colors.primary, Colors.primaryVariant]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.brandGradient}
-          >
-            <Text style={styles.brandText}>COLLEZ</Text>
-          </LinearGradient>
+      <Animated.View style={[styles.cardWrap, { opacity: cardOpacity, transform: [{ translateY: cardTranslateY }] }]}>
+        <View style={styles.card}>
+          <View style={styles.lanyardHole} />
+          <View style={styles.cardHeader}>
+            <View style={styles.logoWrap}>
+              <Animated.Image source={{ uri: LOGO_URI }} style={styles.logo} />
+            </View>
+            <Text style={styles.brandText}>COLLEZ{'\n'}ACCESS CARD</Text>
+          </View>
 
-          <Text style={styles.headline}>Welcome to COLLEZ</Text>
+          <Text style={styles.headline}>AUTHENTICATE IDENTITY</Text>
           <Text style={styles.subheadline}>
-            Your college life, supercharged. Rank up. Stay consistent. Dominate.
+            Your college life, supercharged.
           </Text>
 
           {/* Error */}
@@ -124,7 +119,7 @@ export default function LoginScreen() {
 
           {/* Google Sign-In button */}
           <TouchableOpacity
-            style={styles.googleBtn}
+            style={styles.authBtn}
             onPress={handleGoogleSignIn}
             activeOpacity={0.8}
             disabled={status === 'loading'}
@@ -137,23 +132,35 @@ export default function LoginScreen() {
                 <View style={styles.googleIconWrap}>
                   <FontAwesome name="google" size={18} color="#4285F4" />
                 </View>
-                <Text style={styles.googleBtnText}>Continue with Google</Text>
+                <Text style={styles.authBtnText}>Continue with Google</Text>
               </>
             )}
           </TouchableOpacity>
 
           {Platform.OS === 'ios' ? (
             <TouchableOpacity
-              style={styles.appleBtn}
+              style={styles.authBtn}
               onPress={handleAppleSignIn}
               activeOpacity={0.8}
               disabled={status === 'loading'}
               accessibilityLabel="Sign in with Apple"
             >
               <FontAwesome name="apple" size={18} color="#ffffff" />
-              <Text style={styles.appleBtnText}>Continue with Apple</Text>
+              <Text style={styles.authBtnText}>Continue with Apple</Text>
             </TouchableOpacity>
           ) : null}
+
+          <TouchableOpacity
+            style={styles.authBtn}
+            onPress={() => {}}
+            activeOpacity={0.8}
+            accessibilityLabel="Use college ID"
+          >
+            <FontAwesome name="id-badge" size={18} color={Colors.onSurface} />
+            <Text style={styles.authBtnText}>Use College ID</Text>
+          </TouchableOpacity>
+
+          <View style={styles.barcode} />
 
           {/* Legal */}
           <View style={styles.legal}>
@@ -166,7 +173,11 @@ export default function LoginScreen() {
               <Text style={styles.legalLink}>Privacy Policy</Text>
             </TouchableOpacity>
           </View>
-        </GlassCard>
+          <TouchableOpacity style={styles.ctaBtn} onPress={handleGoogleSignIn} disabled={status === 'loading'}>
+            <Text style={styles.ctaText}>ENTER COLLEZ</Text>
+            <FontAwesome name="arrow-right" size={20} color={Colors.onPrimary} />
+          </TouchableOpacity>
+        </View>
       </Animated.View>
     </View>
   );
@@ -182,39 +193,79 @@ const styles = StyleSheet.create({
   },
   cardWrap: {
     width: '100%',
+    maxWidth: 420,
   },
   card: {
     width: '100%',
     alignItems: 'center',
+    backgroundColor: Colors.secondaryContainer,
+    borderWidth: 4,
+    borderColor: Colors.surfaceContainerLowest,
+    borderRadius: 12,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    shadowOffset: { width: 8, height: 8 },
+    paddingHorizontal: 20,
+    paddingVertical: 18,
   },
-  brandGradient: {
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    marginBottom: Spacing.md,
+  cardHeader: {
+    alignItems: 'center',
+    borderBottomWidth: 4,
+    borderBottomColor: Colors.surfaceContainerLowest,
+    width: '100%',
+    paddingBottom: 14,
+    marginBottom: 14,
   },
+  lanyardHole: {
+    width: 64,
+    height: 12,
+    borderRadius: 99,
+    backgroundColor: Colors.background,
+    borderWidth: 3,
+    borderColor: Colors.surfaceContainerLowest,
+    marginBottom: 10,
+  },
+  logoWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 4,
+    borderColor: Colors.surfaceContainerLowest,
+    backgroundColor: Colors.surface,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  logo: { width: '100%', height: '100%' },
   brandText: {
-    fontSize: 28,
+    fontSize: 30,
+    textAlign: 'center',
     fontFamily: Typography.fontFamily.heading,
-    fontWeight: '800',
-    letterSpacing: 8,
-    color: Colors.background,
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: Colors.onSecondaryContainer,
   },
   headline: {
-    fontSize: Typography.size.xl,
-    fontFamily: Typography.fontFamily.heading,
-    color: Colors.onSurface,
+    fontSize: Typography.size.md,
+    fontFamily: Typography.fontFamily.button,
+    color: Colors.onSecondaryContainer,
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: 6,
+    textTransform: 'uppercase',
   },
   subheadline: {
     fontSize: Typography.size.sm,
     fontFamily: Typography.fontFamily.body,
-    color: Colors.onSurfaceVariant,
+    color: Colors.onSecondaryContainer,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   errorBanner: {
     backgroundColor: `${Colors.error}22`,
@@ -229,43 +280,30 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.body,
     textAlign: 'center',
   },
-  googleBtn: {
+  authBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: '#dadce0',
+    backgroundColor: Colors.surface,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: Colors.surfaceContainerLowest,
     paddingVertical: 14,
     paddingHorizontal: 24,
     width: '100%',
-    marginBottom: Spacing.lg,
+    marginBottom: 10,
     gap: 10,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    shadowOffset: { width: 4, height: 4 },
   },
-  googleBtnText: {
+  authBtnText: {
     fontSize: Typography.size.md,
-    fontFamily: Typography.fontFamily.body,
-    fontWeight: '600',
-    color: '#3c4043',
-  },
-  appleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#000000',
-    borderRadius: BorderRadius.full,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    width: '100%',
-    marginBottom: Spacing.lg,
-    gap: 10,
-  },
-  appleBtnText: {
-    fontSize: Typography.size.md,
-    fontFamily: Typography.fontFamily.body,
-    fontWeight: '600',
-    color: '#ffffff',
+    fontFamily: Typography.fontFamily.button,
+    fontWeight: '700',
+    color: Colors.onSurface,
+    textTransform: 'uppercase',
   },
   googleIconWrap: {
     width: 22,
@@ -282,6 +320,38 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 10,
+  },
+  barcode: {
+    width: '100%',
+    height: 24,
+    marginTop: 4,
+    marginBottom: 14,
+    backgroundColor: 'rgba(17,14,5,0.5)',
+  },
+  ctaBtn: {
+    width: '100%',
+    height: 64,
+    borderRadius: 8,
+    borderWidth: 4,
+    borderColor: Colors.surfaceContainerLowest,
+    backgroundColor: Colors.primaryContainer,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 8, height: 8 },
+    shadowRadius: 0,
+    marginTop: 8,
+  },
+  ctaText: {
+    color: Colors.onPrimary,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.headlineMd ?? 24,
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   legalText: {
     fontSize: Typography.size.xs,

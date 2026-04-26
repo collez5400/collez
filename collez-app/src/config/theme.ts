@@ -1,20 +1,42 @@
 export const Colors = {
-  background: '#0B1326',
-  surface: '#1A233A',
-  surfaceLow: '#141C2E',
-  surfaceHigh: '#26324D',
-  primary: '#B4C5FF',
-  primaryVariant: '#D0BCFF',
-  accentGold: '#F5C542',
-  accentCoral: '#FF6B6B',
-  accentTeal: '#2DD4BF',
-  secondary: '#86EAD4',
-  success: '#4ADE80',
-  warning: '#FBBF24',
+  background: '#161309',
+  surface: '#161309',
+  surfaceDim: '#161309',
+  surfaceContainerLowest: '#110e05',
+  surfaceContainerLow: '#1f1b10',
+  surfaceContainer: '#231f14',
+  surfaceContainerHigh: '#2e2a1e',
+  surfaceContainerHighest: '#393428',
+  surfaceVariant: '#393428',
+  surfaceBright: '#3d392c',
+  surfaceLow: '#1f1b10',
+  surfaceHigh: '#2e2a1e',
+  primary: '#fff3d6',
+  primaryContainer: '#ffd400',
+  primaryFixed: '#ffe177',
+  primaryFixedDim: '#ebc300',
+  primaryVariant: '#ffd400',
+  onPrimary: '#3b2f00',
+  onPrimaryContainer: '#705c00',
+  secondary: '#d1bcff',
+  secondaryContainer: '#6b03f1',
+  secondaryFixed: '#eaddff',
+  secondaryFixedDim: '#d1bcff',
+  onSecondary: '#3d0090',
+  onSecondaryContainer: '#d7c4ff',
+  accentGold: '#ffd400',
+  accentCoral: '#ffb4ab',
+  accentTeal: '#6b03f1',
+  success: '#ebc300',
+  warning: '#ffe177',
   error: '#FFB4AB',
-  onSurface: '#DAE2FD',
-  onSurfaceVariant: '#C3C6D7',
-  outline: '#8D90A0',
+  errorContainer: '#93000a',
+  onError: '#690005',
+  onErrorContainer: '#ffdad6',
+  onSurface: '#eae2cf',
+  onSurfaceVariant: '#d0c6ab',
+  outline: '#999077',
+  outlineVariant: '#4d4632',
   transparent: 'transparent',
 };
 
@@ -26,8 +48,10 @@ export const Gradients = {
 
 export const Typography = {
   fontFamily: {
-    heading: 'SpaceGrotesk',
-    body: 'Manrope',
+    display: 'Space Grotesk',
+    heading: 'Space Grotesk',
+    button: 'Space Grotesk',
+    body: 'Plus Jakarta Sans',
   },
   size: {
     xs: 12,
@@ -37,6 +61,12 @@ export const Typography = {
     xl: 24,
     xxl: 32,
     display: 48,
+    displayHero: 72,
+    headlineLg: 40,
+    headlineMd: 24,
+    buttonLabel: 16,
+    bodyLg: 18,
+    bodyMd: 16,
   },
 };
 
@@ -50,10 +80,11 @@ export const Spacing = {
 };
 
 export const BorderRadius = {
+  xs: 4,
   sm: 8,
-  md: 16,  // default
-  lg: 32,  // large
-  xl: 48,  // XL
+  md: 12,
+  lg: 16,
+  xl: 24,
   full: 9999,
 };
 
@@ -63,19 +94,45 @@ export const Layout = {
 };
 
 export const Shadows = {
+  hardShadowSm: '2px 2px 0px 0px #110e05',
+  hardShadow: '4px 4px 0px 0px #110e05',
+  hardShadowLg: '8px 8px 0px 0px #110e05',
+  hardShadowYellow: '6px 6px 0px 0px #ffd400',
+  hardShadowPurple: '6px 6px 0px 0px #6b03f1',
+  neonYellow: '0 0 20px rgba(255, 212, 0, 0.4)',
+  neonPurple: '0 0 20px rgba(107, 3, 241, 0.3)',
+  glossRim: 'inset 0px 2px 0px 0px rgba(255,255,255,0.4)',
+  card: {
+    shadowColor: '#110e05',
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
+  },
   glass: {
-    shadowColor: '#DAE2FD',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.06,
-    shadowRadius: 50,
-    elevation: 5,
+    shadowColor: '#110e05',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   glowPrimary: {
-    shadowColor: Colors.primary,
+    shadowColor: Colors.primaryContainer,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 30,
-    elevation: 8,
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 0,
+  },
+};
+
+export const Borders = {
+  comicBorder: {
+    borderWidth: 3,
+    borderColor: '#111111',
+  },
+  comicBorderLg: {
+    borderWidth: 4,
+    borderColor: '#111111',
   },
 };
 

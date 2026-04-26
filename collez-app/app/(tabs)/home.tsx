@@ -12,7 +12,6 @@ import {
   View,
 } from 'react-native';
 import { EventBanner } from '../../src/components/home/EventBanner';
-import { GreetingHeader } from '../../src/components/home/GreetingHeader';
 import { LeaderboardMini } from '../../src/components/home/LeaderboardMini';
 import { QuickActions } from '../../src/components/home/QuickActions';
 import { QuoteCard } from '../../src/components/home/QuoteCard';
@@ -22,6 +21,7 @@ import { TimetableCard } from '../../src/components/home/TimetableCard';
 import { ShimmerLoader } from '../../src/components/shared/ShimmerLoader';
 import { AnimatedCard } from '../../src/components/shared/AnimatedCard';
 import { AnimatedSection } from '../../src/components/shared/AnimatedSection';
+import { TopAppBar } from '../../src/components/shared/TopAppBar';
 import { MilestoneCelebrationModal } from '../../src/components/streak/MilestoneCelebrationModal';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { fetchTodayQuote } from '../../src/services/quoteService';
@@ -195,6 +195,11 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.screen}>
+      <TopAppBar
+        avatarUrl={authUser?.avatar_url}
+        xp={totalXp}
+        onAvatarPress={() => router.push('/(tabs)/profile')}
+      />
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />}
@@ -207,12 +212,10 @@ export default function HomeScreen() {
         )}
 
         <AnimatedCard index={0}>
-          <GreetingHeader
-            fullName={authUser?.full_name ?? 'Scholar'}
-            avatarUrl={authUser?.avatar_url}
-            onAvatarPress={() => router.push('/(tabs)/profile')}
-            onLightningPress={() => router.push('/(tabs)/rankings')}
-          />
+          <View style={styles.heroHeadlineCard}>
+            <Text style={styles.heroHeadline}>WHAT&apos;S UP, HERO!</Text>
+            <Text style={styles.heroSubline}>Level up your streak and crush today&apos;s missions.</Text>
+          </View>
         </AnimatedCard>
 
         <AnimatedCard index={1}>
@@ -335,15 +338,44 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.lg,
     gap: Spacing.md,
+    paddingTop: Spacing.md,
+  },
+  heroHeadlineCard: {
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderWidth: 3,
+    borderColor: '#111111',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  heroHeadline: {
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.headlineLg ?? 40,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    color: Colors.primary,
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
+  },
+  heroSubline: {
+    marginTop: 6,
+    color: Colors.onSurfaceVariant,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.bodyMd ?? 16,
   },
   offlineBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: Spacing.xs,
-    borderWidth: 1,
-    borderColor: `${Colors.error}66`,
-    backgroundColor: `${Colors.error}22`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHigh,
     borderRadius: 999,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 6,
@@ -388,8 +420,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHigh,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
+    elevation: 0,
   },
   settingsShortcutText: {
     color: Colors.primary,

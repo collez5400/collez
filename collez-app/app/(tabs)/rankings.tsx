@@ -8,6 +8,7 @@ import { RankRow } from '../../src/components/leaderboard/RankRow';
 import { UserRankCard } from '../../src/components/leaderboard/UserRankCard';
 import { EmptyState } from '../../src/components/shared/EmptyState';
 import { ErrorState } from '../../src/components/shared/ErrorState';
+import { TopAppBar } from '../../src/components/shared/TopAppBar';
 import { LeaderboardEntry, LeaderboardType, useLeaderboardStore } from '../../src/store/leaderboardStore';
 import { useAuthStore } from '../../src/store/authStore';
 import { useEventStore } from '../../src/store/eventStore';
@@ -17,6 +18,7 @@ export default function RankingsScreen() {
   const [activeTab, setActiveTab] = useState<LeaderboardType>('college');
   const [refreshing, setRefreshing] = useState(false);
   const userId = useAuthStore((state) => state.user?.id);
+  const avatarUrl = useAuthStore((state) => state.user?.avatar_url);
   const { liveEvents, submitHuntResponse } = useEventStore(
     (state) => ({ liveEvents: state.liveEvents, submitHuntResponse: state.submitHuntResponse }),
     shallow
@@ -186,6 +188,7 @@ export default function RankingsScreen() {
 
   return (
     <View style={styles.container}>
+      <TopAppBar avatarUrl={avatarUrl} onAvatarPress={() => {}} />
       <FlashList
         data={data}
         renderItem={renderItem}
@@ -218,25 +221,30 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xxl,
     paddingHorizontal: Spacing.md,
     gap: Spacing.sm,
+    paddingTop: Spacing.md,
   },
   headerContainer: {
     paddingTop: Spacing.md,
     gap: Spacing.md,
   },
   title: {
-    color: Colors.onSurface,
+    color: Colors.primaryContainer,
     fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.xxl,
-    fontWeight: '700',
+    fontSize: Typography.size.headlineLg ?? Typography.size.xxl,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    textShadowColor: '#111111',
+    textShadowOffset: { width: 4, height: 4 },
+    textShadowRadius: 0,
   },
   hiddenTrigger: {
     alignSelf: 'flex-end',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}33`,
-    backgroundColor: `${Colors.surfaceHigh}66`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceHigh,
   },
   tabRow: {
     flexDirection: 'row',
@@ -246,18 +254,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}55`,
+    borderWidth: 4,
+    borderColor: '#111111',
     backgroundColor: Colors.surface,
-    color: Colors.onSurfaceVariant,
-    fontFamily: Typography.fontFamily.body,
+    color: Colors.onSurface,
+    fontFamily: Typography.fontFamily.button,
     fontSize: Typography.size.sm,
     fontWeight: '700',
+    textTransform: 'uppercase',
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
+    elevation: 0,
   },
   tabPillActive: {
-    borderColor: `${Colors.primary}88`,
-    backgroundColor: `${Colors.primary}22`,
-    color: Colors.primary,
+    borderColor: '#111111',
+    backgroundColor: Colors.primaryContainer,
+    color: '#000000',
+    shadowColor: '#111111',
   },
   errorText: {
     color: Colors.error,

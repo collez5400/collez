@@ -21,6 +21,7 @@ import { GradientButton } from '../../../src/components/shared/GradientButton';
 import { PdfFile, PdfFolderType, PdfSortOption } from '../../../src/models/pdf';
 import { useVaultStore } from '../../../src/store/vaultStore';
 import { ErrorState } from '../../../src/components/shared/ErrorState';
+import { TopAppBar } from '../../../src/components/shared/TopAppBar';
 import { useAuthStore } from '../../../src/store/authStore';
 
 const SORT_OPTIONS: PdfSortOption[] = ['date', 'name', 'size'];
@@ -78,6 +79,7 @@ export default function PDFsScreen() {
     syncToCloud,
   } = useVaultStore();
   const premiumConfig = useAuthStore((s) => s.user?.premium_config);
+  const user = useAuthStore((s) => s.user);
   const isPremiumUser = (premiumConfig?.unlocked_themes?.length ?? 0) > 1;
 
   const [sortBy, setSortBy] = useState<PdfSortOption>('date');
@@ -222,13 +224,14 @@ export default function PDFsScreen() {
 
   return (
     <View style={styles.container}>
+      <TopAppBar avatarUrl={user?.avatar_url} xp={user?.xp ?? 0} onAvatarPress={() => {}} />
       <StatusBar barStyle="light-content" />
 
       {error ? <ErrorState message={error} onRetry={loadVaultData} compact /> : null}
 
       <Animated.View entering={FadeInUp.duration(260)} style={styles.header}>
         <View style={styles.titleGradient}>
-          <Text style={styles.title}>Vault</Text>
+          <Text style={styles.title}>VAULT</Text>
         </View>
         <View style={styles.storageWrap}>
           <Text style={styles.storageLabel}>{formatBytes(totalStorageUsedBytes)} used</Text>
@@ -507,15 +510,22 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: BorderRadius.full,
+    borderRadius: 12,
     marginBottom: Spacing.sm,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 3,
+    borderColor: '#111111',
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
   },
   title: {
-    color: Colors.background,
+    color: '#000000',
     fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.lg,
-    fontWeight: '700',
+    fontSize: Typography.size.headlineMd ?? 24,
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   storageWrap: {
     marginBottom: Spacing.sm,
@@ -542,8 +552,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     height: 46,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}22`,
+    borderWidth: 3,
+    borderColor: '#111111',
     backgroundColor: Colors.surfaceLow,
     flexDirection: 'row',
     alignItems: 'center',
@@ -584,16 +594,16 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   sortChip: {
-    borderWidth: 1,
-    borderColor: `${Colors.outline}33`,
+    borderWidth: 3,
+    borderColor: '#111111',
     backgroundColor: Colors.surfaceLow,
     borderRadius: BorderRadius.full,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   sortChipActive: {
-    borderColor: Colors.primary,
-    backgroundColor: `${Colors.primary}22`,
+    borderColor: '#111111',
+    backgroundColor: Colors.primaryContainer,
   },
   sortChipText: {
     color: Colors.onSurfaceVariant,
@@ -602,13 +612,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   sortChipTextActive: {
-    color: Colors.primary,
+    color: '#111111',
   },
   uploadCard: {
     marginHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    backgroundColor: Colors.secondaryContainer,
+    borderWidth: 3,
+    borderColor: '#111111',
     paddingHorizontal: Spacing.md,
     paddingVertical: 12,
     flexDirection: 'row',
@@ -618,7 +630,7 @@ const styles = StyleSheet.create({
   uploadText: {
     flex: 1,
     marginLeft: Spacing.sm,
-    color: Colors.background,
+    color: Colors.onSecondaryContainer,
     fontFamily: Typography.fontFamily.heading,
     fontSize: Typography.size.md,
     fontWeight: '700',
@@ -632,9 +644,9 @@ const styles = StyleSheet.create({
   syncBtn: {
     flex: 1,
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}55`,
-    backgroundColor: `${Colors.primary}18`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHigh,
     paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -668,9 +680,9 @@ const styles = StyleSheet.create({
     width: 118,
     height: 96,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: `${Colors.primary}88`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHigh,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -685,16 +697,20 @@ const styles = StyleSheet.create({
   folderCard: {
     width: 132,
     height: 96,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceLow,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}22`,
+    borderRadius: 12,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 3,
+    borderColor: '#110e05',
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 6, height: 6 },
+    shadowRadius: 0,
     padding: Spacing.sm,
     marginRight: Spacing.md,
     justifyContent: 'space-between',
   },
   folderName: {
-    color: Colors.onSurface,
+    color: '#000000',
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,
     fontWeight: '700',
@@ -714,6 +730,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderWidth: 3,
+    borderColor: '#110e05',
   },
   fileMain: {
     flex: 1,
@@ -752,8 +770,8 @@ const styles = StyleSheet.create({
     width: 190,
     borderRadius: BorderRadius.md,
     backgroundColor: Colors.surfaceLow,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}22`,
+    borderWidth: 3,
+    borderColor: '#111111',
     padding: Spacing.sm,
     marginRight: Spacing.md,
   },
@@ -806,14 +824,16 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 4,
+    borderColor: '#111111',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOpacity: 0.35,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 14,
-    elevation: 7,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 6, height: 6 },
+    shadowRadius: 0,
+    elevation: 0,
   },
   modalBackdrop: {
     flex: 1,
@@ -826,8 +846,8 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: BorderRadius.md,
     backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}22`,
+    borderWidth: 4,
+    borderColor: '#111111',
     padding: Spacing.lg,
   },
   modalTitle: {
@@ -840,8 +860,8 @@ const styles = StyleSheet.create({
   modalInput: {
     height: 44,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}33`,
+    borderWidth: 3,
+    borderColor: '#111111',
     backgroundColor: Colors.surfaceLow,
     paddingHorizontal: Spacing.md,
     color: Colors.onSurface,
@@ -854,8 +874,8 @@ const styles = StyleSheet.create({
   },
   typeChip: {
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}33`,
+    borderWidth: 3,
+    borderColor: '#111111',
     backgroundColor: Colors.surfaceLow,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -880,8 +900,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     backgroundColor: Colors.surfaceLow,
   },
   modalCancelText: {

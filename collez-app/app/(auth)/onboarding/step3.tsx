@@ -26,6 +26,7 @@ import { applyReferralCode } from '../../../src/services/referralService';
 import {
   Colors, Typography, Spacing, BorderRadius,
 } from '../../../src/config/theme';
+import { HalftoneOverlay } from '../../../src/components/shared/HalftoneOverlay';
 
 const TOTAL_STEPS = 3;
 const STEP = 3;
@@ -183,6 +184,7 @@ export default function OnboardingStep3() {
 
   return (
     <View style={styles.root}>
+      <HalftoneOverlay dotColor="#6b03f1" spacing={12} opacity={0.1} />
       {/* Confetti */}
       <View style={styles.confettiContainer} pointerEvents="none">
         {confetti.map(c => (
@@ -198,9 +200,9 @@ export default function OnboardingStep3() {
         <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
 
         <Text style={styles.emoji}>🎉</Text>
-        <Text style={styles.headline}>You're all set!</Text>
+        <Text style={styles.headline}>Stay{'\n'}Consistent.</Text>
         <Text style={styles.subheadline}>
-          Welcome to COLLEZ. Your journey to becoming a top scholar starts now.
+          Get rewarded. Your journey to becoming a top scholar starts now.
         </Text>
 
         {/* +2 XP badge */}
@@ -222,6 +224,7 @@ export default function OnboardingStep3() {
             title="Enter COLLEZ ⚡"
             onPress={handleEnter}
             loading={loading}
+            variant="secondary"
           />
         </View>
       </ScrollView>
@@ -281,7 +284,9 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     height: 4,
-    backgroundColor: `${Colors.onSurfaceVariant}33`,
+    backgroundColor: Colors.surfaceContainerHighest,
+    borderWidth: 3,
+    borderColor: '#111111',
     borderRadius: 2,
     overflow: 'hidden',
     marginBottom: Spacing.sm,
@@ -289,7 +294,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
     borderRadius: 2,
   },
   stepLabel: {
@@ -304,12 +309,16 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   headline: {
-    fontSize: Typography.size.xxl,
+    fontSize: Typography.size.displayHero ?? 72,
     fontFamily: Typography.fontFamily.heading,
-    color: Colors.onSurface,
-    fontWeight: '700',
+    color: Colors.primary,
+    fontWeight: '900',
     textAlign: 'center',
     marginBottom: Spacing.sm,
+    textTransform: 'uppercase',
+    textShadowColor: '#111111',
+    textShadowOffset: { width: 4, height: 4 },
+    textShadowRadius: 0,
   },
   subheadline: {
     fontSize: Typography.size.sm,
@@ -320,23 +329,30 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   xpBadge: {
-    backgroundColor: `${Colors.success}22`,
-    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primaryContainer,
+    borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: `${Colors.success}66`,
+    borderWidth: 3,
+    borderColor: '#111111',
     alignSelf: 'center',
     marginBottom: Spacing.xl,
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 6, height: 6 },
+    shadowRadius: 0,
   },
   xpText: {
-    fontSize: Typography.size.md,
+    fontSize: Typography.size.headlineMd ?? 24,
     fontFamily: Typography.fontFamily.heading,
-    color: Colors.success,
-    fontWeight: '700',
+    color: '#000000',
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   summaryCard: {
     width: '100%',
+    borderWidth: 3,
+    borderColor: '#111111',
   },
   btnWrap: {
     width: '100%',

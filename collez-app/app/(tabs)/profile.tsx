@@ -19,6 +19,7 @@ import { BadgeIcon } from '../../src/components/shared/BadgeIcon';
 import { ErrorState } from '../../src/components/shared/ErrorState';
 import { GradientButton } from '../../src/components/shared/GradientButton';
 import { GlassCard } from '../../src/components/shared/GlassCard';
+import { TopAppBar } from '../../src/components/shared/TopAppBar';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { useAuthStore } from '../../src/store/authStore';
 import { useUserStore } from '../../src/store/userStore';
@@ -139,6 +140,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.screen}>
+      <TopAppBar avatarUrl={profile?.avatar_url} xp={profile?.xp ?? 0} />
       <ScrollView contentContainerStyle={styles.content}>
         <GlassCard style={styles.headerCard}>
           <Pressable style={styles.avatarWrap} onPress={handlePickAvatar}>
@@ -315,6 +317,7 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.lg,
     gap: Spacing.md,
+    paddingTop: Spacing.md,
   },
   headerCard: {
     alignItems: 'center',
@@ -342,7 +345,9 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 2,
+    borderColor: '#111111',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -406,7 +411,9 @@ const styles = StyleSheet.create({
     fontSize: Typography.size.sm,
   },
   coordinatorApplyBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 3,
+    borderColor: '#111111',
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 14,
@@ -415,7 +422,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   coordinatorApplyText: {
-    color: Colors.background,
+    color: '#111111',
     fontFamily: Typography.fontFamily.heading,
     fontSize: Typography.size.sm,
     fontWeight: '700',
@@ -495,8 +502,8 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: Colors.surfaceLow,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     borderRadius: 12,
     color: Colors.onSurface,
     fontFamily: Typography.fontFamily.body,

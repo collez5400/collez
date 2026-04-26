@@ -13,11 +13,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { EmptyState } from '../../src/components/shared/EmptyState';
 import { GlassCard } from '../../src/components/shared/GlassCard';
+import { TopAppBar } from '../../src/components/shared/TopAppBar';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { useFriendStore } from '../../src/store/friendStore';
+import { useAuthStore } from '../../src/store/authStore';
 
 export default function FriendsScreen() {
   const router = useRouter();
+  const avatarUrl = useAuthStore((s) => s.user?.avatar_url);
   const {
     friends,
     pendingIncoming,
@@ -167,6 +170,7 @@ export default function FriendsScreen() {
 
   return (
     <View style={styles.screen}>
+      <TopAppBar avatarUrl={avatarUrl} onAvatarPress={() => router.push('/(tabs)/profile')} />
       {!hasContent && !isLoading ? (
         <View style={styles.headerWrap}>
           <Text style={styles.title}>Friends</Text>
@@ -265,10 +269,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   title: {
-    color: Colors.onSurface,
+    color: Colors.primary,
     fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.xl,
-    fontWeight: '700',
+    fontSize: Typography.size.displayHero ?? 72,
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   headerWrap: {
     padding: Spacing.lg,
@@ -300,10 +305,14 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}55`,
-    backgroundColor: Colors.surfaceLow,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surface,
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
   },
   searchInput: {
     flex: 1,
@@ -331,6 +340,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
     padding: Spacing.md,
+    borderWidth: 3,
+    borderColor: '#110e05',
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 8, height: 8 },
+    shadowRadius: 0,
   },
   avatar: {
     width: 36,
@@ -364,9 +379,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    backgroundColor: `${Colors.secondary}22`,
-    borderWidth: 1,
-    borderColor: `${Colors.secondary}55`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHigh,
   },
   badgeText: {
     color: Colors.secondary,
@@ -383,15 +398,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: Spacing.sm,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 3,
+    borderColor: '#111111',
   },
   acceptBtn: {
-    backgroundColor: `${Colors.primary}22`,
-    borderColor: `${Colors.primary}55`,
+    backgroundColor: Colors.primaryContainer,
   },
   rejectBtn: {
-    backgroundColor: `${Colors.error}14`,
-    borderColor: `${Colors.error}44`,
+    backgroundColor: Colors.surfaceContainerHigh,
   },
   acceptText: {
     color: Colors.primary,
@@ -416,9 +430,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}55`,
-    backgroundColor: `${Colors.primary}18`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHigh,
   },
   compareText: {
     color: Colors.primary,

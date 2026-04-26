@@ -7,6 +7,9 @@ import {
   TextInput,
   TouchableOpacity,
   Keyboard,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Animated, {
@@ -16,7 +19,6 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
 import { GradientButton } from '../shared/GradientButton';
@@ -44,8 +46,6 @@ const getIsoDate = (date: Date) => {
 };
 
 export default function AddTaskSheet({ isVisible, onClose }: AddTaskSheetProps) {
-  const translateY = useSharedValue(SCREEN_HEIGHT);
-  const opacity = useSharedValue(0);
   const { addTask, folders } = useTaskStore();
 
   const [title, setTitle] = useState('');
@@ -61,19 +61,6 @@ export default function AddTaskSheet({ isVisible, onClose }: AddTaskSheetProps) 
     return folders.find((folder) => folder.id === folderId)?.name ?? 'No folder';
   }, [folderId, folders]);
 
-  useEffect(() => {
-    if (isVisible) {
-      opacity.value = withTiming(1, { duration: 220 });
-      translateY.value = withSpring(0, { damping: 20, stiffness: 160 });
-      return;
-    }
-
-    translateY.value = withTiming(SCREEN_HEIGHT, { duration: 240 });
-    opacity.value = withTiming(0, { duration: 220 }, (finished) => {
-      if (finished) runOnJS(resetForm)();
-    });
-  }, [isVisible, opacity, translateY]);
-
   const resetForm = () => {
     setTitle('');
     setDescription('');
@@ -86,6 +73,7 @@ export default function AddTaskSheet({ isVisible, onClose }: AddTaskSheetProps) 
 
   const closeSheet = () => {
     Keyboard.dismiss();
+    resetForm();
     onClose();
   };
 
@@ -101,132 +89,129 @@ export default function AddTaskSheet({ isVisible, onClose }: AddTaskSheetProps) 
     closeSheet();
   };
 
-  const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
-
-  const backdropStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
-
-  if (!isVisible && translateY.value === SCREEN_HEIGHT) return null;
-
   return (
-    <View style={styles.container} pointerEvents={isVisible ? 'auto' : 'none'}>
-      <Animated.View style={[styles.backdrop, backdropStyle]}>
-        <BlurView intensity={16} style={StyleSheet.absoluteFill} tint="dark" />
-        <TouchableOpacity style={StyleSheet.absoluteFill} onPress={closeSheet} />
-      </Animated.View>
+    <Modal
+      visible={isVisible}
+      transparent
+      animationType="slide"
+      onRequestClose={closeSheet}
+    >
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={closeSheet} />
 
-      <Animated.View style={[styles.sheet, sheetStyle]}>
-        <View style={styles.handle} />
-        <Text style={styles.title}>Add Task</Text>
+        <View style={styles.sheet}>
+          <View style={styles.handle} />
+          <Text style={styles.title}>Add Task</Text>
 
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Task title"
-            placeholderTextColor={Colors.outline}
-            value={title}
-            onChangeText={setTitle}
-          />
-
-          <TextInput
-            style={[styles.input, styles.multilineInput]}
-            placeholder="Description (optional)"
-            placeholderTextColor={Colors.outline}
-            value={description}
-            onChangeText={setDescription}
-            multiline
-          />
-
-          <Text style={styles.label}>Category</Text>
-          <View style={styles.categoryRow}>
-            {CATEGORY_CONFIG.map((item) => {
-              const isActive = category === item.id;
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  style={[
-                    styles.categoryChip,
-                    isActive && { borderColor: item.color, backgroundColor: `${item.color}22` },
-                  ]}
-                  onPress={() => setCategory(item.id)}
-                >
-                  <View style={[styles.categoryDot, { backgroundColor: item.color }]} />
-                  <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          <View style={styles.row}>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => setShowDatePicker((prev) => !prev)}
-            >
-              <MaterialIcons name="event" size={18} color={Colors.onSurfaceVariant} />
-              <Text style={styles.selectText}>
-                {dueDate ? getIsoDate(dueDate) : 'Set due date'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => setShowFolderPicker((prev) => !prev)}
-            >
-              <MaterialIcons name="folder-open" size={18} color={Colors.onSurfaceVariant} />
-              <Text style={styles.selectText} numberOfLines={1}>
-                {selectedFolderName}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {showDatePicker ? (
-            <DateTimePicker
-              mode="date"
-              display="default"
-              value={dueDate ?? new Date()}
-              onChange={(_, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) setDueDate(selectedDate);
-              }}
+          <View style={styles.form}>
+            <TextInput
+              style={styles.input}
+              placeholder="Task title"
+              placeholderTextColor={Colors.outline}
+              value={title}
+              onChangeText={setTitle}
             />
-          ) : null}
 
-          {showFolderPicker ? (
-            <View style={styles.folderList}>
+            <TextInput
+              style={[styles.input, styles.multilineInput]}
+              placeholder="Description (optional)"
+              placeholderTextColor={Colors.outline}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+            />
+
+            <Text style={styles.label}>Category</Text>
+            <View style={styles.categoryRow}>
+              {CATEGORY_CONFIG.map((item) => {
+                const isActive = category === item.id;
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={[
+                      styles.categoryChip,
+                      isActive && { borderColor: item.color, backgroundColor: `${item.color}22` },
+                    ]}
+                    onPress={() => setCategory(item.id)}
+                  >
+                    <View style={[styles.categoryDot, { backgroundColor: item.color }]} />
+                    <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <View style={styles.row}>
               <TouchableOpacity
-                style={styles.folderOption}
-                onPress={() => {
-                  setFolderId(undefined);
-                  setShowFolderPicker(false);
-                }}
+                style={styles.selectButton}
+                onPress={() => setShowDatePicker((prev) => !prev)}
               >
-                <Text style={styles.folderText}>No folder</Text>
+                <MaterialIcons name="event" size={18} color={Colors.onSurfaceVariant} />
+                <Text style={styles.selectText}>
+                  {dueDate ? getIsoDate(dueDate) : 'Set due date'}
+                </Text>
               </TouchableOpacity>
 
-              {folders.map((folder) => (
+              <TouchableOpacity
+                style={styles.selectButton}
+                onPress={() => setShowFolderPicker((prev) => !prev)}
+              >
+                <MaterialIcons name="folder-open" size={18} color={Colors.onSurfaceVariant} />
+                <Text style={styles.selectText} numberOfLines={1}>
+                  {selectedFolderName}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {showDatePicker ? (
+              <DateTimePicker
+                mode="date"
+                display="default"
+                value={dueDate ?? new Date()}
+                onChange={(_, selectedDate) => {
+                  setShowDatePicker(false);
+                  if (selectedDate) setDueDate(selectedDate);
+                }}
+              />
+            ) : null}
+
+            {showFolderPicker ? (
+              <View style={styles.folderList}>
                 <TouchableOpacity
-                  key={folder.id}
                   style={styles.folderOption}
                   onPress={() => {
-                    setFolderId(folder.id);
+                    setFolderId(undefined);
                     setShowFolderPicker(false);
                   }}
                 >
-                  <Text style={styles.folderText}>{folder.name}</Text>
+                  <Text style={styles.folderText}>No folder</Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-          ) : null}
 
-          <GradientButton title="Save Task" onPress={handleSave} disabled={!title.trim()} />
+                {folders.map((folder) => (
+                  <TouchableOpacity
+                    key={folder.id}
+                    style={styles.folderOption}
+                    onPress={() => {
+                      setFolderId(folder.id);
+                      setShowFolderPicker(false);
+                    }}
+                  >
+                    <Text style={styles.folderText}>{folder.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : null}
+
+            <GradientButton title="Save Task" onPress={handleSave} disabled={!title.trim()} />
+          </View>
         </View>
-      </Animated.View>
-    </View>
+      </KeyboardAvoidingView>
+    </Modal>
   );
 }
 
@@ -244,6 +229,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderTopLeftRadius: BorderRadius.lg,
     borderTopRightRadius: BorderRadius.lg,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#111111',
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.xl,
     paddingTop: Spacing.sm,
@@ -270,8 +259,8 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: Colors.surfaceLow,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     color: Colors.onSurface,
     paddingHorizontal: Spacing.md,
     paddingVertical: 12,
@@ -295,8 +284,8 @@ const styles = StyleSheet.create({
   categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     borderRadius: BorderRadius.full,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -327,8 +316,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.surfaceLow,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     paddingHorizontal: Spacing.md,
     paddingVertical: 12,
   },
@@ -342,8 +331,8 @@ const styles = StyleSheet.create({
   folderList: {
     backgroundColor: Colors.surfaceLow,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     maxHeight: 160,
   },
   folderOption: {

@@ -3,7 +3,6 @@ import { LayoutChangeEvent, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { withLayoutContext } from 'expo-router';
 import { createMaterialTopTabNavigator, MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import Animated, { FadeIn, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import Svg, { Defs, LinearGradient as SvgLinearGradient, Rect, Stop } from 'react-native-svg';
 import { BorderRadius, Colors, Spacing, Typography } from '../../../src/config/theme';
 
 const TopTabs = withLayoutContext(createMaterialTopTabNavigator().Navigator);
@@ -22,15 +21,7 @@ function VaultTabBar({ state, descriptors, navigation }: MaterialTopTabBarProps)
     <View style={styles.tabBarContainer}>
       <View style={styles.tabBarInner} onLayout={handleLayout}>
         <Animated.View entering={FadeIn.duration(220)} style={[styles.indicatorSlot, { width: tabWidth }, indicatorStyle]}>
-          <Svg width="100%" height="100%">
-            <Defs>
-              <SvgLinearGradient id="vaultTabGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <Stop offset="0%" stopColor={Colors.primary} />
-                <Stop offset="100%" stopColor={Colors.secondary} />
-              </SvgLinearGradient>
-            </Defs>
-            <Rect x="0" y="0" width="100%" height="100%" rx={999} fill="url(#vaultTabGradient)" />
-          </Svg>
+          <View style={styles.indicatorSolid} />
         </Animated.View>
 
         {state.routes.map((route, index) => {
@@ -83,8 +74,8 @@ export default function VaultLayout() {
 const styles = StyleSheet.create({
   tabBarContainer: {
     backgroundColor: Colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: `${Colors.outline}22`,
+    borderBottomWidth: 4,
+    borderBottomColor: '#111111',
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.xs,
@@ -94,8 +85,8 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.surfaceLow,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}22`,
+    borderWidth: 3,
+    borderColor: '#111111',
     minHeight: 42,
     position: 'relative',
     overflow: 'hidden',
@@ -124,5 +115,16 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     padding: 3,
+  },
+  indicatorSolid: {
+    flex: 1,
+    borderRadius: 999,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 2,
+    borderColor: '#111111',
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 3, height: 3 },
+    shadowRadius: 0,
   },
 });

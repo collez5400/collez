@@ -1,7 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { Colors, Typography, BorderRadius } from '../../config/theme';
 
 interface GradientButtonProps {
@@ -13,6 +12,7 @@ interface GradientButtonProps {
   fullWidth?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  variant?: 'primary' | 'secondary';
 }
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
@@ -26,20 +26,28 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   fullWidth = true,
   style,
   textStyle,
+  variant = 'primary',
 }) => {
-  const scale = useSharedValue(1);
+  const pressed = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [
+      { translateX: withTiming(pressed.value ? 6 : 0, { duration: 75 }) },
+      { translateY: withTiming(pressed.value ? 6 : 0, { duration: 75 }) },
+    ],
+    shadowOffset: {
+      width: withTiming(pressed.value ? 0 : 6, { duration: 75 }),
+      height: withTiming(pressed.value ? 0 : 6, { duration: 75 }),
+    },
     opacity: disabled ? 0.5 : 1,
   }));
 
   const handlePressIn = () => {
-    scale.value = withTiming(0.95, { duration: 100 });
+    pressed.value = 1;
   };
 
   const handlePressOut = () => {
-    scale.value = withTiming(1, { duration: 100 });
+    pressed.value = withSpring(0, { stiffness: 300, damping: 20 });
   };
 
   return (
@@ -58,47 +66,65 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
         animatedStyle,
       ]}
     >
-      <LinearGradient
-        colors={[Colors.primary, Colors.primaryVariant]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradient}
-      >
+      <View style={[styles.buttonBody, variant === 'secondary' && styles.buttonSecondary]}>
         {loading ? (
-          <ActivityIndicator color={Colors.background} />
+          <ActivityIndicator color={variant === 'secondary' ? Colors.onSecondaryContainer : Colors.onPrimary} />
         ) : (
           <>
             {icon && icon}
-            <Text style={[styles.text, textStyle, icon ? styles.textWithIcon : null]}>
+            <Text
+              style={[
+                styles.text,
+                variant === 'secondary' && styles.textSecondary,
+                textStyle,
+                icon ? styles.textWithIcon : null,
+              ]}
+            >
               {title}
             </Text>
           </>
         )}
-      </LinearGradient>
+      </View>
     </AnimatedTouchable>
   );
 };
 
 const styles = StyleSheet.create({
   touchable: {
-    borderRadius: BorderRadius.full,
+    borderRadius: BorderRadius.md,
     overflow: 'hidden',
+    borderWidth: 4,
+    borderColor: '#111111',
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   fullWidth: {
     width: '100%',
   },
-  gradient: {
+  buttonBody: {
+    backgroundColor: Colors.primaryContainer,
     paddingVertical: 16,
     paddingHorizontal: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  buttonSecondary: {
+    backgroundColor: Colors.secondaryContainer,
   },
   text: {
-    color: Colors.background,
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.md,
+    color: Colors.onPrimary,
+    fontFamily: Typography.fontFamily.button,
+    fontSize: Typography.size.buttonLabel ?? Typography.size.md,
     fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  textSecondary: {
+    color: Colors.onSecondaryContainer,
   },
   textWithIcon: {
     marginLeft: 8,

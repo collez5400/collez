@@ -24,6 +24,7 @@ import { useAuthStore } from '../../../src/store/authStore';
 import {
   Colors, Typography, Spacing, BorderRadius,
 } from '../../../src/config/theme';
+import { HalftoneOverlay } from '../../../src/components/shared/HalftoneOverlay';
 
 const TOTAL_STEPS = 3;
 const STEP = 2;
@@ -293,6 +294,7 @@ export default function OnboardingStep2() {
 
   return (
     <View style={styles.root}>
+      <HalftoneOverlay dotColor="#6b03f1" spacing={14} opacity={0.15} />
       {/* Progress */}
       <View style={styles.progressTrack}>
         <Animated.View style={[styles.progressFill, progressAnimStyle]} />
@@ -302,6 +304,25 @@ export default function OnboardingStep2() {
       <Text style={styles.subheadline}>Select your college to join your campus leaderboard.</Text>
 
       {/* Search */}
+      <View style={styles.podiumWrap}>
+        <View style={[styles.podiumCol, styles.podiumLeft]}>
+          <View style={styles.podiumAvatar} />
+          <View style={styles.scoreChip}><Text style={styles.scoreChipText}>850</Text></View>
+          <View style={styles.blockLeft}><Text style={styles.rankMark}>2</Text></View>
+        </View>
+        <View style={[styles.podiumCol, styles.podiumCenter]}>
+          <View style={[styles.podiumAvatar, styles.podiumAvatarCenter]} />
+          <View style={[styles.scoreChip, styles.scoreChipCenter]}><Text style={styles.scoreChipText}>1200</Text></View>
+          <View style={styles.blockCenter}><Text style={styles.rankMarkCenter}>1</Text></View>
+        </View>
+        <View style={[styles.podiumCol, styles.podiumRight]}>
+          <View style={styles.podiumAvatar} />
+          <View style={styles.scoreChip}><Text style={styles.scoreChipText}>600</Text></View>
+          <View style={styles.blockRight}><Text style={styles.rankMark}>3</Text></View>
+        </View>
+      </View>
+      <Text style={styles.heroLine}>Win with friends.</Text>
+
       <View style={styles.searchRow}>
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
@@ -467,12 +488,14 @@ const styles = StyleSheet.create({
   centeredContent: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
   progressTrack: {
     height: 4,
-    backgroundColor: `${Colors.onSurfaceVariant}33`,
+    backgroundColor: Colors.surfaceContainerHighest,
+    borderWidth: 3,
+    borderColor: '#111111',
     borderRadius: 2,
     overflow: 'hidden',
     marginBottom: Spacing.sm,
   },
-  progressFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 2 },
+  progressFill: { height: '100%', backgroundColor: Colors.primaryContainer, borderRadius: 2 },
   stepLabel: {
     fontSize: Typography.size.xs,
     color: Colors.onSurfaceVariant,
@@ -486,6 +509,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: Spacing.xs,
   },
+  heroLine: {
+    marginTop: 8,
+    marginBottom: 10,
+    textAlign: 'center',
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.headlineMd ?? 24,
+    fontWeight: '700',
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
+  },
   subheadline: {
     fontSize: Typography.size.sm,
     color: Colors.onSurfaceVariant,
@@ -496,12 +531,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.onSurfaceVariant}44`,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: '#111111',
     paddingHorizontal: Spacing.md,
     height: 48,
     marginBottom: Spacing.md,
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
   },
   searchIcon: { fontSize: 16, marginRight: Spacing.sm },
   searchInput: {
@@ -515,11 +554,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
+    borderRadius: 10,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}33`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
   },
   collegeCardSelected: {
     borderColor: Colors.primary,
@@ -548,6 +591,106 @@ const styles = StyleSheet.create({
   requestBtn: {
     alignSelf: 'center',
     paddingVertical: Spacing.md,
+  },
+  podiumWrap: {
+    height: 300,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    gap: 14,
+    marginBottom: 4,
+  },
+  podiumCol: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  podiumLeft: { marginBottom: 16 },
+  podiumCenter: { marginBottom: 0 },
+  podiumRight: { marginBottom: 48 },
+  podiumAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 4,
+    borderColor: '#000000',
+    backgroundColor: Colors.surfaceVariant,
+    marginBottom: -14,
+    zIndex: 2,
+  },
+  podiumAvatarCenter: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.primaryContainer,
+  },
+  scoreChip: {
+    borderRadius: 999,
+    borderWidth: 3,
+    borderColor: '#000000',
+    backgroundColor: Colors.surfaceContainer,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    shadowColor: '#000000',
+    shadowOpacity: 1,
+    shadowOffset: { width: 2, height: 2 },
+    shadowRadius: 0,
+    marginBottom: 6,
+    transform: [{ rotate: '-3deg' }],
+    zIndex: 3,
+  },
+  scoreChipCenter: {
+    transform: [{ rotate: '2deg' }],
+    backgroundColor: Colors.primaryContainer,
+  },
+  scoreChipText: {
+    color: Colors.onSurface,
+    fontFamily: Typography.fontFamily.button,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  blockLeft: {
+    width: 84,
+    height: 140,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    borderWidth: 3,
+    borderColor: '#000000',
+    backgroundColor: Colors.secondaryContainer,
+    alignItems: 'center',
+  },
+  blockCenter: {
+    width: 96,
+    height: 200,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    borderWidth: 3,
+    borderColor: '#000000',
+    backgroundColor: Colors.primaryContainer,
+    alignItems: 'center',
+  },
+  blockRight: {
+    width: 84,
+    height: 100,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    borderWidth: 3,
+    borderColor: '#000000',
+    backgroundColor: Colors.surfaceVariant,
+    alignItems: 'center',
+  },
+  rankMark: {
+    marginTop: 10,
+    color: Colors.onSurface,
+    fontFamily: Typography.fontFamily.heading,
+    fontWeight: '900',
+    fontSize: 30,
+  },
+  rankMarkCenter: {
+    marginTop: 10,
+    color: Colors.onPrimary,
+    fontFamily: Typography.fontFamily.heading,
+    fontWeight: '900',
+    fontSize: 54,
   },
   requestBtnText: {
     color: Colors.primary,
@@ -583,8 +726,8 @@ const styles = StyleSheet.create({
   modalInput: {
     backgroundColor: Colors.surfaceLow,
     borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     paddingHorizontal: Spacing.md,
     height: 48,
     color: Colors.onSurface,
@@ -594,8 +737,8 @@ const styles = StyleSheet.create({
   modalInputPicker: {
     backgroundColor: Colors.surfaceLow,
     borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     paddingHorizontal: Spacing.md,
     height: 48,
     justifyContent: 'center',

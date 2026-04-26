@@ -44,10 +44,15 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.surfaceHigh,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}66`,
+    borderWidth: 3,
+    borderColor: '#111111',
     padding: Spacing.md,
     gap: Spacing.sm,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
+    elevation: 0,
   },
   header: {
     flexDirection: 'row',

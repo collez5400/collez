@@ -6,9 +6,11 @@ import { DayOfWeek, TimetableEntry } from '../../../src/models/timetable';
 import { useTimetableStore } from '../../../src/store/timetableStore';
 import { AddSubjectSheet } from '../../../src/components/timetable/AddSubjectSheet';
 import { EmptyState } from '../../../src/components/shared/EmptyState';
+import { TopAppBar } from '../../../src/components/shared/TopAppBar';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../src/config/theme';
 import { useStreakStore } from '../../../src/store/streakStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuthStore } from '../../../src/store/authStore';
 
 const DAYS = [
   { id: DayOfWeek.Monday, label: 'Mon' },
@@ -22,6 +24,7 @@ const DAYS = [
 export default function TimetableScreen() {
   const { entries, selectedDay, setSelectedDay, fetchEntries, addEntry, updateEntry, deleteEntry, reorderEntries, duplicateDay, resetSemester, generateWeekSlots } = useTimetableStore();
   const insets = useSafeAreaInsets();
+  const user = useAuthStore((s) => s.user);
   
   const [sheetVisible, setSheetVisible] = useState(false);
   const [editingEntry, setEditingEntry] = useState<TimetableEntry | null>(null);
@@ -105,9 +108,10 @@ export default function TimetableScreen() {
 
   return (
     <View style={styles.root}>
+      <TopAppBar avatarUrl={user?.avatar_url} xp={user?.xp ?? 0} onAvatarPress={() => {}} />
       {/* Header actions */}
       <View style={styles.header}>
-        <Text style={styles.title}>Timetable</Text>
+        <Text style={styles.title}>TIMETABLE</Text>
         <View style={styles.actions}>
           <TouchableOpacity onPress={() => setIsGeneratorOpen(true)} style={styles.actionBtn}>
             <MaterialIcons name="auto-awesome" size={20} color={Colors.primary} />
@@ -206,32 +210,112 @@ export default function TimetableScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.background },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Spacing.md, marginTop: Spacing.sm },
-  title: { fontSize: Typography.size.xl, fontFamily: Typography.fontFamily.heading, color: Colors.onSurface, fontWeight: '700' },
+  title: {
+    fontSize: Typography.size.displayHero ?? 72,
+    fontFamily: Typography.fontFamily.heading,
+    color: Colors.primary,
+    fontWeight: '900',
+    textShadowColor: '#111111',
+    textShadowOffset: { width: 4, height: 4 },
+    textShadowRadius: 0,
+  },
   actions: { flexDirection: 'row', gap: Spacing.sm },
-  actionBtn: { padding: 8, backgroundColor: Colors.surfaceLow, borderRadius: BorderRadius.full },
+  actionBtn: {
+    padding: 8,
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: BorderRadius.full,
+    borderWidth: 3,
+    borderColor: '#111111',
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 3, height: 3 },
+    shadowRadius: 0,
+  },
   daysScroll: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, gap: Spacing.xs, maxHeight: 44 },
-  dayPill: { paddingHorizontal: 20, paddingVertical: 8, borderRadius: BorderRadius.full, backgroundColor: Colors.surfaceLow, borderWidth: 1, borderColor: `${Colors.outline}33` },
-  dayPillActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  dayPill: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surfaceContainerHighest,
+    borderWidth: 3,
+    borderColor: '#111111',
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 3, height: 3 },
+    shadowRadius: 0,
+  },
+  dayPillActive: { backgroundColor: Colors.primaryContainer, borderColor: '#111111' },
   dayLabel: { fontSize: 13, fontFamily: Typography.fontFamily.body, color: Colors.onSurfaceVariant, fontWeight: '600' },
-  dayLabelActive: { color: Colors.background },
+  dayLabelActive: { color: Colors.onPrimary, fontFamily: Typography.fontFamily.button, textTransform: 'uppercase' },
   list: { padding: Spacing.md, paddingBottom: 100, gap: Spacing.md },
-  card: { height: 76, flexDirection: 'row', backgroundColor: Colors.surface, borderRadius: BorderRadius.md, overflow: 'hidden', borderWidth: 1, alignItems: 'center' },
+  card: {
+    height: 96,
+    flexDirection: 'row',
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: '#111111',
+    alignItems: 'center',
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 6, height: 6 },
+    shadowRadius: 0,
+  },
   colorStrip: { width: 6, height: '100%' },
   cardContent: { flex: 1, paddingHorizontal: Spacing.md },
-  subject: { fontSize: 16, fontFamily: Typography.fontFamily.body, fontWeight: '700', color: Colors.onSurface, marginBottom: 4 },
+  subject: {
+    fontSize: 20,
+    fontFamily: Typography.fontFamily.heading,
+    fontWeight: '700',
+    color: Colors.primary,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
   row: { flexDirection: 'row', alignItems: 'center' },
-  time: { fontSize: 12, fontFamily: Typography.fontFamily.body, color: Colors.onSurfaceVariant },
+  time: {
+    fontSize: 12,
+    fontFamily: Typography.fontFamily.button,
+    color: Colors.onSurfaceVariant,
+    textTransform: 'uppercase',
+  },
   room: { fontSize: 12, fontFamily: Typography.fontFamily.body, color: Colors.primary },
   delBtn: { padding: Spacing.md },
-  fab: { position: 'absolute', bottom: Spacing.xl + 40, right: Spacing.md, width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center', ...Shadows.glass, elevation: 8 },
+  fab: {
+    position: 'absolute',
+    bottom: Spacing.xl + 40,
+    right: Spacing.md,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.primaryContainer,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+    borderColor: '#111111',
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 6, height: 6 },
+    shadowRadius: 0,
+  },
   modalBackdrop: { flex: 1, backgroundColor: '#00000077', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: Colors.surface, borderTopLeftRadius: BorderRadius.xl, borderTopRightRadius: BorderRadius.xl, padding: Spacing.lg, gap: Spacing.sm },
+  modalCard: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#111111',
+    padding: Spacing.lg,
+    gap: Spacing.sm,
+  },
   modalTitle: { fontSize: Typography.size.lg, fontFamily: Typography.fontFamily.heading, color: Colors.onSurface, fontWeight: '700' },
   modalSub: { fontSize: Typography.size.sm, fontFamily: Typography.fontFamily.body, color: Colors.onSurfaceVariant, marginBottom: Spacing.sm },
-  input: { backgroundColor: Colors.surfaceLow, borderWidth: 1, borderColor: `${Colors.outline}44`, borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, paddingVertical: 12, color: Colors.onSurface, fontFamily: Typography.fontFamily.body },
+  input: { backgroundColor: Colors.surfaceLow, borderWidth: 3, borderColor: '#111111', borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, paddingVertical: 12, color: Colors.onSurface, fontFamily: Typography.fontFamily.body },
   modalButtons: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.sm },
-  secondaryBtn: { flex: 1, borderWidth: 1, borderColor: `${Colors.outline}66`, borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
+  secondaryBtn: { flex: 1, borderWidth: 3, borderColor: '#111111', borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center', paddingVertical: 12, backgroundColor: Colors.surfaceContainerHigh },
   secondaryBtnText: { color: Colors.onSurfaceVariant, fontFamily: Typography.fontFamily.body, fontWeight: '600' },
-  primaryBtn: { flex: 1, backgroundColor: Colors.primary, borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
-  primaryBtnText: { color: Colors.background, fontFamily: Typography.fontFamily.body, fontWeight: '700' },
+  primaryBtn: { flex: 1, backgroundColor: Colors.primaryContainer, borderWidth: 3, borderColor: '#111111', borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center', paddingVertical: 12 },
+  primaryBtnText: { color: '#111111', fontFamily: Typography.fontFamily.body, fontWeight: '700' },
 });

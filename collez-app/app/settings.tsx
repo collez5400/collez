@@ -1,15 +1,19 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Spacing, Typography } from '../src/config/theme';
 import { GlassCard } from '../src/components/shared/GlassCard';
 import { useAuthStore } from '../src/store/authStore';
 import { supabase } from '../src/config/supabase';
+import { TopAppBar } from '../src/components/shared/TopAppBar';
 
 const appVersion = Constants.expoConfig?.version ?? 'dev';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const user = useAuthStore((s) => s.user);
 
   const pushEnabled = user?.push_enabled ?? true;
@@ -41,8 +45,8 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.screen}>
+      <TopAppBar avatarUrl={user?.avatar_url} xp={user?.xp ?? 0} onAvatarPress={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Settings</Text>
         <GlassCard style={styles.card}>
           <Text style={styles.rowTitle}>Edit Name</Text>
           <Text style={styles.rowText}>Use Edit Profile from your profile screen.</Text>
@@ -134,23 +138,21 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.lg,
     gap: Spacing.sm,
-  },
-  title: {
-    color: Colors.onSurface,
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.xl,
-    fontWeight: '700',
-    marginBottom: Spacing.sm,
+    paddingTop: Spacing.md,
   },
   card: {
     gap: 4,
   },
   linkCard: {
-    backgroundColor: Colors.surfaceLow,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}33`,
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderWidth: 3,
+    borderColor: '#111111',
     borderRadius: 12,
     padding: Spacing.md,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
   },
   switchRow: {
     flexDirection: 'row',
@@ -181,12 +183,17 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     marginTop: Spacing.sm,
-    backgroundColor: `${Colors.error}22`,
-    borderColor: `${Colors.error}66`,
-    borderWidth: 1,
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderColor: '#111111',
+    borderWidth: 3,
     borderRadius: 12,
     paddingVertical: Spacing.md,
     alignItems: 'center',
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
+    elevation: 0,
   },
   deleteText: {
     color: Colors.error,

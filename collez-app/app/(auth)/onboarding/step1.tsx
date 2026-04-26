@@ -22,6 +22,7 @@ import { supabase } from '../../../src/config/supabase';
 import {
   Colors, Typography, Spacing, BorderRadius,
 } from '../../../src/config/theme';
+import { HalftoneOverlay } from '../../../src/components/shared/HalftoneOverlay';
 
 const TOTAL_STEPS = 3;
 const STEP = 1;
@@ -123,6 +124,7 @@ export default function OnboardingStep1() {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <HalftoneOverlay dotColor="#d7c4ff" spacing={10} opacity={0.12} />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {/* Progress bar */}
         <View style={styles.progressTrack}>
@@ -130,9 +132,9 @@ export default function OnboardingStep1() {
         </View>
         <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
 
-        <Text style={styles.headline}>Set Up Your Profile</Text>
+        <Text style={styles.headline}>Everything college. One app.</Text>
         <Text style={styles.subheadline}>
-          This is how you'll appear on the leaderboard and to other students.
+          Set up your identity to start climbing leaderboards.
         </Text>
 
         {/* Avatar picker */}
@@ -233,16 +235,24 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   progressTrack: {
-    height: 4,
-    backgroundColor: `${Colors.onSurfaceVariant}33`,
-    borderRadius: 2,
+    height: 8,
+    backgroundColor: Colors.surfaceContainerHighest,
+    borderRadius: 999,
+    borderWidth: 3,
+    borderColor: '#111111',
     overflow: 'hidden',
     marginBottom: Spacing.sm,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
+    backgroundColor: Colors.primaryContainer,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: '#000000',
+    shadowColor: '#000000',
+    shadowOpacity: 1,
+    shadowOffset: { width: 2, height: 2 },
+    shadowRadius: 0,
   },
   stepLabel: {
     fontSize: Typography.size.xs,
@@ -251,11 +261,15 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   headline: {
-    fontSize: Typography.size.xxl,
+    fontSize: Typography.size.headlineLg ?? 40,
     fontFamily: Typography.fontFamily.heading,
-    color: Colors.onSurface,
+    color: Colors.primaryFixedDim,
     fontWeight: '700',
     marginBottom: Spacing.sm,
+    textTransform: 'uppercase',
+    textShadowColor: '#111111',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
   },
   subheadline: {
     fontSize: Typography.size.sm,
@@ -269,23 +283,30 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   avatarImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: Colors.primary,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    borderColor: '#111111',
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 8, height: 8 },
+    shadowRadius: 0,
   },
   avatarPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: Colors.onSurfaceVariant,
-    borderStyle: 'dashed',
-    backgroundColor: Colors.surface,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 8, height: 8 },
+    shadowRadius: 0,
   },
   avatarIcon: { fontSize: 24 },
   avatarHint: {
@@ -305,11 +326,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.onSurfaceVariant}44`,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: '#111111',
     paddingHorizontal: Spacing.md,
-    height: 52,
+    height: 56,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
+    elevation: 0,
   },
   inputError: {
     borderColor: Colors.error,

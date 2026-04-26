@@ -5,7 +5,6 @@ import {
 import Animated, {
   useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS,
 } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ColorLabel, TimetableEntry, DayOfWeek } from '../../models/timetable';
 import { GradientButton } from '../shared/GradientButton';
@@ -109,7 +108,6 @@ export const AddSubjectSheet: React.FC<AddSubjectSheetProps> = ({
   return (
     <View style={styles.container} pointerEvents={visible ? 'auto' : 'none'}>
       <Animated.View style={[styles.backdrop, backdropStyle]}>
-        <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
         <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => { Keyboard.dismiss(); onClose(); }} />
       </Animated.View>
 
@@ -203,6 +201,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#111111',
     paddingHorizontal: 24,
     paddingBottom: 40,
     paddingTop: Spacing.sm,
@@ -216,14 +218,14 @@ const styles = StyleSheet.create({
   form: { gap: Spacing.md },
   input: {
     backgroundColor: Colors.surfaceLow,
-    borderWidth: 1, borderColor: `${Colors.outline}44`,
+    borderWidth: 3, borderColor: '#111111',
     borderRadius: BorderRadius.md, padding: Spacing.md,
     fontFamily: Typography.fontFamily.body, color: Colors.onSurface, fontSize: 16,
   },
   row: { flexDirection: 'row', gap: Spacing.md },
   timeBtn: {
     flex: 1, backgroundColor: Colors.surfaceLow, borderRadius: BorderRadius.md,
-    padding: Spacing.md, borderWidth: 1, borderColor: `${Colors.outline}44`,
+    padding: Spacing.md, borderWidth: 3, borderColor: '#111111',
   },
   timeLabel: { fontSize: 12, color: Colors.onSurfaceVariant, fontFamily: Typography.fontFamily.body, marginBottom: 4 },
   timeValue: { fontSize: 16, color: Colors.onSurface, fontFamily: Typography.fontFamily.body, fontWeight: '600' },

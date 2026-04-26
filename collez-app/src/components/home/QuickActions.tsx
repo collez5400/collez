@@ -26,10 +26,10 @@ export function QuickActions({
   onCustomize,
 }: QuickActionsProps) {
   const actions: Action[] = [
-    { key: 'task', label: 'Add Task', icon: 'check-circle-outline', onPress: onAddTask, tint: `${Colors.success}1E` },
-    { key: 'note', label: 'Quick Note', icon: 'edit-note', onPress: onQuickNote, tint: `${Colors.primary}20` },
-    { key: 'pdf', label: 'Upload PDF', icon: 'upload-file', onPress: onUploadPdf, tint: `${Colors.accentCoral}24` },
-    { key: 'customize', label: 'Customize', icon: 'tune', onPress: onCustomize, tint: `${Colors.accentGold}24` },
+    { key: 'task', label: 'Add Task', icon: 'check-circle-outline', onPress: onAddTask, tint: Colors.surfaceContainerHigh },
+    { key: 'note', label: 'Quick Note', icon: 'edit-note', onPress: onQuickNote, tint: Colors.surfaceContainerHigh },
+    { key: 'pdf', label: 'Upload PDF', icon: 'upload-file', onPress: onUploadPdf, tint: Colors.surfaceContainerHigh },
+    { key: 'customize', label: 'Customize', icon: 'tune', onPress: onCustomize, tint: Colors.surfaceContainerHigh },
   ];
 
   return (
@@ -59,7 +59,7 @@ function ActionCard({ action, index }: { action: Action; index: number }) {
         }}
       >
         <GlassCard style={[styles.card, { backgroundColor: action.tint }]} variant="cool">
-            <MaterialIcons name={action.icon} size={20} color={Colors.primary} />
+            <MaterialIcons name={action.icon} size={20} color={Colors.primaryContainer} />
             <Text style={styles.text}>{action.label}</Text>
         </GlassCard>
       </Pressable>

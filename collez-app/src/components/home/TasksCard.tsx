@@ -1,5 +1,4 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Task } from '../../models/task';
@@ -46,12 +45,7 @@ export function TasksCard({ tasks, onPress }: TasksCardProps) {
         </View>
         <Text style={styles.meta}>{activeTasks.length} active task(s)</Text>
         <View style={styles.progressTrack}>
-          <LinearGradient
-            colors={[Colors.primary, Colors.primaryVariant]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.progressFill, { width: `${Math.max(progress * 100, 6)}%` }]}
-          />
+          <View style={[styles.progressFill, { width: `${Math.max(progress * 100, 6)}%` }]} />
         </View>
         {previewTasks.length === 0 ? (
           <Text style={styles.empty}>You are all caught up.</Text>
@@ -100,6 +94,7 @@ const styles = StyleSheet.create({
   progressFill: {
     height: '100%',
     borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primaryContainer,
   },
   previewList: {
     marginTop: 4,

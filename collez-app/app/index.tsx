@@ -1,17 +1,13 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, Animated, Dimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '../src/store/authStore';
-import { Colors, Typography, Spacing } from '../src/config/theme';
+import { Colors, Typography } from '../src/config/theme';
+import { HalftoneOverlay } from '../src/components/shared/HalftoneOverlay';
 
 const { width } = Dimensions.get('window');
+const LOGO_URI =
+  'file:///C:/Users/Two Stars HQ/.cursor/projects/c-Users-Two-Stars-HQ-Desktop-collez/assets/c__Users_Two_Stars_HQ_AppData_Roaming_Cursor_User_workspaceStorage_c7123c16d2cecfaee064142bf6d2e0b7_images_ChatGPT_Image_Apr_26__2026__05_15_11_PM-57d29549-c004-4b2a-a725-f208aadbdf07.png';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -21,7 +17,7 @@ export default function SplashScreen() {
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.8)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
-  const barWidth = useRef(new Animated.Value(0)).current;
+  const barWidth = useRef(new Animated.Value(8)).current;
   const glowOpacity = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
@@ -57,7 +53,7 @@ export default function SplashScreen() {
 
     // Loading bar
     Animated.timing(barWidth, {
-      toValue: width - 64,
+      toValue: Math.min(width - 84, 360),
       duration: 2200,
       useNativeDriver: false,
     }).start();
@@ -83,30 +79,24 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Radial glow behind logo */}
+      <HalftoneOverlay dotColor="#6b03f1" spacing={16} opacity={0.15} />
       <Animated.View style={[styles.glowCircle, { opacity: glowOpacity }]} />
+      <Animated.View style={[styles.glowCircle2, { opacity: glowOpacity }]} />
 
-      {/* Logo block */}
       <Animated.View
         style={[styles.logoBlock, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}
       >
-        <LinearGradient
-          colors={[Colors.primary, Colors.primaryVariant]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradientText}
-        >
-          <Text style={styles.logo}>COLLEZ</Text>
-        </LinearGradient>
-
+        <Image source={{ uri: LOGO_URI }} style={styles.logoImage} resizeMode="contain" />
+        <Text style={styles.logo}>LEVEL UP{'\n'}COLLEGE LIFE</Text>
         <Animated.Text style={[styles.subtitle, { opacity: subtitleOpacity }]}>
-          The Kinetic Scholar
+          INITIALIZING...
         </Animated.Text>
       </Animated.View>
 
-      {/* Animated loading bar */}
       <View style={styles.barTrack}>
-        <Animated.View style={[styles.barFill, { width: barWidth }]} />
+        <Animated.View style={[styles.barFill, { width: barWidth }]}>
+          <View style={styles.stripe} />
+        </Animated.View>
       </View>
     </View>
   );
@@ -121,55 +111,89 @@ const styles = StyleSheet.create({
   },
   glowCircle: {
     position: 'absolute',
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: Colors.primary,
-    opacity: 0.06,
-    // Soft glow using shadow
-    shadowColor: Colors.primary,
+    width: 420,
+    height: 420,
+    borderRadius: 210,
+    backgroundColor: Colors.secondaryContainer,
+    opacity: 0.4,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
-    shadowRadius: 120,
+    shadowRadius: 100,
+    elevation: 0,
+  },
+  glowCircle2: {
+    position: 'absolute',
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: Colors.primaryContainer,
+    opacity: 0.3,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 80,
     elevation: 0,
   },
   logoBlock: {
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
-  gradientText: {
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
+  logoImage: {
+    width: 192,
+    height: 192,
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 8, height: 8 },
+    shadowRadius: 0,
+    elevation: 0,
   },
   logo: {
-    fontSize: 64,
-    fontFamily: Typography.fontFamily.heading,
-    fontWeight: '800',
-    letterSpacing: 12,
-    color: Colors.background,
+    fontSize: 56,
+    fontFamily: Typography.fontFamily.display,
+    fontWeight: '900',
+    letterSpacing: -1.8,
+    color: Colors.primary,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    textShadowColor: '#6b03f1',
+    textShadowOffset: { width: 4, height: 4 },
+    textShadowRadius: 0,
   },
   subtitle: {
-    fontSize: Typography.size.md,
-    fontFamily: Typography.fontFamily.body,
-    color: Colors.onSurfaceVariant,
-    letterSpacing: 3,
+    fontSize: 14,
+    fontFamily: Typography.fontFamily.button,
+    color: Colors.primary,
+    letterSpacing: 2.4,
+    fontWeight: '700',
     textTransform: 'uppercase',
-    marginTop: Spacing.sm,
   },
   barTrack: {
     position: 'absolute',
-    bottom: 72,
-    left: 32,
-    right: 32,
-    height: 2,
-    backgroundColor: `${Colors.onSurfaceVariant}33`,
-    borderRadius: 2,
+    bottom: 84,
+    width: Math.min(width - 40, 448),
+    height: 32,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: 8,
     overflow: 'hidden',
+    borderColor: '#111111',
+    borderWidth: 3,
+    shadowColor: '#6b03f1',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
   },
   barFill: {
-    height: '100%',
-    borderRadius: 2,
-    backgroundColor: Colors.primary,
+    height: 24,
+    margin: 1,
+    marginTop: 2,
+    borderRadius: 4,
+    backgroundColor: Colors.primaryContainer,
+    shadowColor: '#ffd400',
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  stripe: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.08)',
   },
 });

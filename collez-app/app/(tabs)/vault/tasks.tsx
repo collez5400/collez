@@ -24,10 +24,12 @@ import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-na
 import Svg, { Circle } from 'react-native-svg';
 import { GradientButton } from '../../../src/components/shared/GradientButton';
 import { EmptyState } from '../../../src/components/shared/EmptyState';
+import { TopAppBar } from '../../../src/components/shared/TopAppBar';
 import { useNoteStore } from '../../../src/store/noteStore';
 import { Note, NoteSortOption, NoteTab } from '../../../src/models/note';
 import NoteEditor from '../../../src/components/notes/NoteEditor';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuthStore } from '../../../src/store/authStore';
 
 const CATEGORIES: (TaskCategory | 'all')[] = ['all', 'study', 'personal', 'college'];
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -217,6 +219,7 @@ const TaskItem = ({
 
 export default function TasksScreen() {
   const insets = useSafeAreaInsets();
+  const user = useAuthStore((s) => s.user);
   const {
     tasks,
     folders,
@@ -458,11 +461,12 @@ export default function TasksScreen() {
 
   return (
     <View style={styles.container}>
+      <TopAppBar avatarUrl={user?.avatar_url} xp={user?.xp ?? 0} />
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>{contentMode === 'tasks' ? 'Your Tasks' : 'My Notes'}</Text>
+          <Text style={styles.headerTitle}>{contentMode === 'tasks' ? 'MISSIONS' : 'MY NOTES'}</Text>
           <Text style={styles.headerSubtitle}>
             {contentMode === 'tasks'
               ? `${tasks.filter((t) => !t.isCompleted && !t.isArchived).length} items remaining`
@@ -942,9 +946,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.xl,
+    fontSize: Typography.size.headlineLg ?? 40,
     fontWeight: '700',
-    color: Colors.onSurface,
+    color: Colors.primaryContainer,
+    textTransform: 'uppercase',
+    textShadowColor: '#111111',
+    textShadowOffset: { width: 4, height: 4 },
+    textShadowRadius: 0,
   },
   headerSubtitle: {
     fontFamily: Typography.fontFamily.body,
@@ -974,8 +982,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.outline + '20',
+    borderWidth: 3,
+    borderColor: '#111111',
   },
   searchInput: {
     flex: 1,
@@ -995,13 +1003,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}33`,
-    backgroundColor: Colors.surfaceLow,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHigh,
+    shadowColor: '#111111',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
   },
   tabButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
+    borderColor: '#111111',
   },
   tabButtonText: {
     color: Colors.onSurfaceVariant,
@@ -1024,8 +1036,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: Colors.surfaceLow,
     marginRight: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.outline + '20',
+    borderWidth: 3,
+    borderColor: '#111111',
   },
   pillActive: {
     backgroundColor: Colors.primary,
@@ -1045,13 +1057,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.surfaceLow,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}22`,
+    borderWidth: 3,
+    borderColor: '#111111',
     marginRight: Spacing.sm,
   },
   folderPillActive: {
-    borderColor: Colors.primary,
-    backgroundColor: `${Colors.primary}22`,
+    borderColor: '#111111',
+    backgroundColor: Colors.primaryContainer,
   },
   folderPillText: {
     fontFamily: Typography.fontFamily.body,
@@ -1059,15 +1071,16 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
   },
   folderPillTextActive: {
-    color: Colors.primary,
+    color: '#111111',
     fontWeight: '700',
   },
   folderManageButton: {
     width: 34,
     height: 34,
     borderRadius: 17,
-    borderWidth: 1,
-    borderColor: `${Colors.primary}88`,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1082,6 +1095,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
+    borderWidth: 4,
+    borderColor: '#111111',
   },
   noteCard: {
     padding: Spacing.md,
@@ -1188,14 +1203,16 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 4,
+    borderColor: '#111111',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowColor: '#111111',
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   modalBackdrop: {
     flex: 1,
@@ -1206,6 +1223,8 @@ const styles = StyleSheet.create({
   modalCard: {
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.md,
+    borderWidth: 4,
+    borderColor: '#111111',
     padding: Spacing.lg,
     maxHeight: '80%',
   },
@@ -1223,8 +1242,8 @@ const styles = StyleSheet.create({
   modalInput: {
     flex: 1,
     borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}44`,
+    borderWidth: 3,
+    borderColor: '#111111',
     backgroundColor: Colors.surfaceLow,
     color: Colors.onSurface,
     paddingHorizontal: Spacing.md,
@@ -1236,7 +1255,9 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
+    borderWidth: 3,
+    borderColor: '#111111',
     alignItems: 'center',
     justifyContent: 'center',
   },

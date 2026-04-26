@@ -70,12 +70,17 @@ export function LeaderboardMini() {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.surfaceContainerHigh,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: `${Colors.outline}33`,
+    borderWidth: 3,
+    borderColor: '#111111',
     padding: Spacing.md,
     gap: Spacing.md,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 6, height: 6 },
+    shadowRadius: 0,
+    elevation: 0,
   },
   header: {
     flexDirection: 'row',

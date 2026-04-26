@@ -15,7 +15,6 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
 import { GradientButton } from '../shared/GradientButton';
@@ -117,7 +116,6 @@ export default function NoteEditor({
   return (
     <View style={styles.container} pointerEvents={isVisible ? 'auto' : 'none'}>
       <Animated.View style={[styles.backdrop, backdropStyle]}>
-        <BlurView intensity={16} style={StyleSheet.absoluteFill} tint="dark" />
         <TouchableOpacity style={StyleSheet.absoluteFill} onPress={closeSheet} />
       </Animated.View>
 

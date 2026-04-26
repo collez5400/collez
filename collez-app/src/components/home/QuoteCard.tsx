@@ -1,5 +1,4 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Colors, Spacing, Typography } from '../../config/theme';
@@ -14,12 +13,7 @@ interface QuoteCardProps {
 export function QuoteCard({ quote, author, onViewed }: QuoteCardProps) {
   return (
     <GlassCard style={styles.card} onLayout={onViewed} variant="warm">
-      <LinearGradient
-        colors={['#F5C54222', '#D0BCFF1C']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.bgGlow}
-      />
+      <View style={styles.bgGlow} />
       <View style={styles.iconWrap}>
         <MaterialIcons name="format-quote" size={24} color={Colors.accentGold} />
       </View>
@@ -39,6 +33,7 @@ const styles = StyleSheet.create({
   },
   bgGlow: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(245, 197, 66, 0.15)',
   },
   iconWrap: {
     width: 36,

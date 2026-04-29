@@ -48,10 +48,12 @@ export const Gradients = {
 
 export const Typography = {
   fontFamily: {
-    display: 'Space Grotesk',
-    heading: 'Space Grotesk',
-    button: 'Space Grotesk',
-    body: 'Plus Jakarta Sans',
+    // NOTE: In React Native, `fontFamily` must match the loaded font key.
+    // These keys are loaded in `app/_layout.tsx` via `useFonts(...)`.
+    display: 'SpaceGrotesk_700Bold',
+    heading: 'SpaceGrotesk_700Bold',
+    button: 'SpaceGrotesk_700Bold',
+    body: 'PlusJakartaSans_500Medium',
   },
   size: {
     xs: 12,

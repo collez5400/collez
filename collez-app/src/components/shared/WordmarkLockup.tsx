@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Colors, Typography } from '../../config/theme';
 import { COLLEZ_LOGO_URI, COLLEZ_TAGLINE, COLLEZ_WORDMARK } from '../../config/branding';
+import { HardShadowBox } from './HardShadowBox';
 
 export function WordmarkLockup({
   variant = 'default',
@@ -14,9 +15,11 @@ export function WordmarkLockup({
 
   return (
     <View style={[styles.wrap, style]}>
-      <View style={[styles.logoFrame, { width: logoSize, height: logoSize }]}>
-        <Image source={{ uri: COLLEZ_LOGO_URI }} style={styles.logo} resizeMode="contain" />
-      </View>
+      <HardShadowBox shadowOffset={6} borderRadius={999}>
+        <View style={[styles.logoFrame, { width: logoSize, height: logoSize }]}>
+          <Image source={{ uri: COLLEZ_LOGO_URI }} style={styles.logo} resizeMode="contain" />
+        </View>
+      </HardShadowBox>
       <Text style={styles.wordmark}>{COLLEZ_WORDMARK}</Text>
       <Text style={styles.tagline}>{COLLEZ_TAGLINE}</Text>
     </View>
@@ -35,11 +38,6 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: '#111111',
     backgroundColor: Colors.surfaceContainerLowest,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 6, height: 6 },
-    shadowRadius: 0,
-    elevation: 0,
     overflow: 'hidden',
   },
   logo: {

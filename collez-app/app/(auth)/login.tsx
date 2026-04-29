@@ -15,6 +15,8 @@ import { useAuthStore } from '../../src/store/authStore';
 import { Colors, Typography, Spacing, BorderRadius } from '../../src/config/theme';
 import { ComicBrandShell } from '../../src/components/shared/ComicBrandShell';
 import { COLLEZ_LOGO_URI } from '../../src/config/branding';
+import { HardShadowBox } from '../../src/components/shared/HardShadowBox';
+import { GradientButton } from '../../src/components/shared/GradientButton';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -46,94 +48,108 @@ export default function LoginScreen() {
     signIn('apple');
   };
 
+  const AuthButton = ({
+    label,
+    onPress,
+    icon,
+  }: {
+    label: string;
+    onPress: () => void;
+    icon: React.ReactNode;
+  }) => (
+    <HardShadowBox shadowOffset={4} borderRadius={BorderRadius.sm}>
+      <TouchableOpacity
+        style={styles.authBtn}
+        onPress={onPress}
+        activeOpacity={0.8}
+        disabled={status === 'loading'}
+        accessibilityLabel={label}
+      >
+        {status === 'loading' ? (
+          <ActivityIndicator color={Colors.onSurfaceVariant} />
+        ) : (
+          <>
+            {icon}
+            <Text style={styles.authBtnText}>{label}</Text>
+          </>
+        )}
+      </TouchableOpacity>
+    </HardShadowBox>
+  );
+
   return (
     <ComicBrandShell dotColor="#110e05" dotSpacing={10} halftoneOpacity={0.22}>
       <View style={styles.root}>
 
       {/* Main card */}
       <Animated.View style={[styles.cardWrap, { opacity: cardOpacity, transform: [{ translateY: cardTranslateY }] }]}>
-        <View style={styles.card}>
-          <View style={styles.lanyardHole} />
-          <View style={styles.cardHeader}>
-            <View style={styles.logoWrap}>
-              <Animated.Image source={{ uri: COLLEZ_LOGO_URI }} style={styles.logo} />
+        <HardShadowBox shadowOffset={8} borderRadius={BorderRadius.md}>
+          <View style={styles.card}>
+            <View style={styles.lanyardHole} />
+            <View style={styles.cardHeader}>
+              <HardShadowBox shadowOffset={4} borderRadius={999}>
+                <View style={styles.logoWrap}>
+                  <Animated.Image source={{ uri: COLLEZ_LOGO_URI }} style={styles.logo} />
+                </View>
+              </HardShadowBox>
+              <Text style={styles.brandText}>COLLEZ{'\n'}ACCESS CARD</Text>
             </View>
-            <Text style={styles.brandText}>COLLEZ{'\n'}ACCESS CARD</Text>
-          </View>
 
-          <Text style={styles.headline}>AUTHENTICATE IDENTITY</Text>
-          <Text style={styles.subheadline}>
-            Your college life, supercharged.
-          </Text>
+            <Text style={styles.headline}>AUTHENTICATE IDENTITY</Text>
+            <Text style={styles.subheadline}>
+              Your college life, supercharged.
+            </Text>
 
-          {/* Error */}
-          {error ? (
-            <View style={styles.errorBanner}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : null}
+            {/* Error */}
+            {error ? (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : null}
 
-          {/* Google Sign-In button */}
-          <TouchableOpacity
-            style={styles.authBtn}
-            onPress={handleGoogleSignIn}
-            activeOpacity={0.8}
-            disabled={status === 'loading'}
-            accessibilityLabel="Sign in with Google"
-          >
-            {status === 'loading' ? (
-              <ActivityIndicator color="#5f6368" />
-            ) : (
-              <>
+            <AuthButton
+              label="Continue with Google"
+              onPress={handleGoogleSignIn}
+              icon={
                 <View style={styles.googleIconWrap}>
                   <FontAwesome name="google" size={18} color="#4285F4" />
                 </View>
-                <Text style={styles.authBtnText}>Continue with Google</Text>
-              </>
-            )}
-          </TouchableOpacity>
+              }
+            />
 
-          {Platform.OS === 'ios' ? (
-            <TouchableOpacity
-              style={styles.authBtn}
-              onPress={handleAppleSignIn}
-              activeOpacity={0.8}
-              disabled={status === 'loading'}
-              accessibilityLabel="Sign in with Apple"
-            >
-              <FontAwesome name="apple" size={18} color="#ffffff" />
-              <Text style={styles.authBtnText}>Continue with Apple</Text>
-            </TouchableOpacity>
-          ) : null}
+            {Platform.OS === 'ios' ? (
+              <AuthButton
+                label="Continue with Apple"
+                onPress={handleAppleSignIn}
+                icon={<FontAwesome name="apple" size={18} color={Colors.onSurface} />}
+              />
+            ) : null}
 
-          <TouchableOpacity
-            style={styles.authBtn}
-            onPress={() => {}}
-            activeOpacity={0.8}
-            accessibilityLabel="Use college ID"
-          >
-            <FontAwesome name="id-badge" size={18} color={Colors.onSurface} />
-            <Text style={styles.authBtnText}>Use College ID</Text>
-          </TouchableOpacity>
+            <AuthButton
+              label="Use College ID"
+              onPress={() => {}}
+              icon={<FontAwesome name="id-badge" size={18} color={Colors.onSurface} />}
+            />
 
-          <View style={styles.barcode} />
+            <View style={styles.barcode} />
 
-          {/* Legal */}
-          <View style={styles.legal}>
-            <Text style={styles.legalText}>By continuing, you agree to our </Text>
-            <TouchableOpacity onPress={() => Linking.openURL('https://collez.app/terms')}>
-              <Text style={styles.legalLink}>Terms</Text>
-            </TouchableOpacity>
-            <Text style={styles.legalText}> & </Text>
-            <TouchableOpacity onPress={() => Linking.openURL('https://collez.app/privacy')}>
-              <Text style={styles.legalLink}>Privacy Policy</Text>
-            </TouchableOpacity>
+            {/* Legal */}
+            <View style={styles.legal}>
+              <Text style={styles.legalText}>By continuing, you agree to our </Text>
+              <TouchableOpacity onPress={() => Linking.openURL('https://collez.app/terms')}>
+                <Text style={styles.legalLink}>Terms</Text>
+              </TouchableOpacity>
+              <Text style={styles.legalText}> & </Text>
+              <TouchableOpacity onPress={() => Linking.openURL('https://collez.app/privacy')}>
+                <Text style={styles.legalLink}>Privacy Policy</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.ctaWrap}>
+              <GradientButton title="Enter COLLEZ" onPress={handleGoogleSignIn} disabled={status === 'loading'} />
+            </View>
           </View>
-          <TouchableOpacity style={styles.ctaBtn} onPress={handleGoogleSignIn} disabled={status === 'loading'}>
-            <Text style={styles.ctaText}>ENTER COLLEZ</Text>
-            <FontAwesome name="arrow-right" size={20} color={Colors.onPrimary} />
-          </TouchableOpacity>
-        </View>
+        </HardShadowBox>
       </Animated.View>
       </View>
     </ComicBrandShell>
@@ -158,10 +174,6 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: Colors.surfaceContainerLowest,
     borderRadius: 12,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    shadowOffset: { width: 8, height: 8 },
     paddingHorizontal: 20,
     paddingVertical: 18,
   },
@@ -189,10 +201,6 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: Colors.surfaceContainerLowest,
     backgroundColor: Colors.surface,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
     overflow: 'hidden',
     marginBottom: 10,
   },
@@ -249,10 +257,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 10,
     gap: 10,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    shadowOffset: { width: 4, height: 4 },
   },
   authBtnText: {
     fontSize: Typography.size.md,
@@ -285,29 +289,9 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     backgroundColor: 'rgba(17,14,5,0.5)',
   },
-  ctaBtn: {
+  ctaWrap: {
     width: '100%',
-    height: 64,
-    borderRadius: 8,
-    borderWidth: 4,
-    borderColor: Colors.surfaceContainerLowest,
-    backgroundColor: Colors.primaryContainer,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 8, height: 8 },
-    shadowRadius: 0,
     marginTop: 8,
-  },
-  ctaText: {
-    color: Colors.onPrimary,
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.headlineMd ?? 24,
-    fontWeight: '900',
-    textTransform: 'uppercase',
   },
   legalText: {
     fontSize: Typography.size.xs,

@@ -31,6 +31,7 @@ import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
 import { RewardExplosionSpotlight } from '../../../src/components/shared/RewardExplosionSpotlight';
 import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBar';
 import { StickerChip } from '../../../src/components/shared/StickerChip';
+import { HardShadowBox } from '../../../src/components/shared/HardShadowBox';
 
 const TOTAL_STEPS = 3;
 const STEP = 3;
@@ -276,7 +277,11 @@ export default function OnboardingStep3() {
             <FloatingRewardProp label="BONUS" tone="success" top={170} right={18} rotateDeg={5} delay={760} />
 
             <Animated.View style={[styles.xpBadge, xpAnimStyle]}>
-              <Text style={styles.xpText}>+{XP_VALUES.DAILY_LOGIN} XP</Text>
+              <HardShadowBox shadowOffset={6} borderRadius={BorderRadius.md}>
+                <View style={styles.xpBadgeInner}>
+                  <Text style={styles.xpText}>+{XP_VALUES.DAILY_LOGIN} XP</Text>
+                </View>
+              </HardShadowBox>
             </Animated.View>
 
             <View style={styles.rewardsCtaWrap}>
@@ -419,18 +424,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   xpBadge: {
+    alignSelf: 'center',
+    marginBottom: Spacing.xl,
+  },
+  xpBadgeInner: {
     backgroundColor: Colors.primaryContainer,
     borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderWidth: 3,
     borderColor: '#111111',
-    alignSelf: 'center',
-    marginBottom: Spacing.xl,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 6, height: 6 },
-    shadowRadius: 0,
   },
   xpText: {
     fontSize: Typography.size.headlineMd ?? 24,

@@ -25,6 +25,7 @@ import { TopAppBar } from '../../../src/components/shared/TopAppBar';
 import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBar';
 import { StickerChip } from '../../../src/components/shared/StickerChip';
 import { useAuthStore } from '../../../src/store/authStore';
+import { HardShadowBox } from '../../../src/components/shared/HardShadowBox';
 
 const SORT_OPTIONS: PdfSortOption[] = ['date', 'name', 'size'];
 const FOLDER_TYPES: PdfFolderType[] = ['semester', 'subject', 'pyq', 'books', 'notes', 'important', 'custom'];
@@ -232,9 +233,11 @@ export default function PDFsScreen() {
       {error ? <ErrorState message={error} onRetry={loadVaultData} compact /> : null}
 
       <Animated.View entering={FadeInUp.duration(260)} style={styles.header}>
-        <View style={styles.titleGradient}>
-          <Text style={styles.title}>VAULT</Text>
-        </View>
+        <HardShadowBox shadowOffset={4} borderRadius={12} style={styles.titleWrap}>
+          <View style={styles.titleGradient}>
+            <Text style={styles.title}>VAULT</Text>
+          </View>
+        </HardShadowBox>
         <View style={styles.storageWrap}>
           <ComicProgressBar
             progress={Math.max(0, Math.min(1, usagePercent / 100))}
@@ -287,11 +290,13 @@ export default function PDFsScreen() {
         ))}
       </View>
 
-      <TouchableOpacity activeOpacity={0.9} onPress={() => void onUpload()} style={styles.uploadCard}>
-        <MaterialIcons name="upload-file" size={22} color={Colors.background} />
-        <Text style={styles.uploadText}>Upload PDF</Text>
-        <MaterialIcons name="arrow-forward" size={18} color={Colors.background} />
-      </TouchableOpacity>
+      <HardShadowBox shadowOffset={6} borderRadius={12} style={styles.uploadWrap}>
+        <TouchableOpacity activeOpacity={0.9} onPress={() => void onUpload()} style={styles.uploadCard}>
+          <MaterialIcons name="upload-file" size={22} color={Colors.background} />
+          <Text style={styles.uploadText}>Upload PDF</Text>
+          <MaterialIcons name="arrow-forward" size={18} color={Colors.background} />
+        </TouchableOpacity>
+      </HardShadowBox>
 
       {isPremiumUser ? (
         <View style={styles.syncRow}>
@@ -333,23 +338,25 @@ export default function PDFsScreen() {
           const folder = item.folder;
           const iconName = getFolderIcon(folder.folderType);
           return (
-            <TouchableOpacity
-              style={styles.folderCard}
-              onPress={() => setCurrentFolderId(folder.id)}
-              onLongPress={() =>
-                Alert.alert(folder.name, 'Choose action', [
-                  { text: 'Rename', onPress: () => openRenameDialog({ type: 'folder', id: folder.id }, folder.name) },
-                  { text: 'Delete', style: 'destructive', onPress: () => requestDeleteFolder(folder.id, folder.name) },
-                  { text: 'Cancel', style: 'cancel' },
-                ])
-              }
-            >
-              <MaterialIcons name={iconName} size={24} color={Colors.primary} />
-              <Text numberOfLines={1} style={styles.folderName}>
-                {folder.name}
-              </Text>
-              <Text style={styles.folderMeta}>{folder.folderType.toUpperCase()}</Text>
-            </TouchableOpacity>
+            <HardShadowBox shadowOffset={6} borderRadius={12}>
+              <TouchableOpacity
+                style={styles.folderCard}
+                onPress={() => setCurrentFolderId(folder.id)}
+                onLongPress={() =>
+                  Alert.alert(folder.name, 'Choose action', [
+                    { text: 'Rename', onPress: () => openRenameDialog({ type: 'folder', id: folder.id }, folder.name) },
+                    { text: 'Delete', style: 'destructive', onPress: () => requestDeleteFolder(folder.id, folder.name) },
+                    { text: 'Cancel', style: 'cancel' },
+                  ])
+                }
+              >
+                <MaterialIcons name={iconName} size={24} color={Colors.primary} />
+                <Text numberOfLines={1} style={styles.folderName}>
+                  {folder.name}
+                </Text>
+                <Text style={styles.folderMeta}>{folder.folderType.toUpperCase()}</Text>
+              </TouchableOpacity>
+            </HardShadowBox>
           );
         }}
         ListEmptyComponent={
@@ -435,9 +442,13 @@ export default function PDFsScreen() {
       />
       </ScrollView>
 
-      <TouchableOpacity style={styles.fab} onPress={() => void onUpload()}>
-        <MaterialIcons name="upload" size={28} color="#fff" />
-      </TouchableOpacity>
+      <View style={styles.fabWrap}>
+        <HardShadowBox shadowOffset={6} borderRadius={29}>
+          <TouchableOpacity style={styles.fab} onPress={() => void onUpload()}>
+            <MaterialIcons name="upload" size={28} color="#fff" />
+          </TouchableOpacity>
+        </HardShadowBox>
+      </View>
 
       <Modal visible={folderModalVisible} transparent animationType="fade" onRequestClose={() => setFolderModalVisible(false)}>
         <View style={styles.modalBackdrop}>
@@ -508,6 +519,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
   },
+  titleWrap: {
+    alignSelf: 'flex-start',
+  },
   titleGradient: {
     alignSelf: 'flex-start',
     paddingHorizontal: 14,
@@ -517,10 +531,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryContainer,
     borderWidth: 3,
     borderColor: '#111111',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
   },
   title: {
     color: '#000000',
@@ -600,9 +610,11 @@ const styles = StyleSheet.create({
   sortChipTextActive: {
     color: '#111111',
   },
-  uploadCard: {
+  uploadWrap: {
     marginHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
+  },
+  uploadCard: {
     borderRadius: 12,
     backgroundColor: Colors.secondaryContainer,
     borderWidth: 3,
@@ -687,10 +699,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryContainer,
     borderWidth: 3,
     borderColor: '#110e05',
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 6, height: 6 },
-    shadowRadius: 0,
     padding: Spacing.sm,
     marginRight: Spacing.md,
     justifyContent: 'space-between',
@@ -803,10 +811,12 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,
   },
-  fab: {
+  fabWrap: {
     position: 'absolute',
     right: 22,
     bottom: 22,
+  },
+  fab: {
     width: 58,
     height: 58,
     borderRadius: 29,
@@ -815,11 +825,6 @@ const styles = StyleSheet.create({
     borderColor: '#111111',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 6, height: 6 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   modalBackdrop: {
     flex: 1,

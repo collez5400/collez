@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Colors, Typography } from '../../config/theme';
 import { StickerChip } from './StickerChip';
+import { HardShadowBox } from './HardShadowBox';
 
 interface PodiumEntry {
   rank: 1 | 2 | 3;
@@ -42,27 +43,31 @@ export function ComicPodium({ entries = DEFAULT_ENTRIES, style }: ComicPodiumPro
               entry.rank === 3 && styles.rightCol,
             ]}
           >
-            <View style={[styles.avatar, isCenter && styles.avatarCenter]}>
-              <Text style={[styles.avatarText, isCenter && styles.avatarTextCenter]}>
-                {entry.label.slice(0, 1)}
-              </Text>
-            </View>
+            <HardShadowBox shadowOffset={4} borderRadius={isCenter ? 37 : 29}>
+              <View style={[styles.avatar, isCenter && styles.avatarCenter]}>
+                <Text style={[styles.avatarText, isCenter && styles.avatarTextCenter]}>
+                  {entry.label.slice(0, 1)}
+                </Text>
+              </View>
+            </HardShadowBox>
             <StickerChip
               label={entry.score}
               tone={entry.tone ?? (isCenter ? 'yellow' : 'purple')}
               style={isCenter ? styles.scoreChipCenter : styles.scoreChip}
             />
-            <View
-              style={[
-                styles.block,
-                { height: HEIGHTS[entry.rank] },
-                entry.rank === 1 && styles.blockCenter,
-                entry.rank === 2 && styles.blockLeft,
-                entry.rank === 3 && styles.blockRight,
-              ]}
-            >
-              <Text style={[styles.rank, isCenter && styles.rankCenter]}>{entry.rank}</Text>
-            </View>
+            <HardShadowBox shadowOffset={6} borderRadius={16}>
+              <View
+                style={[
+                  styles.block,
+                  { height: HEIGHTS[entry.rank] },
+                  entry.rank === 1 && styles.blockCenter,
+                  entry.rank === 2 && styles.blockLeft,
+                  entry.rank === 3 && styles.blockRight,
+                ]}
+              >
+                <Text style={[styles.rank, isCenter && styles.rankCenter]}>{entry.rank}</Text>
+              </View>
+            </HardShadowBox>
           </View>
         );
       })}
@@ -99,10 +104,6 @@ const styles = StyleSheet.create({
     zIndex: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
   },
   avatarCenter: {
     width: 74,
@@ -138,10 +139,6 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: '#111111',
     alignItems: 'center',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 6, height: 6 },
-    shadowRadius: 0,
   },
   blockLeft: {
     backgroundColor: Colors.secondaryContainer,

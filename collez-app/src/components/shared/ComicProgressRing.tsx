@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Colors, Typography } from '../../config/theme';
+import { HardShadowBox } from './HardShadowBox';
 
 interface ComicProgressRingProps {
   progress: number;
@@ -24,32 +25,34 @@ export function ComicProgressRing({
   const filled = Math.max(safeProgress * circumference, circumference * 0.06);
 
   return (
-    <View style={[styles.wrap, { width: size, height: size, borderRadius: size / 2 }]}>
-      <Svg width={size} height={size} style={styles.svg}>
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={`${accentColor}33`}
-          strokeWidth={strokeWidth}
-          fill="none"
-        />
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={accentColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={`${filled}, ${circumference}`}
-          rotation={-90}
-          originX={size / 2}
-          originY={size / 2}
-        />
-      </Svg>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
-    </View>
+    <HardShadowBox shadowOffset={4} borderRadius={size / 2}>
+      <View style={[styles.wrap, { width: size, height: size, borderRadius: size / 2 }]}>
+        <Svg width={size} height={size} style={styles.svg}>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={`${accentColor}33`}
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={accentColor}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${filled}, ${circumference}`}
+            rotation={-90}
+            originX={size / 2}
+            originY={size / 2}
+          />
+        </Svg>
+        {label ? <Text style={styles.label}>{label}</Text> : null}
+      </View>
+    </HardShadowBox>
   );
 }
 
@@ -60,10 +63,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#111111',
     backgroundColor: Colors.surfaceContainerHighest,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
     overflow: 'hidden',
   },
   svg: {

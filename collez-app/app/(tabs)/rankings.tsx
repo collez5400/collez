@@ -14,6 +14,7 @@ import { LeaderboardEntry, LeaderboardType, useLeaderboardStore } from '../../sr
 import { useAuthStore } from '../../src/store/authStore';
 import { useEventStore } from '../../src/store/eventStore';
 import { shallow } from 'zustand/shallow';
+import { HardShadowBox } from '../../src/components/shared/HardShadowBox';
 
 export default function RankingsScreen() {
   const [activeTab, setActiveTab] = useState<LeaderboardType>('college');
@@ -147,13 +148,14 @@ export default function RankingsScreen() {
   );
 
   const tabButton = (type: LeaderboardType, label: string) => (
-    <Text
-      key={type}
-      style={[styles.tabPill, activeTab === type && styles.tabPillActive]}
-      onPress={() => setActiveTab(type)}
-    >
-      {label}
-    </Text>
+    <HardShadowBox key={type} shadowOffset={4} borderRadius={999}>
+      <Text
+        style={[styles.tabPill, activeTab === type && styles.tabPillActive]}
+        onPress={() => setActiveTab(type)}
+      >
+        {label}
+      </Text>
+    </HardShadowBox>
   );
 
   const listHeader = (
@@ -264,11 +266,6 @@ const styles = StyleSheet.create({
     fontSize: Typography.size.sm,
     fontWeight: '700',
     textTransform: 'uppercase',
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   tabPillActive: {
     borderColor: '#111111',

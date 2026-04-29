@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { Colors, Typography } from '../../config/theme';
+import { BorderRadius, Colors, Typography } from '../../config/theme';
+import { HardShadowBox } from './HardShadowBox';
 
 type StickerChipTone = 'yellow' | 'purple' | 'dark' | 'danger' | 'success';
 
@@ -22,9 +23,11 @@ export function StickerChip({ label, tone = 'yellow', style }: StickerChipProps)
   const toneStyle = TONE_STYLES[tone];
 
   return (
-    <View style={[styles.chip, { backgroundColor: toneStyle.backgroundColor }, style]}>
-      <Text style={[styles.label, { color: toneStyle.color }]}>{label}</Text>
-    </View>
+    <HardShadowBox shadowOffset={3} borderRadius={BorderRadius.full} style={style}>
+      <View style={[styles.chip, { backgroundColor: toneStyle.backgroundColor }]}>
+        <Text style={[styles.label, { color: toneStyle.color }]}>{label}</Text>
+      </View>
+    </HardShadowBox>
   );
 }
 
@@ -35,11 +38,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 3, height: 3 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   label: {
     fontFamily: Typography.fontFamily.button,

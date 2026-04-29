@@ -4,6 +4,7 @@ import { withLayoutContext } from 'expo-router';
 import { createMaterialTopTabNavigator, MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import Animated, { FadeIn, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { BorderRadius, Colors, Spacing, Typography } from '../../../src/config/theme';
+import { HardShadowBox } from '../../../src/components/shared/HardShadowBox';
 
 const TopTabs = withLayoutContext(createMaterialTopTabNavigator().Navigator);
 
@@ -21,7 +22,9 @@ function VaultTabBar({ state, descriptors, navigation }: MaterialTopTabBarProps)
     <View style={styles.tabBarContainer}>
       <View style={styles.tabBarInner} onLayout={handleLayout}>
         <Animated.View entering={FadeIn.duration(220)} style={[styles.indicatorSlot, { width: tabWidth }, indicatorStyle]}>
-          <View style={styles.indicatorSolid} />
+          <HardShadowBox shadowOffset={3} borderRadius={999}>
+            <View style={styles.indicatorSolid} />
+          </HardShadowBox>
         </Animated.View>
 
         {state.routes.map((route, index) => {
@@ -122,9 +125,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryContainer,
     borderWidth: 2,
     borderColor: '#111111',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 3, height: 3 },
-    shadowRadius: 0,
   },
 });

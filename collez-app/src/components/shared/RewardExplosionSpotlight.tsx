@@ -3,6 +3,7 @@ import { StyleSheet, View, ViewStyle } from 'react-native';
 import { Colors, BorderRadius } from '../../config/theme';
 import { HalftoneOverlay } from './HalftoneOverlay';
 import { StarburstOverlay } from './StarburstOverlay';
+import { HardShadowBox } from './HardShadowBox';
 
 export function RewardExplosionSpotlight({
   children,
@@ -16,12 +17,14 @@ export function RewardExplosionSpotlight({
   dotColor?: string;
 }) {
   return (
-    <View style={[styles.card, style]}>
-      <HalftoneOverlay dotColor={dotColor} spacing={12} opacity={0.12} />
-      <StarburstOverlay size={340} spikes={16} innerRatio={0.44} color={burstColor} opacity={0.95} style={styles.burst} />
-      <View style={styles.echoBurst} />
-      {children}
-    </View>
+    <HardShadowBox shadowOffset={10} borderRadius={BorderRadius.xl} style={style}>
+      <View style={styles.card}>
+        <HalftoneOverlay dotColor={dotColor} spacing={12} opacity={0.12} />
+        <StarburstOverlay size={340} spikes={16} innerRatio={0.44} color={burstColor} opacity={0.95} style={styles.burst} />
+        <View style={styles.echoBurst} />
+        {children}
+      </View>
+    </HardShadowBox>
   );
 }
 
@@ -36,11 +39,6 @@ const styles = StyleSheet.create({
     paddingVertical: 26,
     paddingHorizontal: 18,
     alignItems: 'center',
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 10, height: 10 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   burst: {
     top: -24,

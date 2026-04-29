@@ -22,7 +22,9 @@ export const BottomNavBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
   const barHeight = Platform.OS === 'ios' ? 76 : 72;
 
   return (
-    <View style={[styles.container, { bottom: bottomInset }]}>
+    <View style={[styles.containerOuter, { bottom: bottomInset }]}>
+      <View pointerEvents="none" style={styles.containerHardShadow} />
+      <View style={styles.container}>
       <View style={[styles.content, { height: barHeight, paddingBottom: Platform.OS === 'ios' ? 4 : 0 }]}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
@@ -70,6 +72,7 @@ export const BottomNavBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
           );
         })}
       </View>
+      </View>
     </View>
   );
 };
@@ -102,14 +105,17 @@ const TabItem = ({
       style={styles.tabBtn}
       activeOpacity={0.8}
     >
-      <Animated.View style={[styles.iconWrap, isFocused ? styles.iconWrapFocused : styles.iconWrapIdle, iconStyle]}>
-        <MaterialIcons
-          name={iconName as any}
-          size={24}
-          color={isFocused ? '#111111' : Colors.onSurfaceVariant}
-          style={styles.icon}
-        />
-      </Animated.View>
+      <View style={styles.iconWrapStack}>
+        {isFocused ? <View pointerEvents="none" style={styles.iconWrapHardShadow} /> : null}
+        <Animated.View style={[styles.iconWrap, isFocused ? styles.iconWrapFocused : styles.iconWrapIdle, iconStyle]}>
+          <MaterialIcons
+            name={iconName as any}
+            size={24}
+            color={isFocused ? '#111111' : Colors.onSurfaceVariant}
+            style={styles.icon}
+          />
+        </Animated.View>
+      </View>
       
       <Animated.Text style={[styles.label, { color: isFocused ? '#111111' : Colors.onSurfaceVariant }, animatedLabelStyle]}>
         {label}
@@ -119,19 +125,25 @@ const TabItem = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  containerOuter: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  containerHardShadow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
+    backgroundColor: '#111111',
+    transform: [{ translateY: -4 }],
+  },
+  container: {
     backgroundColor: Colors.primary,
     borderTopWidth: 4,
     borderTopColor: '#111111',
-    shadowColor: '#111111',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
   },
   content: {
     flexDirection: 'row',
@@ -154,15 +166,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
   },
+  iconWrapStack: {
+    position: 'relative',
+  },
+  iconWrapHardShadow: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    right: 0,
+    bottom: 0,
+    borderRadius: BorderRadius.md,
+    backgroundColor: '#111111',
+  },
   iconWrapFocused: {
     backgroundColor: Colors.primaryContainer,
     borderWidth: 3,
     borderColor: '#111111',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
-    elevation: 0,
     transform: [{ scale: 1.04 }],
   },
   iconWrapIdle: {

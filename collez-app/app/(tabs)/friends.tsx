@@ -18,6 +18,7 @@ import { StickerChip } from '../../src/components/shared/StickerChip';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { useFriendStore } from '../../src/store/friendStore';
 import { useAuthStore } from '../../src/store/authStore';
+import { HardShadowBox } from '../../src/components/shared/HardShadowBox';
 
 export default function FriendsScreen() {
   const router = useRouter();
@@ -68,26 +69,28 @@ export default function FriendsScreen() {
       <View style={styles.headerWrap}>
         <Text style={styles.title}>Friends</Text>
 
-        <View style={styles.searchBar}>
-          <MaterialIcons name="search" size={20} color={Colors.outline} />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search by username..."
-            placeholderTextColor={Colors.outline}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-            onSubmitEditing={onSearch}
-            style={styles.searchInput}
-            accessibilityLabel="Search users by username"
-          />
-          {query.length > 0 ? (
-            <Pressable onPress={() => setQuery('')} accessibilityLabel="Clear search">
-              <MaterialIcons name="close" size={20} color={Colors.outline} />
-            </Pressable>
-          ) : null}
-        </View>
+        <HardShadowBox shadowOffset={4} borderRadius={10}>
+          <View style={styles.searchBar}>
+            <MaterialIcons name="search" size={20} color={Colors.outline} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search by username..."
+              placeholderTextColor={Colors.outline}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+              onSubmitEditing={onSearch}
+              style={styles.searchInput}
+              accessibilityLabel="Search users by username"
+            />
+            {query.length > 0 ? (
+              <Pressable onPress={() => setQuery('')} accessibilityLabel="Clear search">
+                <MaterialIcons name="close" size={20} color={Colors.outline} />
+              </Pressable>
+            ) : null}
+          </View>
+        </HardShadowBox>
 
         {error ? (
           <Text style={styles.errorText} accessibilityLabel="Friends error">
@@ -175,26 +178,28 @@ export default function FriendsScreen() {
       {!hasContent && !isLoading ? (
         <View style={styles.headerWrap}>
           <Text style={styles.title}>Friends</Text>
-          <View style={styles.searchBar}>
-            <MaterialIcons name="search" size={20} color={Colors.outline} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search by username..."
-              placeholderTextColor={Colors.outline}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="search"
-              onSubmitEditing={onSearch}
-              style={styles.searchInput}
-              accessibilityLabel="Search users by username"
-            />
-            {query.length > 0 ? (
-              <Pressable onPress={() => setQuery('')} accessibilityLabel="Clear search">
-                <MaterialIcons name="close" size={20} color={Colors.outline} />
-              </Pressable>
-            ) : null}
-          </View>
+          <HardShadowBox shadowOffset={4} borderRadius={10}>
+            <View style={styles.searchBar}>
+              <MaterialIcons name="search" size={20} color={Colors.outline} />
+              <TextInput
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Search by username..."
+                placeholderTextColor={Colors.outline}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="search"
+                onSubmitEditing={onSearch}
+                style={styles.searchInput}
+                accessibilityLabel="Search users by username"
+              />
+              {query.length > 0 ? (
+                <Pressable onPress={() => setQuery('')} accessibilityLabel="Clear search">
+                  <MaterialIcons name="close" size={20} color={Colors.outline} />
+                </Pressable>
+              ) : null}
+            </View>
+          </HardShadowBox>
           <EmptyState
             icon="group"
             title="No friends yet"
@@ -233,14 +238,16 @@ export default function FriendsScreen() {
                   <StickerChip label={`${item.streak_count ?? 0}d`} tone="purple" style={styles.badgePill} />
                 </ComicPanelCard>
               </Pressable>
-              <Pressable
-                style={styles.compareBtn}
-                onPress={() => router.push(`/friends/compare/${item.id}`)}
-                accessibilityLabel={`Compare stats with ${item.username}`}
-              >
-                <MaterialIcons name="compare-arrows" size={16} color={Colors.primary} />
-                <Text style={styles.compareText}>Compare</Text>
-              </Pressable>
+              <HardShadowBox shadowOffset={4} borderRadius={999}>
+                <Pressable
+                  style={styles.compareBtn}
+                  onPress={() => router.push(`/friends/compare/${item.id}`)}
+                  accessibilityLabel={`Compare stats with ${item.username}`}
+                >
+                  <MaterialIcons name="compare-arrows" size={16} color={Colors.primary} />
+                  <Text style={styles.compareText}>Compare</Text>
+                </Pressable>
+              </HardShadowBox>
             </View>
           )}
           ListEmptyComponent={
@@ -307,10 +314,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#111111',
     backgroundColor: Colors.surface,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
   },
   searchInput: {
     flex: 1,
@@ -340,10 +343,6 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderWidth: 3,
     borderColor: '#110e05',
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 8, height: 8 },
-    shadowRadius: 0,
   },
   avatar: {
     width: 36,

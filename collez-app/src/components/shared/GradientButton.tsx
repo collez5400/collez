@@ -31,15 +31,19 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
 }) => {
   const pressed = useSharedValue(0);
 
+  const shadowStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(pressed.value ? 0 : 1, { duration: 75 }),
+    transform: [
+      { translateX: withTiming(pressed.value ? 0 : 6, { duration: 75 }) },
+      { translateY: withTiming(pressed.value ? 0 : 6, { duration: 75 }) },
+    ],
+  }));
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: withTiming(pressed.value ? 6 : 0, { duration: 75 }) },
       { translateY: withTiming(pressed.value ? 6 : 0, { duration: 75 }) },
     ],
-    shadowOffset: {
-      width: withTiming(pressed.value ? 0 : 6, { duration: 75 }),
-      height: withTiming(pressed.value ? 0 : 6, { duration: 75 }),
-    },
     opacity: disabled ? 0.5 : 1,
   }));
 
@@ -52,66 +56,72 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
   };
 
   return (
-    <AnimatedTouchable
-      activeOpacity={0.8}
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      disabled={disabled || loading}
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      style={[
-        styles.touchable,
-        fullWidth && styles.fullWidth,
-        style,
-        animatedStyle,
-      ]}
-    >
-      <View style={[styles.buttonBody, variant === 'secondary' && styles.buttonSecondary]}>
-        <LinearGradient
-          colors={[
-            'rgba(255,255,255,0.35)',
-            'rgba(255,255,255,0.08)',
-            'rgba(255,255,255,0)',
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gloss}
-          pointerEvents="none"
-        />
-        <View style={styles.rim} pointerEvents="none" />
-        {loading ? (
-          <ActivityIndicator color={variant === 'secondary' ? Colors.onSecondaryContainer : Colors.onPrimary} />
-        ) : (
-          <>
-            {icon && icon}
-            <Text
-              style={[
-                styles.text,
-                variant === 'secondary' && styles.textSecondary,
-                textStyle,
-                icon ? styles.textWithIcon : null,
-              ]}
-            >
-              {title}
-            </Text>
-          </>
-        )}
-      </View>
-    </AnimatedTouchable>
+    <View style={[styles.wrap, fullWidth && styles.fullWidth, style]}>
+      <Animated.View pointerEvents="none" style={[styles.hardShadow, shadowStyle]} />
+      <AnimatedTouchable
+        activeOpacity={0.8}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={disabled || loading}
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        style={[styles.touchable, animatedStyle]}
+      >
+        <View style={[styles.buttonBody, variant === 'secondary' && styles.buttonSecondary]}>
+          <LinearGradient
+            colors={[
+              'rgba(255,255,255,0.35)',
+              'rgba(255,255,255,0.08)',
+              'rgba(255,255,255,0)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gloss}
+            pointerEvents="none"
+          />
+          <View style={styles.rim} pointerEvents="none" />
+          {loading ? (
+            <ActivityIndicator color={variant === 'secondary' ? Colors.onSecondaryContainer : Colors.onPrimary} />
+          ) : (
+            <>
+              {icon && icon}
+              <Text
+                style={[
+                  styles.text,
+                  variant === 'secondary' && styles.textSecondary,
+                  textStyle,
+                  icon ? styles.textWithIcon : null,
+                ]}
+              >
+                {title}
+              </Text>
+            </>
+          )}
+        </View>
+      </AnimatedTouchable>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrap: {
+    position: 'relative',
+  },
+  hardShadow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: BorderRadius.md,
+    backgroundColor: '#111111',
+  },
   touchable: {
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
     borderWidth: 4,
     borderColor: '#111111',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
   },
   fullWidth: {
     width: '100%',

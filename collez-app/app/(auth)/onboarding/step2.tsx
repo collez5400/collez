@@ -28,6 +28,7 @@ import { ComicBrandShell } from '../../../src/components/shared/ComicBrandShell'
 import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
 import { ComicPodium } from '../../../src/components/shared/ComicPodium';
 import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBar';
+import { HardShadowBox } from '../../../src/components/shared/HardShadowBox';
 
 const TOTAL_STEPS = 3;
 const STEP = 2;
@@ -263,20 +264,22 @@ export default function OnboardingStep2() {
   const renderCollege = ({ item }: { item: College }) => {
     const isSelected = selected?.id === item.id;
     return (
-      <TouchableOpacity
-        style={[styles.collegeCard, isSelected && styles.collegeCardSelected]}
-        onPress={() => setSelected(item)}
-        activeOpacity={0.7}
-        accessibilityLabel={`Select ${item.name}`}
-      >
-        <View style={styles.collegeInfo}>
-          <Text style={styles.collegeName}>{item.name}</Text>
-          <Text style={styles.collegeMeta}>{item.city} • {item.student_count.toLocaleString()} students</Text>
-        </View>
-        {isSelected && (
-          <Text style={styles.checkMark}>✓</Text>
-        )}
-      </TouchableOpacity>
+      <HardShadowBox shadowOffset={4} borderRadius={10}>
+        <TouchableOpacity
+          style={[styles.collegeCard, isSelected && styles.collegeCardSelected]}
+          onPress={() => setSelected(item)}
+          activeOpacity={0.7}
+          accessibilityLabel={`Select ${item.name}`}
+        >
+          <View style={styles.collegeInfo}>
+            <Text style={styles.collegeName}>{item.name}</Text>
+            <Text style={styles.collegeMeta}>{item.city} • {item.student_count.toLocaleString()} students</Text>
+          </View>
+          {isSelected && (
+            <Text style={styles.checkMark}>✓</Text>
+          )}
+        </TouchableOpacity>
+      </HardShadowBox>
     );
   };
 
@@ -319,17 +322,19 @@ export default function OnboardingStep2() {
       <ComicPodium style={styles.podiumWrap} />
       <Text style={styles.heroLine}>Win with friends.</Text>
 
-      <View style={styles.searchRow}>
-        <Text style={styles.searchIcon}>🔍</Text>
-        <TextInput
-          style={styles.searchInput}
-          value={search}
-          onChangeText={setSearch}
-          placeholder="Search by college or city…"
-          placeholderTextColor={Colors.onSurfaceVariant}
-          accessibilityLabel="Search college"
-        />
-      </View>
+      <HardShadowBox shadowOffset={4} borderRadius={10}>
+        <View style={styles.searchRow}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search by college or city…"
+            placeholderTextColor={Colors.onSurfaceVariant}
+            accessibilityLabel="Search college"
+          />
+        </View>
+      </HardShadowBox>
 
       {loading ? (
         <ActivityIndicator color={Colors.primary} style={{ marginTop: 40 }} />
@@ -544,10 +549,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     height: 48,
     marginBottom: Spacing.md,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
   },
   searchIcon: { fontSize: 16, marginRight: Spacing.sm },
   searchInput: {
@@ -566,10 +567,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     borderWidth: 3,
     borderColor: '#111111',
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
   },
   collegeCardSelected: {
     borderColor: Colors.primary,

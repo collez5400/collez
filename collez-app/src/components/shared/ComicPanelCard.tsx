@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Colors, BorderRadius } from '../../config/theme';
 import { HalftoneOverlay } from './HalftoneOverlay';
+import { HardShadowBox } from './HardShadowBox';
 
 interface ComicPanelCardProps {
   children: React.ReactNode;
@@ -21,11 +22,13 @@ export function ComicPanelCard({
   padding = 18,
 }: ComicPanelCardProps) {
   return (
-    <View style={[styles.card, { backgroundColor, padding }, style]}>
-      <HalftoneOverlay dotColor={dotColor} spacing={12} opacity={halftoneOpacity} />
-      <View style={styles.cornerAccent} />
-      <View style={styles.inner}>{children}</View>
-    </View>
+    <HardShadowBox shadowOffset={8} borderRadius={BorderRadius.lg} style={style}>
+      <View style={[styles.card, { backgroundColor, padding }]}>
+        <HalftoneOverlay dotColor={dotColor} spacing={12} opacity={halftoneOpacity} />
+        <View style={styles.cornerAccent} />
+        <View style={styles.inner}>{children}</View>
+      </View>
+    </HardShadowBox>
   );
 }
 
@@ -35,11 +38,6 @@ const styles = StyleSheet.create({
     borderColor: '#111111',
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 8, height: 8 },
-    shadowRadius: 0,
-    elevation: 0,
     position: 'relative',
   },
   inner: {

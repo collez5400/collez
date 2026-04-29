@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Typography } from '../../config/theme';
+import { HardShadowBox } from './HardShadowBox';
 
 interface ComicProgressBarProps {
   progress: number;
@@ -42,21 +43,24 @@ export function ComicProgressBar({
           <Text style={styles.value}>{valueLabel}</Text>
         </View>
       )}
-      <View style={[styles.track, compact && styles.trackCompact]}>
-        <Animated.View style={[styles.fillWrap, compact && styles.fillWrapCompact, { width }]}>
-          <LinearGradient
-            colors={[
-              'rgba(255,212,0,1)',
-              'rgba(255,243,214,0.8)',
-              'rgba(107,3,241,0.95)',
-              'rgba(255,212,0,1)',
-            ]}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={styles.fill}
-          />
-        </Animated.View>
-      </View>
+      <HardShadowBox shadowOffset={4} borderRadius={999}>
+        <View style={[styles.track, compact && styles.trackCompact]}>
+          <Animated.View style={[styles.fillWrap, compact && styles.fillWrapCompact, { width }]}>
+            <LinearGradient
+              colors={[
+                'rgba(255,212,0,1)',
+                'rgba(255,243,214,0.85)',
+                'rgba(107,3,241,0.95)',
+                'rgba(255,212,0,1)',
+              ]}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.fill}
+            />
+            <View pointerEvents="none" style={styles.fillRim} />
+          </Animated.View>
+        </View>
+      </HardShadowBox>
     </View>
   );
 }
@@ -110,5 +114,13 @@ const styles = StyleSheet.create({
   },
   fill: {
     flex: 1,
+  },
+  fillRim: {
+    ...StyleSheet.absoluteFillObject,
+    borderTopWidth: 2,
+    borderTopColor: 'rgba(255,255,255,0.35)',
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(255,255,255,0.22)',
+    borderRadius: 999,
   },
 });

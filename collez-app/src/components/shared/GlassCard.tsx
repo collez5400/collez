@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, ViewStyle, ViewProps, View } from 'react-native';
 import { Colors, BorderRadius } from '../../config/theme';
+import { HardShadowBox } from './HardShadowBox';
 
 interface GlassCardProps extends ViewProps {
   children: React.ReactNode;
@@ -29,20 +30,21 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   }[variant];
 
   return (
-    <View
-      style={[
-        styles.container,
-        variantStyle,
-        {
-          borderRadius,
-          padding,
-        },
-        style,
-      ]}
-      {...rest}
-    >
-      {children}
-    </View>
+    <HardShadowBox shadowOffset={6} borderRadius={borderRadius} style={style}>
+      <View
+        style={[
+          styles.container,
+          variantStyle,
+          {
+            borderRadius,
+            padding,
+          },
+        ]}
+        {...rest}
+      >
+        {children}
+      </View>
+    </HardShadowBox>
   );
 };
 
@@ -51,11 +53,6 @@ const styles = StyleSheet.create({
     borderColor: '#111111',
     borderWidth: 3,
     overflow: 'hidden',
-    shadowColor: '#110e05',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
   },
   defaultBg: {
     backgroundColor: Colors.surfaceContainerHigh,

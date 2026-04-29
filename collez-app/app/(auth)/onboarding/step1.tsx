@@ -27,6 +27,7 @@ import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
 import { ComicCutoutPanel } from '../../../src/components/shared/ComicCutoutPanel';
 import { ComicIllustrationHero } from '../../../src/components/shared/ComicIllustrationHero';
 import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBar';
+import { HardShadowBox } from '../../../src/components/shared/HardShadowBox';
 
 const TOTAL_STEPS = 3;
 const STEP = 1;
@@ -138,11 +139,13 @@ export default function OnboardingStep1() {
             <ComicIllustrationHero />
           </ComicCutoutPanel>
 
-          <View style={styles.captionBox}>
-            <Text style={styles.captionText}>
-              Set your handle + avatar. Your campus leaderboard starts here.
-            </Text>
-          </View>
+          <HardShadowBox shadowOffset={6} borderRadius={BorderRadius.lg}>
+            <View style={styles.captionBox}>
+              <Text style={styles.captionText}>
+                Set your handle + avatar. Your campus leaderboard starts here.
+              </Text>
+            </View>
+          </HardShadowBox>
 
         {/* Progress bar */}
         <ComicProgressBar
@@ -158,19 +161,22 @@ export default function OnboardingStep1() {
 
         {/* Avatar picker */}
         <TouchableOpacity style={styles.avatarWrap} onPress={pickAvatar} activeOpacity={0.8}>
-          {avatarUri ? (
-            <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarIcon}>📷</Text>
-              <Text style={styles.avatarHint}>Add Photo</Text>
-            </View>
-          )}
+          <HardShadowBox shadowOffset={8} borderRadius={60}>
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarIcon}>📷</Text>
+                <Text style={styles.avatarHint}>Add Photo</Text>
+              </View>
+            )}
+          </HardShadowBox>
         </TouchableOpacity>
 
         {/* Full Name */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Full Name</Text>
+          <HardShadowBox shadowOffset={4} borderRadius={8}>
           <View style={styles.inputRow}>
             <Text style={styles.inputIcon}>👤</Text>
             <TextInput
@@ -184,11 +190,13 @@ export default function OnboardingStep1() {
               accessibilityLabel="Full name input"
             />
           </View>
+          </HardShadowBox>
         </View>
 
         {/* Username */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Username</Text>
+          <HardShadowBox shadowOffset={4} borderRadius={8}>
           <View style={[styles.inputRow, usernameError ? styles.inputError : null]}>
             <Text style={styles.inputPrefix}>@</Text>
             <TextInput
@@ -210,6 +218,7 @@ export default function OnboardingStep1() {
               <Text style={styles.checkingText}>Checking…</Text>
             )}
           </View>
+          </HardShadowBox>
           {usernameError ? (
             <Text style={styles.errorText}>{usernameError}</Text>
           ) : null}
@@ -217,6 +226,7 @@ export default function OnboardingStep1() {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Referral Code (Optional)</Text>
+          <HardShadowBox shadowOffset={4} borderRadius={8}>
           <View style={styles.inputRow}>
             <Text style={styles.inputIcon}>🎁</Text>
             <TextInput
@@ -230,6 +240,7 @@ export default function OnboardingStep1() {
               accessibilityLabel="Referral code input"
             />
           </View>
+          </HardShadowBox>
         </View>
 
         <View style={styles.btnWrap}>
@@ -270,10 +281,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceContainerHighest,
     padding: Spacing.md,
     marginBottom: Spacing.lg,
-    shadowColor: '#ffd400',
-    shadowOpacity: 1,
-    shadowOffset: { width: 6, height: 6 },
-    shadowRadius: 0,
     transform: [{ rotate: '-1deg' }],
   },
   captionText: {
@@ -322,10 +329,6 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     borderWidth: 4,
     borderColor: '#111111',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 8, height: 8 },
-    shadowRadius: 0,
   },
   avatarPlaceholder: {
     width: 120,
@@ -337,10 +340,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 8, height: 8 },
-    shadowRadius: 0,
   },
   avatarIcon: { fontSize: 24 },
   avatarHint: {
@@ -365,11 +364,6 @@ const styles = StyleSheet.create({
     borderColor: '#111111',
     paddingHorizontal: Spacing.md,
     height: 56,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   inputError: {
     borderColor: Colors.error,

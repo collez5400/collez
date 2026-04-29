@@ -5,6 +5,7 @@ import { Image } from 'expo-image';
 import { Colors, Spacing, Typography } from '../../config/theme';
 import { LeaderboardEntry } from '../../store/leaderboardStore';
 import { StickerChip } from '../shared/StickerChip';
+import { HardShadowBox } from '../shared/HardShadowBox';
 
 interface RankRowProps {
   entry: LeaderboardEntry;
@@ -31,40 +32,42 @@ export function RankRow({ entry, isCurrentUser, showCollege = true, xpLabel = 'X
           : null;
 
   return (
-    <View style={[styles.container, isCurrentUser && styles.currentUserContainer]}>
-      <Text style={styles.rank}>{getRankDisplay(entry.position)}</Text>
+    <HardShadowBox shadowOffset={4} borderRadius={14}>
+      <View style={[styles.container, isCurrentUser && styles.currentUserContainer]}>
+        <Text style={styles.rank}>{getRankDisplay(entry.position)}</Text>
 
-      {entry.avatar_url ? (
-        <Image source={{ uri: entry.avatar_url }} style={styles.avatar} contentFit="cover" />
-      ) : (
-        <View style={styles.avatarFallback}>
-          <MaterialIcons name="person" size={16} color={Colors.onSurfaceVariant} />
-        </View>
-      )}
+        {entry.avatar_url ? (
+          <Image source={{ uri: entry.avatar_url }} style={styles.avatar} contentFit="cover" />
+        ) : (
+          <View style={styles.avatarFallback}>
+            <MaterialIcons name="person" size={16} color={Colors.onSurfaceVariant} />
+          </View>
+        )}
 
-      <View style={styles.userInfo}>
-        <Text style={styles.name} numberOfLines={1}>
-          {entry.full_name}
-          {entry.is_coordinator ? (
-            <Text style={styles.verified}>
-              {' '}
-              <MaterialIcons name="verified" size={14} color={Colors.secondary} />
+        <View style={styles.userInfo}>
+          <Text style={styles.name} numberOfLines={1}>
+            {entry.full_name}
+            {entry.is_coordinator ? (
+              <Text style={styles.verified}>
+                {' '}
+                <MaterialIcons name="verified" size={14} color={Colors.secondary} />
+              </Text>
+            ) : null}
+          </Text>
+          <Text style={styles.meta} numberOfLines={1}>
+            @{entry.username}
+            {showCollege && entry.college_name ? ` • ${entry.college_name}` : ''}
+          </Text>
+          {coordinatorRoleLabel ? (
+            <Text style={styles.roleMeta} numberOfLines={1}>
+              {coordinatorRoleLabel}
             </Text>
           ) : null}
-        </Text>
-        <Text style={styles.meta} numberOfLines={1}>
-          @{entry.username}
-          {showCollege && entry.college_name ? ` • ${entry.college_name}` : ''}
-        </Text>
-        {coordinatorRoleLabel ? (
-          <Text style={styles.roleMeta} numberOfLines={1}>
-            {coordinatorRoleLabel}
-          </Text>
-        ) : null}
-      </View>
+        </View>
 
-      <StickerChip label={`${entry.xp} ${xpLabel}`} tone={isCurrentUser ? 'dark' : 'yellow'} style={styles.rightInfo} />
-    </View>
+        <StickerChip label={`${entry.xp} ${xpLabel}`} tone={isCurrentUser ? 'dark' : 'yellow'} style={styles.rightInfo} />
+      </View>
+    </HardShadowBox>
   );
 }
 
@@ -79,11 +82,6 @@ const styles = StyleSheet.create({
     borderColor: '#111111',
     paddingHorizontal: Spacing.md,
     paddingVertical: 12,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   currentUserContainer: {
     borderColor: '#111111',

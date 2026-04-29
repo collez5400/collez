@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import { HalftoneOverlay } from './HalftoneOverlay';
 import { Colors, BorderRadius } from '../../config/theme';
+import { HardShadowBox } from './HardShadowBox';
 
 export function ComicCutoutPanel({
   children,
@@ -19,10 +20,12 @@ export function ComicCutoutPanel({
   backgroundColor?: string;
 }) {
   return (
-    <View style={[styles.panel, { backgroundColor }, style]}>
-      <HalftoneOverlay dotColor={dotColor} spacing={dotSpacing} opacity={halftoneOpacity} />
-      {children}
-    </View>
+    <HardShadowBox shadowOffset={8} borderRadius={BorderRadius.xl} style={style}>
+      <View style={[styles.panel, { backgroundColor }]}>
+        <HalftoneOverlay dotColor={dotColor} spacing={dotSpacing} opacity={halftoneOpacity} />
+        {children}
+      </View>
+    </HardShadowBox>
   );
 }
 
@@ -33,12 +36,6 @@ const styles = StyleSheet.create({
     borderColor: '#111111',
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
-    // Heavy offset shadow like comic ink depth.
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 8, height: 8 },
-    shadowRadius: 0,
-    elevation: 0,
     paddingVertical: 22,
     paddingHorizontal: 20,
   },

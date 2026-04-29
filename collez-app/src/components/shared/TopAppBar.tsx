@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography } from '../../config/theme';
 import { StickerChip } from './StickerChip';
+import { HardShadowBox } from './HardShadowBox';
 
 interface TopAppBarProps {
   avatarUrl?: string | null;
@@ -15,21 +16,23 @@ interface TopAppBarProps {
 export function TopAppBar({ avatarUrl, xp = 0, onAvatarPress }: TopAppBarProps) {
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.wrap, { paddingTop: Math.max(insets.top, 8) }]}>
-      <View style={styles.row}>
-        <Pressable style={styles.avatarButton} onPress={onAvatarPress}>
-          {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} style={styles.avatar} contentFit="cover" />
-          ) : (
-            <View style={styles.avatarFallback}>
-              <MaterialIcons name="person" size={20} color="#111111" />
-            </View>
-          )}
-        </Pressable>
-        <Text style={styles.brand}>COLLEZ</Text>
-        <StickerChip label={`${Math.max(0, Math.round(xp))} XP`} tone="yellow" style={styles.xpPill} />
+    <HardShadowBox shadowOffset={4}>
+      <View style={[styles.wrap, { paddingTop: Math.max(insets.top, 8) }]}>
+        <View style={styles.row}>
+          <Pressable style={styles.avatarButton} onPress={onAvatarPress}>
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={styles.avatar} contentFit="cover" />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <MaterialIcons name="person" size={20} color="#111111" />
+              </View>
+            )}
+          </Pressable>
+          <Text style={styles.brand}>COLLEZ</Text>
+          <StickerChip label={`${Math.max(0, Math.round(xp))} XP`} tone="yellow" style={styles.xpPill} />
+        </View>
       </View>
-    </View>
+    </HardShadowBox>
   );
 }
 
@@ -38,11 +41,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryContainer,
     borderBottomWidth: 4,
     borderBottomColor: '#111111',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   row: {
     height: 80,

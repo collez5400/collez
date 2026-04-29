@@ -6,6 +6,7 @@ import { Colors, Typography } from '../src/config/theme';
 import { ComicBrandShell } from '../src/components/shared/ComicBrandShell';
 import { WordmarkLockup } from '../src/components/shared/WordmarkLockup';
 import { LinearGradient } from 'expo-linear-gradient';
+import { HardShadowBox } from '../src/components/shared/HardShadowBox';
 
 const { width } = Dimensions.get('window');
 
@@ -91,21 +92,25 @@ export default function SplashScreen() {
         </Animated.Text>
       </Animated.View>
 
-      <View style={styles.barTrack}>
-        <Animated.View style={[styles.barFill, { width: barWidth }]}>
-          <LinearGradient
-            colors={[
-              'rgba(255,212,0,0.95)',
-              'rgba(255,212,0,0.10)',
-              'rgba(107,3,241,0.85)',
-              'rgba(255,212,0,0.10)',
-              'rgba(255,212,0,0.95)',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.stripes}
-          />
-        </Animated.View>
+      <View style={styles.barTrackWrap}>
+        <HardShadowBox shadowOffset={4} borderRadius={8}>
+          <View style={styles.barTrack}>
+            <Animated.View style={[styles.barFill, { width: barWidth }]}>
+              <LinearGradient
+                colors={[
+                  'rgba(255,212,0,0.95)',
+                  'rgba(255,212,0,0.10)',
+                  'rgba(107,3,241,0.85)',
+                  'rgba(255,212,0,0.10)',
+                  'rgba(255,212,0,0.95)',
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.stripes}
+              />
+            </Animated.View>
+          </View>
+        </HardShadowBox>
       </View>
     </ComicBrandShell>
   );
@@ -149,20 +154,18 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     textAlign: 'center',
   },
-  barTrack: {
+  barTrackWrap: {
     position: 'absolute',
     bottom: 84,
     width: Math.min(width - 40, 448),
+  },
+  barTrack: {
     height: 32,
     backgroundColor: Colors.surfaceContainerLowest,
     borderRadius: 8,
     overflow: 'hidden',
     borderColor: '#111111',
     borderWidth: 3,
-    shadowColor: '#6b03f1',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
   },
   barFill: {
     height: 24,

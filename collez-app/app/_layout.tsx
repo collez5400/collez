@@ -9,12 +9,10 @@ import {
   SpaceGrotesk_400Regular,
 } from '@expo-google-fonts/space-grotesk';
 import {
-  Manrope_400Regular,
-  Manrope_500Medium,
-  Manrope_600SemiBold,
-  Manrope_700Bold,
-  Manrope_800ExtraBold,
-} from '@expo-google-fonts/manrope';
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_700Bold,
+} from '@expo-google-fonts/plus-jakarta-sans';
 import { configureGoogleSignIn } from '../src/services/authService';
 import { useStreakStore } from '../src/store/streakStore';
 import { useXpStore } from '../src/store/xpStore';
@@ -42,12 +40,10 @@ export default function RootLayout() {
   const router = useRouter();
   const [fontsLoaded, fontError] = useFonts({
     SpaceGrotesk_400Regular,
-    SpaceGrotesk: SpaceGrotesk_700Bold,
-    Manrope: Manrope_400Regular,
-    Manrope_500Medium,
-    Manrope_600SemiBold,
-    Manrope_700Bold,
-    Manrope_800ExtraBold,
+    SpaceGrotesk_700Bold,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_700Bold,
   });
 
   const [isReady, setIsReady] = useState(false);

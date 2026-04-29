@@ -31,6 +31,7 @@ import { Note, NoteSortOption, NoteTab } from '../../../src/models/note';
 import NoteEditor from '../../../src/components/notes/NoteEditor';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../../src/store/authStore';
+import { HardShadowBox } from '../../../src/components/shared/HardShadowBox';
 
 const CATEGORIES: (TaskCategory | 'all')[] = ['all', 'study', 'personal', 'college'];
 const STROKE_WIDTH = 6;
@@ -469,24 +470,28 @@ export default function TasksScreen() {
       </View>
 
       <View style={styles.tabRow}>
-        <TouchableOpacity
-          style={[styles.tabButton, contentMode === 'tasks' && styles.tabButtonActive]}
-          onPress={() => {
-            LayoutAnimation.spring();
-            setContentMode('tasks');
-          }}
-        >
-          <Text style={[styles.tabButtonText, contentMode === 'tasks' && styles.tabButtonTextActive]}>Tasks</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tabButton, contentMode === 'notes' && styles.tabButtonActive]}
-          onPress={() => {
-            LayoutAnimation.spring();
-            setContentMode('notes');
-          }}
-        >
-          <Text style={[styles.tabButtonText, contentMode === 'notes' && styles.tabButtonTextActive]}>Notes</Text>
-        </TouchableOpacity>
+        <HardShadowBox shadowOffset={4} borderRadius={BorderRadius.full} style={{ flex: 1 }}>
+          <TouchableOpacity
+            style={[styles.tabButton, contentMode === 'tasks' && styles.tabButtonActive]}
+            onPress={() => {
+              LayoutAnimation.spring();
+              setContentMode('tasks');
+            }}
+          >
+            <Text style={[styles.tabButtonText, contentMode === 'tasks' && styles.tabButtonTextActive]}>Tasks</Text>
+          </TouchableOpacity>
+        </HardShadowBox>
+        <HardShadowBox shadowOffset={4} borderRadius={BorderRadius.full} style={{ flex: 1 }}>
+          <TouchableOpacity
+            style={[styles.tabButton, contentMode === 'notes' && styles.tabButtonActive]}
+            onPress={() => {
+              LayoutAnimation.spring();
+              setContentMode('notes');
+            }}
+          >
+            <Text style={[styles.tabButtonText, contentMode === 'notes' && styles.tabButtonTextActive]}>Notes</Text>
+          </TouchableOpacity>
+        </HardShadowBox>
       </View>
 
       <View style={styles.searchBar}>
@@ -775,12 +780,16 @@ export default function TasksScreen() {
         </>
       )}
 
-      <TouchableOpacity
-        style={[styles.fab, { bottom: insets.bottom + 24 }]}
-        onPress={() => (contentMode === 'tasks' ? setIsAddSheetVisible(true) : openNewNote())}
-      >
-        <MaterialIcons name="add" size={32} color="white" />
-      </TouchableOpacity>
+      <View style={[styles.fabWrap, { bottom: insets.bottom + 24 }]}>
+        <HardShadowBox shadowOffset={6} borderRadius={32}>
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => (contentMode === 'tasks' ? setIsAddSheetVisible(true) : openNewNote())}
+          >
+            <MaterialIcons name="add" size={32} color="white" />
+          </TouchableOpacity>
+        </HardShadowBox>
+      </View>
 
       <AddTaskSheet
         isVisible={isAddSheetVisible}
@@ -957,10 +966,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#111111',
     backgroundColor: Colors.surfaceContainerHigh,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
   },
   tabButtonActive: {
     backgroundColor: Colors.primaryContainer,
@@ -1139,9 +1144,6 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   fab: {
-    position: 'absolute',
-    bottom: 32,
-    right: 24,
     width: 64,
     height: 64,
     borderRadius: 32,
@@ -1150,11 +1152,10 @@ const styles = StyleSheet.create({
     borderColor: '#111111',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#111111',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
+  },
+  fabWrap: {
+    position: 'absolute',
+    right: 24,
   },
   modalBackdrop: {
     flex: 1,

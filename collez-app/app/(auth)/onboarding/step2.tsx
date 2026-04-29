@@ -24,7 +24,8 @@ import { useAuthStore } from '../../../src/store/authStore';
 import {
   Colors, Typography, Spacing, BorderRadius,
 } from '../../../src/config/theme';
-import { HalftoneOverlay } from '../../../src/components/shared/HalftoneOverlay';
+import { ComicBrandShell } from '../../../src/components/shared/ComicBrandShell';
+import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
 
 const TOTAL_STEPS = 3;
 const STEP = 2;
@@ -279,29 +280,35 @@ export default function OnboardingStep2() {
 
   if (requestPending) {
     return (
-      <View style={[styles.root, styles.centeredContent]}>
-        <Text style={styles.pendingIcon}>⏳</Text>
-        <Text style={styles.pendingHeadline}>Request Submitted!</Text>
-        <Text style={styles.pendingBody}>
-          We'll review your college and add it soon. Meanwhile, ask your coordinator to onboard your campus.
-        </Text>
-        <GradientButton title="Continue for Now" onPress={continueWithRequestedCollege} />
-        <View style={{ height: Spacing.md }} />
-        <GradientButton title="Go Back to Search" onPress={() => setRequestPending(false)} />
-      </View>
+      <ComicBrandShell dotColor="#6b03f1" dotSpacing={14} halftoneOpacity={0.12}>
+        <View style={[styles.root, styles.centeredContent]}>
+          <Text style={styles.pendingIcon}>⏳</Text>
+          <Text style={styles.pendingHeadline}>Request Submitted!</Text>
+          <Text style={styles.pendingBody}>
+            We'll review your college and add it soon. Meanwhile, ask your coordinator to onboard your campus.
+          </Text>
+          <GradientButton title="Continue for Now" onPress={continueWithRequestedCollege} />
+          <View style={{ height: Spacing.md }} />
+          <GradientButton title="Go Back to Search" onPress={() => setRequestPending(false)} />
+        </View>
+      </ComicBrandShell>
     );
   }
 
   return (
-    <View style={styles.root}>
-      <HalftoneOverlay dotColor="#6b03f1" spacing={14} opacity={0.15} />
+    <ComicBrandShell dotColor="#6b03f1" dotSpacing={14} halftoneOpacity={0.15}>
+      <View style={styles.root}>
+        <View style={styles.wordmarkWrap}>
+          <WordmarkLockup variant="compact" />
+        </View>
       {/* Progress */}
       <View style={styles.progressTrack}>
         <Animated.View style={[styles.progressFill, progressAnimStyle]} />
       </View>
       <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
+      <Text style={styles.storylineHeader}>STORY BEAT 2</Text>
       <Text style={styles.headline}>Find Your Campus</Text>
-      <Text style={styles.subheadline}>Select your college to join your campus leaderboard.</Text>
+      <Text style={styles.subheadline}>Pick a squad—then watch the podium move.</Text>
 
       {/* Search */}
       <View style={styles.podiumWrap}>
@@ -479,13 +486,18 @@ export default function OnboardingStep2() {
           </GlassCard>
         </View>
       </Modal>
-    </View>
+      </View>
+    </ComicBrandShell>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background, paddingHorizontal: 24, paddingTop: 60 },
+  root: { flex: 1, paddingHorizontal: 24, paddingTop: 34 },
   centeredContent: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  wordmarkWrap: {
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
   progressTrack: {
     height: 4,
     backgroundColor: Colors.surfaceContainerHighest,
@@ -501,6 +513,19 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,
     marginBottom: Spacing.md,
+  },
+  storylineHeader: {
+    fontSize: Typography.size.xs,
+    fontFamily: Typography.fontFamily.body,
+    color: Colors.primary,
+    fontWeight: '800',
+    letterSpacing: 2.4,
+    textTransform: 'uppercase',
+    marginBottom: Spacing.sm,
+    textAlign: 'left',
+    textShadowColor: '#111111',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
   },
   headline: {
     fontSize: Typography.size.xxl,

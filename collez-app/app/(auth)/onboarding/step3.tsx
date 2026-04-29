@@ -26,7 +26,9 @@ import { applyReferralCode } from '../../../src/services/referralService';
 import {
   Colors, Typography, Spacing, BorderRadius,
 } from '../../../src/config/theme';
-import { HalftoneOverlay } from '../../../src/components/shared/HalftoneOverlay';
+import { ComicBrandShell } from '../../../src/components/shared/ComicBrandShell';
+import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
+import { RewardExplosionSpotlight } from '../../../src/components/shared/RewardExplosionSpotlight';
 
 const TOTAL_STEPS = 3;
 const STEP = 3;
@@ -183,52 +185,68 @@ export default function OnboardingStep3() {
   }
 
   return (
-    <View style={styles.root}>
-      <HalftoneOverlay dotColor="#6b03f1" spacing={12} opacity={0.1} />
-      {/* Confetti */}
-      <View style={styles.confettiContainer} pointerEvents="none">
-        {confetti.map(c => (
-          <ConfettiDot key={c.id} {...c} />
-        ))}
+    <ComicBrandShell dotColor="#6b03f1" dotSpacing={12} halftoneOpacity={0.1}>
+      <View style={styles.root}>
+        {/* Confetti */}
+        <View style={styles.confettiContainer} pointerEvents="none">
+          {confetti.map(c => (
+            <ConfettiDot key={c.id} {...c} />
+          ))}
+        </View>
+
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <View style={styles.wordmarkWrap}>
+            <WordmarkLockup variant="compact" />
+          </View>
+
+          {/* Progress */}
+          <View style={styles.progressTrack}>
+            <Animated.View style={[styles.progressFill, progressAnimStyle]} />
+          </View>
+          <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
+
+          <RewardExplosionSpotlight style={styles.rewardsPanel}>
+            <Text style={styles.rewardsKicker}>REWARD DROP</Text>
+
+            {/* Floating XP props (comic “props” around the badge) */}
+            <View style={[styles.floatingXpChip, styles.floatingXpChip1]}>
+              <Text style={styles.floatingXpText}>+{XP_VALUES.DAILY_LOGIN}</Text>
+            </View>
+            <View style={[styles.floatingXpChip, styles.floatingXpChip2]}>
+              <Text style={styles.floatingXpText}>XP</Text>
+            </View>
+
+            <Animated.View style={[styles.xpBadge, xpAnimStyle]}>
+              <Text style={styles.xpText}>+{XP_VALUES.DAILY_LOGIN} XP</Text>
+            </Animated.View>
+
+            <View style={styles.rewardsCtaWrap}>
+              <GradientButton
+                title="Enter COLLEZ ⚡"
+                onPress={handleEnter}
+                loading={loading}
+                variant="primary"
+              />
+            </View>
+          </RewardExplosionSpotlight>
+
+          <Text style={styles.emoji}>💥</Text>
+          <Text style={styles.headline}>Rewards for{'\n'}showing up.</Text>
+          <Text style={styles.subheadline}>
+            Your daily login powers your streak—now jump into the app.
+          </Text>
+
+          {/* Summary card */}
+          <Animated.View style={cardAnimStyle}>
+            <GlassCard style={styles.summaryCard} padding={20}>
+              <SummaryRow label="👤 Name" value={params.fullName} />
+              <SummaryRow label="@ Username" value={`@${params.username}`} />
+              <SummaryRow label="🏫 College" value={params.collegeName} />
+            </GlassCard>
+          </Animated.View>
+        </ScrollView>
       </View>
-
-      <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Progress */}
-        <View style={styles.progressTrack}>
-          <Animated.View style={[styles.progressFill, progressAnimStyle]} />
-        </View>
-        <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
-
-        <Text style={styles.emoji}>🎉</Text>
-        <Text style={styles.headline}>Stay{'\n'}Consistent.</Text>
-        <Text style={styles.subheadline}>
-          Get rewarded. Your journey to becoming a top scholar starts now.
-        </Text>
-
-        {/* +2 XP badge */}
-        <Animated.View style={[styles.xpBadge, xpAnimStyle]}>
-          <Text style={styles.xpText}>+{XP_VALUES.DAILY_LOGIN} XP for joining!</Text>
-        </Animated.View>
-
-        {/* Summary card */}
-        <Animated.View style={cardAnimStyle}>
-          <GlassCard style={styles.summaryCard} padding={20}>
-            <SummaryRow label="👤 Name" value={params.fullName} />
-            <SummaryRow label="@ Username" value={`@${params.username}`} />
-            <SummaryRow label="🏫 College" value={params.collegeName} />
-          </GlassCard>
-        </Animated.View>
-
-        <View style={styles.btnWrap}>
-          <GradientButton
-            title="Enter COLLEZ ⚡"
-            onPress={handleEnter}
-            loading={loading}
-            variant="secondary"
-          />
-        </View>
-      </ScrollView>
-    </View>
+    </ComicBrandShell>
   );
 }
 
@@ -266,7 +284,7 @@ const summaryStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
   confettiContainer: {
     position: 'absolute',
     top: 120,
@@ -278,9 +296,14 @@ const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: 34,
     paddingBottom: 40,
     alignItems: 'center',
+  },
+  wordmarkWrap: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
   progressTrack: {
     height: 4,
@@ -328,6 +351,51 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: Spacing.lg,
   },
+  rewardsPanel: {
+    marginBottom: Spacing.sm,
+  },
+  rewardsKicker: {
+    fontFamily: Typography.fontFamily.button,
+    fontWeight: '900',
+    color: Colors.primary,
+    letterSpacing: 2.4,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+  },
+  rewardsCtaWrap: {
+    width: '100%',
+    marginTop: Spacing.md,
+  },
+  floatingXpChip: {
+    position: 'absolute',
+    borderWidth: 3,
+    borderColor: '#111111',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: Colors.primaryContainer,
+    shadowColor: '#110e05',
+    shadowOpacity: 1,
+    shadowOffset: { width: 4, height: 4 },
+    shadowRadius: 0,
+  },
+  floatingXpChip1: {
+    top: 40,
+    left: 16,
+    transform: [{ rotate: '-6deg' }],
+  },
+  floatingXpChip2: {
+    top: 110,
+    right: 14,
+    transform: [{ rotate: '8deg' }],
+  },
+  floatingXpText: {
+    fontFamily: Typography.fontFamily.heading,
+    fontWeight: '900',
+    color: '#000000',
+    textTransform: 'uppercase',
+  },
   xpBadge: {
     backgroundColor: Colors.primaryContainer,
     borderRadius: 12,
@@ -354,8 +422,5 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#111111',
   },
-  btnWrap: {
-    width: '100%',
-    marginTop: Spacing.xl,
-  },
+  // btnWrap intentionally removed: CTA now lives inside rewards spotlight.
 });

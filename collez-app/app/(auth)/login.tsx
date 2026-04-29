@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   Animated,
-  Dimensions,
   TouchableOpacity,
   ActivityIndicator,
   Linking,
@@ -14,47 +13,8 @@ import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useAuthStore } from '../../src/store/authStore';
 import { Colors, Typography, Spacing, BorderRadius } from '../../src/config/theme';
-import { HalftoneOverlay } from '../../src/components/shared/HalftoneOverlay';
-
-const { width, height } = Dimensions.get('window');
-const LOGO_URI =
-  'file:///C:/Users/Two Stars HQ/.cursor/projects/c-Users-Two-Stars-HQ-Desktop-collez/assets/c__Users_Two_Stars_HQ_AppData_Roaming_Cursor_User_workspaceStorage_c7123c16d2cecfaee064142bf6d2e0b7_images_ChatGPT_Image_Apr_26__2026__05_15_11_PM-57d29549-c004-4b2a-a725-f208aadbdf07.png';
-
-// Floating ambient blob
-function AmbientBlob({
-  x, y, size, color, delay,
-}: {
-  x: number; y: number; size: number; color: string; delay: number;
-}) {
-  const translateY = useRef(new Animated.Value(0)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(opacity, { toValue: 0.18, duration: 1000, delay, useNativeDriver: true }).start();
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(translateY, { toValue: -20, duration: 3000 + delay, useNativeDriver: true }),
-        Animated.timing(translateY, { toValue: 0, duration: 3000 + delay, useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
-
-  return (
-    <Animated.View
-      style={{
-        position: 'absolute',
-        left: x,
-        top: y,
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: color,
-        opacity,
-        transform: [{ translateY }],
-      }}
-    />
-  );
-}
+import { ComicBrandShell } from '../../src/components/shared/ComicBrandShell';
+import { COLLEZ_LOGO_URI } from '../../src/config/branding';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -87,12 +47,8 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.root}>
-      <HalftoneOverlay dotColor="#110e05" spacing={10} opacity={0.25} />
-      {/* Ambient blobs */}
-      <AmbientBlob x={-60} y={100} size={260} color={Colors.primary} delay={0} />
-      <AmbientBlob x={width - 180} y={height * 0.35} size={300} color={Colors.primaryVariant} delay={400} />
-      <AmbientBlob x={40} y={height * 0.65} size={200} color={Colors.secondary} delay={600} />
+    <ComicBrandShell dotColor="#110e05" dotSpacing={10} halftoneOpacity={0.22}>
+      <View style={styles.root}>
 
       {/* Main card */}
       <Animated.View style={[styles.cardWrap, { opacity: cardOpacity, transform: [{ translateY: cardTranslateY }] }]}>
@@ -100,7 +56,7 @@ export default function LoginScreen() {
           <View style={styles.lanyardHole} />
           <View style={styles.cardHeader}>
             <View style={styles.logoWrap}>
-              <Animated.Image source={{ uri: LOGO_URI }} style={styles.logo} />
+              <Animated.Image source={{ uri: COLLEZ_LOGO_URI }} style={styles.logo} />
             </View>
             <Text style={styles.brandText}>COLLEZ{'\n'}ACCESS CARD</Text>
           </View>
@@ -179,14 +135,14 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
       </Animated.View>
-    </View>
+      </View>
+    </ComicBrandShell>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.background,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,

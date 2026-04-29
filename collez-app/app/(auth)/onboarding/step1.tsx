@@ -22,7 +22,9 @@ import { supabase } from '../../../src/config/supabase';
 import {
   Colors, Typography, Spacing, BorderRadius,
 } from '../../../src/config/theme';
-import { HalftoneOverlay } from '../../../src/components/shared/HalftoneOverlay';
+import { ComicBrandShell } from '../../../src/components/shared/ComicBrandShell';
+import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
+import { ComicCutoutPanel } from '../../../src/components/shared/ComicCutoutPanel';
 
 const TOTAL_STEPS = 3;
 const STEP = 1;
@@ -120,12 +122,34 @@ export default function OnboardingStep1() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <HalftoneOverlay dotColor="#d7c4ff" spacing={10} opacity={0.12} />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+    <ComicBrandShell dotColor="#d7c4ff" dotSpacing={12} halftoneOpacity={0.12}>
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          <View style={styles.wordmarkWrap}>
+            <WordmarkLockup variant="compact" />
+          </View>
+
+          <ComicCutoutPanel style={styles.heroPanel} dotColor={Colors.primaryContainer} dotSpacing={10} halftoneOpacity={0.1}>
+            <View style={styles.heroInner}>
+              <Text style={styles.heroTitle}>
+                HERO{'\n'}PANEL
+              </Text>
+              <Text style={styles.heroSub}>
+                Make your identity loud. Then climb.
+              </Text>
+              <Text style={styles.heroIcon}>🧢⚡</Text>
+            </View>
+          </ComicCutoutPanel>
+
+          <View style={styles.captionBox}>
+            <Text style={styles.captionText}>
+              Set your handle + avatar. Your campus leaderboard starts here.
+            </Text>
+          </View>
+
         {/* Progress bar */}
         <View style={styles.progressTrack}>
           <Animated.View style={[styles.progressFill, progressAnimStyle]} />
@@ -133,9 +157,7 @@ export default function OnboardingStep1() {
         <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
 
         <Text style={styles.headline}>Everything college. One app.</Text>
-        <Text style={styles.subheadline}>
-          Set up your identity to start climbing leaderboards.
-        </Text>
+        <Text style={styles.subheadline}>Now we build your comic-style identity.</Text>
 
         {/* Avatar picker */}
         <TouchableOpacity style={styles.avatarWrap} onPress={pickAvatar} activeOpacity={0.8}>
@@ -221,18 +243,77 @@ export default function OnboardingStep1() {
             disabled={!fullName.trim() || !username.trim()}
           />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ComicBrandShell>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: 32,
     paddingBottom: 40,
+  },
+  wordmarkWrap: {
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  heroPanel: {
+    marginBottom: Spacing.lg,
+    paddingHorizontal: 14,
+  },
+  heroInner: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  heroTitle: {
+    fontFamily: Typography.fontFamily.heading,
+    fontWeight: '900',
+    fontSize: 34,
+    color: Colors.primary,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    lineHeight: 36,
+    textShadowColor: '#111111',
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 0,
+  },
+  heroSub: {
+    fontFamily: Typography.fontFamily.body,
+    color: Colors.onSecondaryContainer,
+    fontSize: Typography.size.sm,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  heroIcon: {
+    fontSize: 26,
+    color: Colors.primaryFixedDim,
+  },
+  captionBox: {
+    width: '100%',
+    borderRadius: BorderRadius.lg,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHighest,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+    shadowColor: '#ffd400',
+    shadowOpacity: 1,
+    shadowOffset: { width: 6, height: 6 },
+    shadowRadius: 0,
+    transform: [{ rotate: '-1deg' }],
+  },
+  captionText: {
+    color: Colors.onSurface,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.sm,
+    fontWeight: '700',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
   },
   progressTrack: {
     height: 8,

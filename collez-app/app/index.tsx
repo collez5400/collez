@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions, Image } from 'react-native';
+import { View, StyleSheet, Animated, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../src/store/authStore';
 import { Colors, Typography } from '../src/config/theme';
-import { HalftoneOverlay } from '../src/components/shared/HalftoneOverlay';
+import { ComicBrandShell } from '../src/components/shared/ComicBrandShell';
+import { WordmarkLockup } from '../src/components/shared/WordmarkLockup';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
-const LOGO_URI =
-  'file:///C:/Users/Two Stars HQ/.cursor/projects/c-Users-Two-Stars-HQ-Desktop-collez/assets/c__Users_Two_Stars_HQ_AppData_Roaming_Cursor_User_workspaceStorage_c7123c16d2cecfaee064142bf6d2e0b7_images_ChatGPT_Image_Apr_26__2026__05_15_11_PM-57d29549-c004-4b2a-a725-f208aadbdf07.png';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -78,37 +78,40 @@ export default function SplashScreen() {
   }, [status]);
 
   return (
-    <View style={styles.root}>
-      <HalftoneOverlay dotColor="#6b03f1" spacing={16} opacity={0.15} />
+    <ComicBrandShell dotColor="#6b03f1" dotSpacing={16} halftoneOpacity={0.15}>
       <Animated.View style={[styles.glowCircle, { opacity: glowOpacity }]} />
       <Animated.View style={[styles.glowCircle2, { opacity: glowOpacity }]} />
 
       <Animated.View
         style={[styles.logoBlock, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}
       >
-        <Image source={{ uri: LOGO_URI }} style={styles.logoImage} resizeMode="contain" />
-        <Text style={styles.logo}>LEVEL UP{'\n'}COLLEGE LIFE</Text>
-        <Animated.Text style={[styles.subtitle, { opacity: subtitleOpacity }]}>
-          INITIALIZING...
+        <WordmarkLockup />
+        <Animated.Text style={[styles.brandPromise, { opacity: subtitleOpacity }]}>
+          WELCOME TO THE{'\n'}COMIC CAMPUS
         </Animated.Text>
       </Animated.View>
 
       <View style={styles.barTrack}>
         <Animated.View style={[styles.barFill, { width: barWidth }]}>
-          <View style={styles.stripe} />
+          <LinearGradient
+            colors={[
+              'rgba(255,212,0,0.95)',
+              'rgba(255,212,0,0.10)',
+              'rgba(107,3,241,0.85)',
+              'rgba(255,212,0,0.10)',
+              'rgba(255,212,0,0.95)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.stripes}
+          />
         </Animated.View>
       </View>
-    </View>
+    </ComicBrandShell>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   glowCircle: {
     position: 'absolute',
     width: 420,
@@ -137,34 +140,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
   },
-  logoImage: {
-    width: 192,
-    height: 192,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 8, height: 8 },
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  logo: {
-    fontSize: 56,
-    fontFamily: Typography.fontFamily.display,
-    fontWeight: '900',
-    letterSpacing: -1.8,
-    color: Colors.primary,
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    textShadowColor: '#6b03f1',
-    textShadowOffset: { width: 4, height: 4 },
-    textShadowRadius: 0,
-  },
-  subtitle: {
+  brandPromise: {
     fontSize: 14,
     fontFamily: Typography.fontFamily.button,
     color: Colors.primary,
     letterSpacing: 2.4,
     fontWeight: '700',
     textTransform: 'uppercase',
+    textAlign: 'center',
   },
   barTrack: {
     position: 'absolute',
@@ -195,5 +178,9 @@ const styles = StyleSheet.create({
   stripe: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.08)',
+  },
+  stripes: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.95,
   },
 });

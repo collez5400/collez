@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Typography } from '../../config/theme';
+import { StickerChip } from './StickerChip';
 
 interface TopAppBarProps {
   avatarUrl?: string | null;
@@ -26,10 +27,7 @@ export function TopAppBar({ avatarUrl, xp = 0, onAvatarPress }: TopAppBarProps) 
           )}
         </Pressable>
         <Text style={styles.brand}>COLLEZ</Text>
-        <View style={styles.xpPill}>
-          <Text style={styles.xpText}>{Math.max(0, Math.round(xp))} XP</Text>
-          <MaterialIcons name="local-fire-department" size={16} color="#111111" />
-        </View>
+        <StickerChip label={`${Math.max(0, Math.round(xp))} XP`} tone="yellow" style={styles.xpPill} />
       </View>
     </View>
   );
@@ -78,26 +76,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   xpPill: {
-    flexDirection: 'row',
+    minWidth: 88,
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: Colors.primary,
-    borderWidth: 2,
-    borderColor: '#111111',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 2, height: 2 },
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  xpText: {
-    color: '#111111',
-    fontFamily: Typography.fontFamily.button,
-    fontWeight: '700',
-    fontSize: 12,
-    textTransform: 'uppercase',
   },
 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Typography, BorderRadius } from '../../config/theme';
 
 interface GradientButtonProps {
@@ -67,6 +68,18 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
       ]}
     >
       <View style={[styles.buttonBody, variant === 'secondary' && styles.buttonSecondary]}>
+        <LinearGradient
+          colors={[
+            'rgba(255,255,255,0.35)',
+            'rgba(255,255,255,0.08)',
+            'rgba(255,255,255,0)',
+          ]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gloss}
+          pointerEvents="none"
+        />
+        <View style={styles.rim} pointerEvents="none" />
         {loading ? (
           <ActivityIndicator color={variant === 'secondary' ? Colors.onSecondaryContainer : Colors.onPrimary} />
         ) : (
@@ -114,6 +127,19 @@ const styles = StyleSheet.create({
   },
   buttonSecondary: {
     backgroundColor: Colors.secondaryContainer,
+  },
+  gloss: {
+    ...StyleSheet.absoluteFillObject,
+    height: '65%',
+  },
+  rim: {
+    position: 'absolute',
+    top: 4,
+    left: 6,
+    right: 6,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.18)',
   },
   text: {
     color: Colors.onPrimary,

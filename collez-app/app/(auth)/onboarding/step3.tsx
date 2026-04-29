@@ -29,6 +29,8 @@ import {
 import { ComicBrandShell } from '../../../src/components/shared/ComicBrandShell';
 import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
 import { RewardExplosionSpotlight } from '../../../src/components/shared/RewardExplosionSpotlight';
+import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBar';
+import { StickerChip } from '../../../src/components/shared/StickerChip';
 
 const TOTAL_STEPS = 3;
 const STEP = 3;
@@ -75,6 +77,62 @@ function ConfettiDot({
         style,
       ]}
     />
+  );
+}
+
+function FloatingRewardProp({
+  label,
+  top,
+  left,
+  right,
+  rotateDeg,
+  tone,
+  delay,
+}: {
+  label: string;
+  top: number;
+  left?: number;
+  right?: number;
+  rotateDeg: number;
+  tone: 'yellow' | 'purple' | 'dark' | 'success';
+  delay: number;
+}) {
+  const bob = useSharedValue(0);
+  const tilt = useSharedValue(rotateDeg);
+
+  useEffect(() => {
+    bob.value = withDelay(
+      delay,
+      withRepeat(
+        withSequence(
+          withTiming(-10, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+          withTiming(0, { duration: 900, easing: Easing.inOut(Easing.quad) })
+        ),
+        -1,
+        false
+      )
+    );
+    tilt.value = withDelay(
+      delay,
+      withRepeat(
+        withSequence(
+          withTiming(rotateDeg + 4, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+          withTiming(rotateDeg - 4, { duration: 900, easing: Easing.inOut(Easing.quad) })
+        ),
+        -1,
+        true
+      )
+    );
+  }, [bob, delay, rotateDeg, tilt]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: bob.value }, { rotate: `${tilt.value}deg` }],
+  }));
+
+  return (
+    <Animated.View style={[styles.floatingRewardProp, { top, left, right }, animatedStyle]}>
+      <StickerChip label={label} tone={tone} />
+    </Animated.View>
   );
 }
 
@@ -200,21 +258,22 @@ export default function OnboardingStep3() {
           </View>
 
           {/* Progress */}
-          <View style={styles.progressTrack}>
-            <Animated.View style={[styles.progressFill, progressAnimStyle]} />
-          </View>
+          <ComicProgressBar
+            progress={STEP / TOTAL_STEPS}
+            valueLabel={`Step ${STEP} of ${TOTAL_STEPS}`}
+            style={styles.progressTrack}
+            compact
+          />
           <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
 
           <RewardExplosionSpotlight style={styles.rewardsPanel}>
             <Text style={styles.rewardsKicker}>REWARD DROP</Text>
 
             {/* Floating XP props (comic “props” around the badge) */}
-            <View style={[styles.floatingXpChip, styles.floatingXpChip1]}>
-              <Text style={styles.floatingXpText}>+{XP_VALUES.DAILY_LOGIN}</Text>
-            </View>
-            <View style={[styles.floatingXpChip, styles.floatingXpChip2]}>
-              <Text style={styles.floatingXpText}>XP</Text>
-            </View>
+            <FloatingRewardProp label={`+${XP_VALUES.DAILY_LOGIN}`} tone="yellow" top={28} left={8} rotateDeg={-8} delay={200} />
+            <FloatingRewardProp label="XP DROP" tone="purple" top={84} right={10} rotateDeg={8} delay={420} />
+            <FloatingRewardProp label="STREAK" tone="dark" top={142} left={18} rotateDeg={-4} delay={620} />
+            <FloatingRewardProp label="BONUS" tone="success" top={170} right={18} rotateDeg={5} delay={760} />
 
             <Animated.View style={[styles.xpBadge, xpAnimStyle]}>
               <Text style={styles.xpText}>+{XP_VALUES.DAILY_LOGIN} XP</Text>
@@ -306,19 +365,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   progressTrack: {
-    height: 4,
-    backgroundColor: Colors.surfaceContainerHighest,
-    borderWidth: 3,
-    borderColor: '#111111',
-    borderRadius: 2,
-    overflow: 'hidden',
     marginBottom: Spacing.sm,
     width: '100%',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.primaryContainer,
-    borderRadius: 2,
   },
   stepLabel: {
     fontSize: Typography.size.xs,
@@ -367,34 +415,8 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: Spacing.md,
   },
-  floatingXpChip: {
+  floatingRewardProp: {
     position: 'absolute',
-    borderWidth: 3,
-    borderColor: '#111111',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: Colors.primaryContainer,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
-  },
-  floatingXpChip1: {
-    top: 40,
-    left: 16,
-    transform: [{ rotate: '-6deg' }],
-  },
-  floatingXpChip2: {
-    top: 110,
-    right: 14,
-    transform: [{ rotate: '8deg' }],
-  },
-  floatingXpText: {
-    fontFamily: Typography.fontFamily.heading,
-    fontWeight: '900',
-    color: '#000000',
-    textTransform: 'uppercase',
   },
   xpBadge: {
     backgroundColor: Colors.primaryContainer,

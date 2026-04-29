@@ -18,7 +18,8 @@ export function RewardExplosionSpotlight({
   return (
     <View style={[styles.card, style]}>
       <HalftoneOverlay dotColor={dotColor} spacing={12} opacity={0.12} />
-      <StarburstOverlay size={300} spikes={12} innerRatio={0.5} color={burstColor} opacity={0.9} style={styles.burst} />
+      <StarburstOverlay size={340} spikes={16} innerRatio={0.44} color={burstColor} opacity={0.95} style={styles.burst} />
+      <View style={styles.echoBurst} />
       {children}
     </View>
   );
@@ -42,8 +43,19 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   burst: {
-    top: -10,
-    left: -10,
+    top: -24,
+    left: -20,
+  },
+  echoBurst: {
+    position: 'absolute',
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 4,
+    borderColor: '#111111',
+    top: 58,
+    alignSelf: 'center',
   },
 });
 

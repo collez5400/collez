@@ -22,6 +22,7 @@ import { ShimmerLoader } from '../../src/components/shared/ShimmerLoader';
 import { AnimatedCard } from '../../src/components/shared/AnimatedCard';
 import { AnimatedSection } from '../../src/components/shared/AnimatedSection';
 import { TopAppBar } from '../../src/components/shared/TopAppBar';
+import { ComicPanelCard } from '../../src/components/shared/ComicPanelCard';
 import { MilestoneCelebrationModal } from '../../src/components/streak/MilestoneCelebrationModal';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { fetchTodayQuote } from '../../src/services/quoteService';
@@ -212,10 +213,10 @@ export default function HomeScreen() {
         )}
 
         <AnimatedCard index={0}>
-          <View style={styles.heroHeadlineCard}>
+          <ComicPanelCard style={styles.heroHeadlineCard}>
             <Text style={styles.heroHeadline}>WHAT&apos;S UP, HERO!</Text>
             <Text style={styles.heroSubline}>Level up your streak and crush today&apos;s missions.</Text>
-          </View>
+          </ComicPanelCard>
         </AnimatedCard>
 
         <AnimatedCard index={1}>
@@ -341,16 +342,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
   },
   heroHeadlineCard: {
-    backgroundColor: Colors.surfaceContainerHigh,
-    borderWidth: 3,
-    borderColor: '#111111',
-    borderRadius: 12,
     padding: 20,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   heroHeadline: {
     fontFamily: Typography.fontFamily.heading,

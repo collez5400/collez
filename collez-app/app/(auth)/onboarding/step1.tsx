@@ -25,6 +25,8 @@ import {
 import { ComicBrandShell } from '../../../src/components/shared/ComicBrandShell';
 import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
 import { ComicCutoutPanel } from '../../../src/components/shared/ComicCutoutPanel';
+import { ComicIllustrationHero } from '../../../src/components/shared/ComicIllustrationHero';
+import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBar';
 
 const TOTAL_STEPS = 3;
 const STEP = 1;
@@ -133,15 +135,7 @@ export default function OnboardingStep1() {
           </View>
 
           <ComicCutoutPanel style={styles.heroPanel} dotColor={Colors.primaryContainer} dotSpacing={10} halftoneOpacity={0.1}>
-            <View style={styles.heroInner}>
-              <Text style={styles.heroTitle}>
-                HERO{'\n'}PANEL
-              </Text>
-              <Text style={styles.heroSub}>
-                Make your identity loud. Then climb.
-              </Text>
-              <Text style={styles.heroIcon}>🧢⚡</Text>
-            </View>
+            <ComicIllustrationHero />
           </ComicCutoutPanel>
 
           <View style={styles.captionBox}>
@@ -151,9 +145,12 @@ export default function OnboardingStep1() {
           </View>
 
         {/* Progress bar */}
-        <View style={styles.progressTrack}>
-          <Animated.View style={[styles.progressFill, progressAnimStyle]} />
-        </View>
+        <ComicProgressBar
+          progress={STEP / TOTAL_STEPS}
+          valueLabel={`Step ${STEP} of ${TOTAL_STEPS}`}
+          style={styles.progressTrack}
+          compact
+        />
         <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
 
         <Text style={styles.headline}>Everything college. One app.</Text>
@@ -265,33 +262,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
     paddingHorizontal: 14,
   },
-  heroInner: {
-    alignItems: 'center',
-    gap: 10,
-  },
-  heroTitle: {
-    fontFamily: Typography.fontFamily.heading,
-    fontWeight: '900',
-    fontSize: 34,
-    color: Colors.primary,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-    lineHeight: 36,
-    textShadowColor: '#111111',
-    textShadowOffset: { width: 3, height: 3 },
-    textShadowRadius: 0,
-  },
-  heroSub: {
-    fontFamily: Typography.fontFamily.body,
-    color: Colors.onSecondaryContainer,
-    fontSize: Typography.size.sm,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  heroIcon: {
-    fontSize: 26,
-    color: Colors.primaryFixedDim,
-  },
   captionBox: {
     width: '100%',
     borderRadius: BorderRadius.lg,
@@ -316,24 +286,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   progressTrack: {
-    height: 8,
-    backgroundColor: Colors.surfaceContainerHighest,
-    borderRadius: 999,
-    borderWidth: 3,
-    borderColor: '#111111',
-    overflow: 'hidden',
     marginBottom: Spacing.sm,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.primaryContainer,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: '#000000',
-    shadowColor: '#000000',
-    shadowOpacity: 1,
-    shadowOffset: { width: 2, height: 2 },
-    shadowRadius: 0,
   },
   stepLabel: {
     fontSize: Typography.size.xs,

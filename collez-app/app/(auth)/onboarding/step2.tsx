@@ -26,6 +26,8 @@ import {
 } from '../../../src/config/theme';
 import { ComicBrandShell } from '../../../src/components/shared/ComicBrandShell';
 import { WordmarkLockup } from '../../../src/components/shared/WordmarkLockup';
+import { ComicPodium } from '../../../src/components/shared/ComicPodium';
+import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBar';
 
 const TOTAL_STEPS = 3;
 const STEP = 2;
@@ -302,32 +304,19 @@ export default function OnboardingStep2() {
           <WordmarkLockup variant="compact" />
         </View>
       {/* Progress */}
-      <View style={styles.progressTrack}>
-        <Animated.View style={[styles.progressFill, progressAnimStyle]} />
-      </View>
+      <ComicProgressBar
+        progress={STEP / TOTAL_STEPS}
+        valueLabel={`Step ${STEP} of ${TOTAL_STEPS}`}
+        style={styles.progressTrack}
+        compact
+      />
       <Text style={styles.stepLabel}>Step {STEP} of {TOTAL_STEPS}</Text>
       <Text style={styles.storylineHeader}>STORY BEAT 2</Text>
       <Text style={styles.headline}>Find Your Campus</Text>
       <Text style={styles.subheadline}>Pick a squad—then watch the podium move.</Text>
 
       {/* Search */}
-      <View style={styles.podiumWrap}>
-        <View style={[styles.podiumCol, styles.podiumLeft]}>
-          <View style={styles.podiumAvatar} />
-          <View style={styles.scoreChip}><Text style={styles.scoreChipText}>850</Text></View>
-          <View style={styles.blockLeft}><Text style={styles.rankMark}>2</Text></View>
-        </View>
-        <View style={[styles.podiumCol, styles.podiumCenter]}>
-          <View style={[styles.podiumAvatar, styles.podiumAvatarCenter]} />
-          <View style={[styles.scoreChip, styles.scoreChipCenter]}><Text style={styles.scoreChipText}>1200</Text></View>
-          <View style={styles.blockCenter}><Text style={styles.rankMarkCenter}>1</Text></View>
-        </View>
-        <View style={[styles.podiumCol, styles.podiumRight]}>
-          <View style={styles.podiumAvatar} />
-          <View style={styles.scoreChip}><Text style={styles.scoreChipText}>600</Text></View>
-          <View style={styles.blockRight}><Text style={styles.rankMark}>3</Text></View>
-        </View>
-      </View>
+      <ComicPodium style={styles.podiumWrap} />
       <Text style={styles.heroLine}>Win with friends.</Text>
 
       <View style={styles.searchRow}>
@@ -499,15 +488,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   progressTrack: {
-    height: 4,
-    backgroundColor: Colors.surfaceContainerHighest,
-    borderWidth: 3,
-    borderColor: '#111111',
-    borderRadius: 2,
-    overflow: 'hidden',
     marginBottom: Spacing.sm,
   },
-  progressFill: { height: '100%', backgroundColor: Colors.primaryContainer, borderRadius: 2 },
   stepLabel: {
     fontSize: Typography.size.xs,
     color: Colors.onSurfaceVariant,
@@ -618,104 +600,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   podiumWrap: {
-    height: 300,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    gap: 14,
     marginBottom: 4,
-  },
-  podiumCol: {
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  podiumLeft: { marginBottom: 16 },
-  podiumCenter: { marginBottom: 0 },
-  podiumRight: { marginBottom: 48 },
-  podiumAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 4,
-    borderColor: '#000000',
-    backgroundColor: Colors.surfaceVariant,
-    marginBottom: -14,
-    zIndex: 2,
-  },
-  podiumAvatarCenter: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: Colors.primaryContainer,
-  },
-  scoreChip: {
-    borderRadius: 999,
-    borderWidth: 3,
-    borderColor: '#000000',
-    backgroundColor: Colors.surfaceContainer,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    shadowColor: '#000000',
-    shadowOpacity: 1,
-    shadowOffset: { width: 2, height: 2 },
-    shadowRadius: 0,
-    marginBottom: 6,
-    transform: [{ rotate: '-3deg' }],
-    zIndex: 3,
-  },
-  scoreChipCenter: {
-    transform: [{ rotate: '2deg' }],
-    backgroundColor: Colors.primaryContainer,
-  },
-  scoreChipText: {
-    color: Colors.onSurface,
-    fontFamily: Typography.fontFamily.button,
-    fontWeight: '700',
-    fontSize: 12,
-  },
-  blockLeft: {
-    width: 84,
-    height: 140,
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
-    borderWidth: 3,
-    borderColor: '#000000',
-    backgroundColor: Colors.secondaryContainer,
-    alignItems: 'center',
-  },
-  blockCenter: {
-    width: 96,
-    height: 200,
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
-    borderWidth: 3,
-    borderColor: '#000000',
-    backgroundColor: Colors.primaryContainer,
-    alignItems: 'center',
-  },
-  blockRight: {
-    width: 84,
-    height: 100,
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
-    borderWidth: 3,
-    borderColor: '#000000',
-    backgroundColor: Colors.surfaceVariant,
-    alignItems: 'center',
-  },
-  rankMark: {
-    marginTop: 10,
-    color: Colors.onSurface,
-    fontFamily: Typography.fontFamily.heading,
-    fontWeight: '900',
-    fontSize: 30,
-  },
-  rankMarkCenter: {
-    marginTop: 10,
-    color: Colors.onPrimary,
-    fontFamily: Typography.fontFamily.heading,
-    fontWeight: '900',
-    fontSize: 54,
   },
   requestBtnText: {
     color: Colors.primary,

@@ -20,11 +20,12 @@ import { BorderRadius, Colors, Spacing, Typography } from '../../../src/config/t
 import { GlassCard } from '../../../src/components/shared/GlassCard';
 import { FlashList } from '@shopify/flash-list';
 import AddTaskSheet from '../../../src/components/tasks/AddTaskSheet';
-import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
-import Svg, { Circle } from 'react-native-svg';
 import { GradientButton } from '../../../src/components/shared/GradientButton';
 import { EmptyState } from '../../../src/components/shared/EmptyState';
 import { TopAppBar } from '../../../src/components/shared/TopAppBar';
+import { ComicProgressRing } from '../../../src/components/shared/ComicProgressRing';
+import { ComicPanelCard } from '../../../src/components/shared/ComicPanelCard';
+import { StickerChip } from '../../../src/components/shared/StickerChip';
 import { useNoteStore } from '../../../src/store/noteStore';
 import { Note, NoteSortOption, NoteTab } from '../../../src/models/note';
 import NoteEditor from '../../../src/components/notes/NoteEditor';
@@ -32,10 +33,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../../src/store/authStore';
 
 const CATEGORIES: (TaskCategory | 'all')[] = ['all', 'study', 'personal', 'college'];
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-const RADIUS = 20;
 const STROKE_WIDTH = 6;
-const CIRCLE_LENGTH = 2 * Math.PI * RADIUS;
 const NOTE_TABS: NoteTab[] = ['all', 'pinned', 'subjects'];
 const NOTE_SORTS: NoteSortOption[] = ['date', 'subject', 'pinned'];
 
@@ -120,13 +118,13 @@ const TaskItem = ({
 
   return (
     <View style={styles.taskContainer}>
-      <GlassCard
-        intensity={20}
+      <ComicPanelCard
         style={[
           styles.taskCard,
           { opacity: task.isCompleted ? 0.6 : 1 },
           { borderLeftWidth: 4, borderLeftColor: categoryColor },
         ]}
+        padding={16}
       >
         <TouchableOpacity
           style={styles.checkbox}
@@ -159,11 +157,7 @@ const TaskItem = ({
           ) : null}
 
           <View style={styles.taskMeta}>
-            <View style={[styles.categoryBadge, { backgroundColor: categoryColor + '20' }]}>
-              <Text style={[styles.categoryText, { color: categoryColor }]}>
-                {task.category}
-              </Text>
-            </View>
+            <StickerChip label={task.category} tone="dark" style={styles.categoryBadge} />
 
             {task.dueDate && (
               <View style={styles.dueContainer}>
@@ -212,7 +206,7 @@ const TaskItem = ({
             <MaterialIcons name="delete-outline" size={20} color={Colors.error} />
           </TouchableOpacity>
         </View>
-      </GlassCard>
+      </ComicPanelCard>
     </View>
   );
 };
@@ -278,7 +272,6 @@ export default function TasksScreen() {
   const [noteFolderInput, setNoteFolderInput] = useState('');
   const [isNoteEditorVisible, setIsNoteEditorVisible] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | undefined>(undefined);
-  const progressOffset = useSharedValue(CIRCLE_LENGTH);
 
   useEffect(() => {
     void loadTasks();
@@ -333,15 +326,6 @@ export default function TasksScreen() {
       );
     });
   }, [activeNoteFolderId, activeNoteTab, noteSearchQuery, noteSortBy, notes, showArchivedNotes]);
-
-  useEffect(() => {
-    const target = CIRCLE_LENGTH - (completionRate / 100) * CIRCLE_LENGTH;
-    progressOffset.value = withTiming(target, { duration: 500 });
-  }, [completionRate, progressOffset]);
-
-  const animatedCircleProps = useAnimatedProps(() => ({
-    strokeDashoffset: progressOffset.value,
-  }));
 
   const openFolderManager = () => setIsFolderModalVisible(true);
 
@@ -474,33 +458,13 @@ export default function TasksScreen() {
           </Text>
         </View>
         {contentMode === 'tasks' ? (
-          <View style={styles.progressCircleWrap}>
-            <Svg width={56} height={56}>
-              <Circle
-                cx={28}
-                cy={28}
-                r={RADIUS}
-                stroke={`${Colors.outline}44`}
-                strokeWidth={STROKE_WIDTH}
-                fill="none"
-              />
-              <AnimatedCircle
-                animatedProps={animatedCircleProps}
-                cx={28}
-                cy={28}
-                r={RADIUS}
-                stroke={Colors.primary}
-                strokeWidth={STROKE_WIDTH}
-                strokeDasharray={`${CIRCLE_LENGTH}, ${CIRCLE_LENGTH}`}
-                strokeLinecap="round"
-                fill="none"
-                rotation={-90}
-                originX={28}
-                originY={28}
-              />
-            </Svg>
-            <Text style={styles.progressText}>{completionRate}%</Text>
-          </View>
+          <ComicProgressRing
+            progress={completionRate / 100}
+            label={`${completionRate}%`}
+            size={56}
+            strokeWidth={STROKE_WIDTH}
+            accentColor={Colors.primaryContainer}
+          />
         ) : null}
       </View>
 
@@ -960,19 +924,6 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     marginTop: 2,
   },
-  progressCircleWrap: {
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  progressText: {
-    position: 'absolute',
-    color: Colors.onSurface,
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.size.xs,
-    fontWeight: '700',
-  },
   searchBar: {
     marginHorizontal: Spacing.lg,
     marginVertical: Spacing.md,
@@ -1163,16 +1114,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
     marginRight: Spacing.md,
-  },
-  categoryText: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.size.xs,
-    fontWeight: '700',
-    textTransform: 'uppercase',
   },
   dueContainer: {
     flexDirection: 'row',

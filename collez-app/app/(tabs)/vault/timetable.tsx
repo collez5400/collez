@@ -8,6 +8,7 @@ import { AddSubjectSheet } from '../../../src/components/timetable/AddSubjectShe
 import { EmptyState } from '../../../src/components/shared/EmptyState';
 import { TopAppBar } from '../../../src/components/shared/TopAppBar';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../../../src/config/theme';
+import { ComicPanelCard } from '../../../src/components/shared/ComicPanelCard';
 import { useStreakStore } from '../../../src/store/streakStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../../src/store/authStore';
@@ -86,22 +87,29 @@ export default function TimetableScreen() {
   const renderItem = ({ item, drag, isActive }: RenderItemParams<TimetableEntry>) => {
     return (
       <TouchableOpacity
-        style={[styles.card, { backgroundColor: isActive ? Colors.surfaceHigh : Colors.surface, borderColor: `${item.color}55` }]}
+        style={[styles.cardWrap, { opacity: isActive ? 0.9 : 1 }]}
         onLongPress={drag}
         onPress={() => { setEditingEntry(item); setSheetVisible(true); }}
         delayLongPress={200}
       >
-        <View style={[styles.colorStrip, { backgroundColor: item.color as string }]} />
-        <View style={styles.cardContent}>
-          <Text style={styles.subject}>{item.subject}</Text>
-          <View style={styles.row}>
-            <Text style={styles.time}>{item.start_time} - {item.end_time}</Text>
-            {item.room && <Text style={styles.room}> • {item.room}</Text>}
+        <ComicPanelCard
+          style={[styles.card, { backgroundColor: isActive ? Colors.surfaceHigh : Colors.surface, borderColor: `${item.color}55` }]}
+          padding={0}
+          dotColor={item.color}
+          halftoneOpacity={0.08}
+        >
+          <View style={[styles.colorStrip, { backgroundColor: item.color as string }]} />
+          <View style={styles.cardContent}>
+            <Text style={styles.subject}>{item.subject}</Text>
+            <View style={styles.row}>
+              <Text style={styles.time}>{item.start_time} - {item.end_time}</Text>
+              {item.room && <Text style={styles.room}> • {item.room}</Text>}
+            </View>
           </View>
-        </View>
-        <TouchableOpacity style={styles.delBtn} onPress={() => deleteEntry(item.id)}>
-          <MaterialIcons name="close" size={20} color={Colors.onSurfaceVariant} />
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.delBtn} onPress={() => deleteEntry(item.id)}>
+            <MaterialIcons name="close" size={20} color={Colors.onSurfaceVariant} />
+          </TouchableOpacity>
+        </ComicPanelCard>
       </TouchableOpacity>
     );
   };
@@ -248,19 +256,15 @@ const styles = StyleSheet.create({
   dayLabel: { fontSize: 13, fontFamily: Typography.fontFamily.body, color: Colors.onSurfaceVariant, fontWeight: '600' },
   dayLabelActive: { color: Colors.onPrimary, fontFamily: Typography.fontFamily.button, textTransform: 'uppercase' },
   list: { padding: Spacing.md, paddingBottom: 100, gap: Spacing.md },
-  card: {
+  cardWrap: {
     height: 96,
+  },
+  card: {
+    height: '100%',
     flexDirection: 'row',
-    backgroundColor: Colors.surfaceContainerHigh,
-    borderRadius: 16,
-    overflow: 'hidden',
     borderWidth: 3,
     borderColor: '#111111',
     alignItems: 'center',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 6, height: 6 },
-    shadowRadius: 0,
   },
   colorStrip: { width: 6, height: '100%' },
   cardContent: { flex: 1, paddingHorizontal: Spacing.md },

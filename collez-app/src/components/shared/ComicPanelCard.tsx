@@ -1,11 +1,11 @@
 import React from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Colors, BorderRadius } from '../../config/theme';
 import { HalftoneOverlay } from './HalftoneOverlay';
 
 interface ComicPanelCardProps {
   children: React.ReactNode;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   backgroundColor?: string;
   dotColor?: string;
   halftoneOpacity?: number;

@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { TimetableEntry } from '../../models/timetable';
 import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
-import { GlassCard } from '../shared/GlassCard';
+import { ComicPanelCard } from '../shared/ComicPanelCard';
 
 interface TimetableCardProps {
   entries: TimetableEntry[];
@@ -35,7 +35,7 @@ export function TimetableCard({ entries, onPress }: TimetableCardProps) {
           scale.value = withTiming(1, { duration: 110 });
         }}
       >
-      <GlassCard style={styles.card} variant="cool">
+      <ComicPanelCard style={styles.card} dotColor={Colors.primaryContainer} halftoneOpacity={0.08} padding={14}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Today's Timetable</Text>
           <MaterialIcons name="calendar-month" size={18} color={Colors.primary} />
@@ -57,7 +57,7 @@ export function TimetableCard({ entries, onPress }: TimetableCardProps) {
             ))}
           </View>
         )}
-      </GlassCard>
+      </ComicPanelCard>
       </Pressable>
     </Animated.View>
   );

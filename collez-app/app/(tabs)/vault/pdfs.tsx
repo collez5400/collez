@@ -22,6 +22,8 @@ import { PdfFile, PdfFolderType, PdfSortOption } from '../../../src/models/pdf';
 import { useVaultStore } from '../../../src/store/vaultStore';
 import { ErrorState } from '../../../src/components/shared/ErrorState';
 import { TopAppBar } from '../../../src/components/shared/TopAppBar';
+import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBar';
+import { StickerChip } from '../../../src/components/shared/StickerChip';
 import { useAuthStore } from '../../../src/store/authStore';
 
 const SORT_OPTIONS: PdfSortOption[] = ['date', 'name', 'size'];
@@ -234,10 +236,12 @@ export default function PDFsScreen() {
           <Text style={styles.title}>VAULT</Text>
         </View>
         <View style={styles.storageWrap}>
-          <Text style={styles.storageLabel}>{formatBytes(totalStorageUsedBytes)} used</Text>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${usagePercent}%` }]} />
-          </View>
+          <ComicProgressBar
+            progress={Math.max(0, Math.min(1, usagePercent / 100))}
+            label={`${formatBytes(totalStorageUsedBytes)} used`}
+            valueLabel={`${Math.round(usagePercent)}%`}
+            compact
+          />
         </View>
       </Animated.View>
 
@@ -278,9 +282,7 @@ export default function PDFsScreen() {
             style={[styles.sortChip, sortBy === option && styles.sortChipActive]}
             onPress={() => setSortBy(option)}
           >
-            <Text style={[styles.sortChipText, sortBy === option && styles.sortChipTextActive]}>
-              Sort: {option}
-            </Text>
+            <StickerChip label={`Sort: ${option}`} tone={sortBy === option ? 'yellow' : 'dark'} />
           </TouchableOpacity>
         ))}
       </View>
@@ -536,16 +538,6 @@ const styles = StyleSheet.create({
     fontSize: Typography.size.sm,
     marginBottom: 6,
   },
-  progressTrack: {
-    height: 8,
-    borderRadius: BorderRadius.full,
-    backgroundColor: `${Colors.outline}33`,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.primary,
-  },
   searchBar: {
     marginHorizontal: Spacing.lg,
     marginTop: Spacing.sm,
@@ -594,16 +586,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   sortChip: {
-    borderWidth: 3,
-    borderColor: '#111111',
-    backgroundColor: Colors.surfaceLow,
     borderRadius: BorderRadius.full,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
   },
   sortChipActive: {
-    borderColor: '#111111',
-    backgroundColor: Colors.primaryContainer,
+    backgroundColor: Colors.transparent,
   },
   sortChipText: {
     color: Colors.onSurfaceVariant,

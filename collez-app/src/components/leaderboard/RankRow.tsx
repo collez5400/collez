@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Colors, Spacing, Typography } from '../../config/theme';
 import { LeaderboardEntry } from '../../store/leaderboardStore';
+import { StickerChip } from '../shared/StickerChip';
 
 interface RankRowProps {
   entry: LeaderboardEntry;
@@ -62,10 +63,7 @@ export function RankRow({ entry, isCurrentUser, showCollege = true, xpLabel = 'X
         ) : null}
       </View>
 
-      <View style={styles.rightInfo}>
-        <Text style={styles.xp}>{entry.xp}</Text>
-        <Text style={styles.xpLabel}>{xpLabel}</Text>
-      </View>
+      <StickerChip label={`${entry.xp} ${xpLabel}`} tone={isCurrentUser ? 'dark' : 'yellow'} style={styles.rightInfo} />
     </View>
   );
 }
@@ -140,17 +138,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   rightInfo: {
-    alignItems: 'flex-end',
-  },
-  xp: {
-    color: Colors.primary,
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.md,
-    fontWeight: '700',
-  },
-  xpLabel: {
-    color: Colors.onSurfaceVariant,
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.size.xs,
+    minWidth: 86,
+    alignItems: 'center',
   },
 });

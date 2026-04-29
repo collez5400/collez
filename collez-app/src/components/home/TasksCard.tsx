@@ -2,8 +2,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Task } from '../../models/task';
-import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
-import { GlassCard } from '../shared/GlassCard';
+import { Colors, Spacing, Typography } from '../../config/theme';
+import { ComicPanelCard } from '../shared/ComicPanelCard';
+import { ComicProgressBar } from '../shared/ComicProgressBar';
 
 interface TasksCardProps {
   tasks: Task[];
@@ -36,7 +37,7 @@ export function TasksCard({ tasks, onPress }: TasksCardProps) {
           scale.value = withTiming(1, { duration: 110 });
         }}
       >
-      <GlassCard style={styles.card}>
+      <ComicPanelCard style={styles.card} padding={14}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Tasks</Text>
           <Animated.View style={checkStyle}>
@@ -44,9 +45,7 @@ export function TasksCard({ tasks, onPress }: TasksCardProps) {
           </Animated.View>
         </View>
         <Text style={styles.meta}>{activeTasks.length} active task(s)</Text>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${Math.max(progress * 100, 6)}%` }]} />
-        </View>
+        <ComicProgressBar progress={Math.max(progress, 0.06)} compact />
         {previewTasks.length === 0 ? (
           <Text style={styles.empty}>You are all caught up.</Text>
         ) : (
@@ -58,7 +57,7 @@ export function TasksCard({ tasks, onPress }: TasksCardProps) {
             ))}
           </View>
         )}
-      </GlassCard>
+      </ComicPanelCard>
       </Pressable>
     </Animated.View>
   );
@@ -83,18 +82,6 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontFamily: Typography.fontFamily.body,
     fontSize: Typography.size.sm,
-  },
-  progressTrack: {
-    width: '100%',
-    height: 8,
-    backgroundColor: `${Colors.surfaceHigh}99`,
-    borderRadius: BorderRadius.full,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.primaryContainer,
   },
   previewList: {
     marginTop: 4,

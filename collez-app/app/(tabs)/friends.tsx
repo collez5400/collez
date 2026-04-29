@@ -12,8 +12,9 @@ import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { EmptyState } from '../../src/components/shared/EmptyState';
-import { GlassCard } from '../../src/components/shared/GlassCard';
 import { TopAppBar } from '../../src/components/shared/TopAppBar';
+import { ComicPanelCard } from '../../src/components/shared/ComicPanelCard';
+import { StickerChip } from '../../src/components/shared/StickerChip';
 import { Colors, Spacing, Typography } from '../../src/config/theme';
 import { useFriendStore } from '../../src/store/friendStore';
 import { useAuthStore } from '../../src/store/authStore';
@@ -99,7 +100,7 @@ export default function FriendsScreen() {
             <Text style={styles.sectionTitle}>Pending requests</Text>
             <View style={styles.sectionBody}>
               {pendingIncoming.map((req) => (
-                <GlassCard key={req.id} style={styles.requestCard}>
+                <ComicPanelCard key={req.id} style={styles.requestCard} padding={12}>
                   <Pressable
                     style={styles.row}
                     onPress={() => router.push(`/profile/${req.sender_id}`)}
@@ -143,7 +144,7 @@ export default function FriendsScreen() {
                       <Text style={styles.rejectText}>Reject</Text>
                     </Pressable>
                   </View>
-                </GlassCard>
+                </ComicPanelCard>
               ))}
             </View>
           </View>
@@ -213,7 +214,7 @@ export default function FriendsScreen() {
                 onPress={() => router.push(`/profile/${item.id}`)}
                 accessibilityLabel={`Open friend profile for ${item.username}`}
               >
-                <GlassCard style={styles.friendCard}>
+                <ComicPanelCard style={styles.friendCard} padding={12}>
                   {item.avatar_url ? (
                     <Image source={{ uri: item.avatar_url }} style={styles.avatar} contentFit="cover" />
                   ) : (
@@ -229,11 +230,8 @@ export default function FriendsScreen() {
                       @{item.username} · {item.college_name ?? 'No college'}
                     </Text>
                   </View>
-                  <View style={styles.badgePill}>
-                    <MaterialIcons name="local-fire-department" size={16} color={Colors.secondary} />
-                    <Text style={styles.badgeText}>{item.streak_count ?? 0}d</Text>
-                  </View>
-                </GlassCard>
+                  <StickerChip label={`${item.streak_count ?? 0}d`} tone="purple" style={styles.badgePill} />
+                </ComicPanelCard>
               </Pressable>
               <Pressable
                 style={styles.compareBtn}
@@ -373,21 +371,8 @@ const styles = StyleSheet.create({
     fontSize: Typography.size.sm,
   },
   badgePill: {
-    flexDirection: 'row',
+    minWidth: 56,
     alignItems: 'center',
-    gap: 4,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: 3,
-    borderColor: '#111111',
-    backgroundColor: Colors.surfaceContainerHigh,
-  },
-  badgeText: {
-    color: Colors.secondary,
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.size.sm,
-    fontWeight: '700',
   },
   actionRow: {
     flexDirection: 'row',

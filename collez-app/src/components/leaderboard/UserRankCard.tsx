@@ -3,6 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../../config/theme';
 import { LeaderboardType, UserRankSummary } from '../../store/leaderboardStore';
+import { ComicPanelCard } from '../shared/ComicPanelCard';
+import { StickerChip } from '../shared/StickerChip';
 
 interface UserRankCardProps {
   summary: UserRankSummary | null;
@@ -20,7 +22,7 @@ export function UserRankCard({ summary }: UserRankCardProps) {
   if (!summary) return null;
 
   return (
-    <View style={styles.container}>
+    <ComicPanelCard style={styles.container} padding={16}>
       <View style={styles.header}>
         <MaterialIcons name="military-tech" size={18} color={Colors.primary} />
         <Text style={styles.headerText}>Your {getTypeLabel(summary.type)} Rank</Text>
@@ -29,30 +31,20 @@ export function UserRankCard({ summary }: UserRankCardProps) {
       <View style={styles.body}>
         <Text style={styles.rankValue}>{summary.rank ? `#${summary.rank}` : 'Unranked'}</Text>
         <View style={styles.metaGroup}>
-          <Text style={styles.metaText}>
-            {summary.type === 'weekly' ? summary.weeklyXp ?? 0 : summary.xp}{' '}
-            {summary.type === 'weekly' ? 'Weekly XP' : 'XP'}
-          </Text>
+          <StickerChip
+            label={`${summary.type === 'weekly' ? summary.weeklyXp ?? 0 : summary.xp} ${summary.type === 'weekly' ? 'weekly xp' : 'xp'}`}
+            tone="yellow"
+          />
           {summary.collegeName ? <Text style={styles.metaText}>{summary.collegeName}</Text> : null}
         </View>
       </View>
-    </View>
+    </ComicPanelCard>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.surfaceHigh,
-    borderRadius: 16,
-    borderWidth: 3,
-    borderColor: '#111111',
-    padding: Spacing.md,
     gap: Spacing.sm,
-    shadowColor: '#110e05',
-    shadowOpacity: 1,
-    shadowOffset: { width: 4, height: 4 },
-    shadowRadius: 0,
-    elevation: 0,
   },
   header: {
     flexDirection: 'row',

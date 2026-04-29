@@ -115,11 +115,11 @@ Each phase includes:
 Last updated: Wednesday, Apr 29, 2026
 
 Overall:
-- Phase progress: **Phase 1 (Brand System) in progress (~67%)**
-- Completed (Phase 1): `ComicBrandShell` background grammar, Splash refactor to use it + striped loading feel, onboarding Step 1/2/3 story-beat layout updates, and Login wrapped in the same brand shell.
-- Remaining (Phase 1): replace Step 1 hero placeholder (“HERO PANEL”) with the real illustration art, tune rewards starburst + floating XP “prop” motion, and extract podium primitives into reusable components.
+- Phase progress: **Phase 2 (Design System) complete**
+- Completed (Phase 1): `ComicBrandShell` grammar, splash/login/onboarding rebuild, Step 1 comic illustration, Step 2 reusable podium primitives, and Step 3 reward explosion + floating XP prop tuning.
+- Completed (Phase 2): reusable `ComicPanelCard`, `GradientButton` physical gloss behavior, `StickerChip` badge system, `ComicProgressBar` + `ComicProgressRing`, and navigation primitives (`TopAppBar`, `BottomNavBar`) rolled into onboarding + home + friends + rankings + vault surfaces.
 
-Next phase to ship: **PHASE 2 — Design System**
+Next phase to ship: **PHASE 3 — Core Screens (Academics)**
 
 ---
 
@@ -175,9 +175,7 @@ Done:
   - Beat 3: rewards explosion spotlight with XP “props” + big CTA
 
 Left:
-- Swap the Beat 1 placeholder hero copy (“HERO PANEL”) for the actual comic illustration art.
-- Fine-tune starburst intensity + floating XP prop motion to match reference “explosion” density.
-- Extract podium primitives (Beat 2) into a reusable component set (Phase 2 dependency).
+- None. Phase 1 implementation checklist is complete.
 
 ---
 
@@ -229,6 +227,21 @@ Once primitives are correct, every feature can be implemented as “comic compos
 
 ### 7) ⚙️ Implementation priority
 **P0.** All later phases depend on these primitives.
+
+### ✅ Phase 2 Completion Snapshot
+Done:
+- Card system: shared comic panel primitive with halftone + thick ink + corner accent (`ComicPanelCard`) is implemented and used on key surfaces.
+- Button system: shared physical button behavior with chunky border, hard shadow, press translation, and glossy rim/highlight (`GradientButton`) is implemented.
+- Chip/badge system: reusable sticker chip primitive (`StickerChip`) is implemented and used for XP/state badges across onboarding, leaderboard, and social/vault views.
+- Progress widgets:
+  - Stripe-energy horizontal progress primitive (`ComicProgressBar`) implemented and reused for onboarding and XP/task progress.
+  - Circular progress primitive (`ComicProgressRing`) implemented and reused for ranking and mission completion widgets.
+- Navigation:
+  - Top bar updated to yellow-dominant comic framing with avatar/brand/XP chip.
+  - Bottom nav updated to tile-like comic tabs with active yellow tile and heavy ink/shadow treatment.
+
+Left:
+- None in Phase 2 scope. Remaining work shifts to Phase 3+ feature-specific screen rebuilds.
 
 ---
 

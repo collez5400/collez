@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { GradientButton } from '../shared/GradientButton';
 import { BorderRadius, Colors, Spacing, Typography } from '../../config/theme';
+import { StickerChip } from '../shared/StickerChip';
 
 export interface HomeEvent {
   id: string;
@@ -42,7 +43,7 @@ export function EventBanner({ event, onJoin }: EventBannerProps) {
   const content = (
     <View style={styles.overlay}>
       <Animated.View style={[styles.liveBadge, liveStyle]}>
-        <Text style={styles.liveText}>LIVE</Text>
+        <StickerChip label="Live" tone="danger" />
       </Animated.View>
       <Text style={styles.title}>{event.title}</Text>
       <GradientButton
@@ -99,22 +100,6 @@ const styles = StyleSheet.create({
   },
   liveBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.error,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: BorderRadius.full,
-    borderWidth: 2,
-    borderColor: '#111111',
-    shadowColor: '#111111',
-    shadowOpacity: 1,
-    shadowOffset: { width: 2, height: 2 },
-    shadowRadius: 0,
-  },
-  liveText: {
-    color: '#111111',
-    fontFamily: Typography.fontFamily.heading,
-    fontWeight: '700',
-    fontSize: Typography.size.xs,
   },
   title: {
     color: Colors.onSurface,

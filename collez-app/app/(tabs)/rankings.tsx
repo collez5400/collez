@@ -9,6 +9,7 @@ import { UserRankCard } from '../../src/components/leaderboard/UserRankCard';
 import { EmptyState } from '../../src/components/shared/EmptyState';
 import { ErrorState } from '../../src/components/shared/ErrorState';
 import { TopAppBar } from '../../src/components/shared/TopAppBar';
+import { ComicPanelCard } from '../../src/components/shared/ComicPanelCard';
 import { LeaderboardEntry, LeaderboardType, useLeaderboardStore } from '../../src/store/leaderboardStore';
 import { useAuthStore } from '../../src/store/authStore';
 import { useEventStore } from '../../src/store/eventStore';
@@ -156,7 +157,7 @@ export default function RankingsScreen() {
   );
 
   const listHeader = (
-    <View style={styles.headerContainer}>
+    <ComicPanelCard style={styles.headerContainer} padding={16}>
       <Text style={styles.title}>Leaderboard</Text>
       <Pressable style={styles.hiddenTrigger} onPress={triggerLeaderboardHiddenAction}>
         <MaterialIcons name="emoji-objects" size={14} color={Colors.onSurfaceVariant} />
@@ -170,7 +171,7 @@ export default function RankingsScreen() {
       </View>
       <UserRankCard summary={summary} />
       {error ? <ErrorState message={error} onRetry={onRefresh} compact /> : null}
-    </View>
+    </ComicPanelCard>
   );
 
   const listFooter = !hasMore ? (
@@ -226,6 +227,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingTop: Spacing.md,
     gap: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   title: {
     color: Colors.primaryContainer,

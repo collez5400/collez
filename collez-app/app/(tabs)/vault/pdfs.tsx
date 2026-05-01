@@ -16,7 +16,6 @@ import { FlashList } from '@shopify/flash-list';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
 import { BorderRadius, Colors, Spacing, Typography } from '../../../src/config/theme';
-import { GlassCard } from '../../../src/components/shared/GlassCard';
 import { GradientButton } from '../../../src/components/shared/GradientButton';
 import { PdfFile, PdfFolderType, PdfSortOption } from '../../../src/models/pdf';
 import { useVaultStore } from '../../../src/store/vaultStore';
@@ -26,6 +25,7 @@ import { ComicProgressBar } from '../../../src/components/shared/ComicProgressBa
 import { StickerChip } from '../../../src/components/shared/StickerChip';
 import { useAuthStore } from '../../../src/store/authStore';
 import { HardShadowBox } from '../../../src/components/shared/HardShadowBox';
+import { ComicPanelCard } from '../../../src/components/shared/ComicPanelCard';
 
 const SORT_OPTIONS: PdfSortOption[] = ['date', 'name', 'size'];
 const FOLDER_TYPES: PdfFolderType[] = ['semester', 'subject', 'pyq', 'books', 'notes', 'important', 'custom'];
@@ -249,6 +249,17 @@ export default function PDFsScreen() {
       </Animated.View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.pageContent}>
+      <View style={styles.quickActionsRow}>
+        <TouchableOpacity style={[styles.quickActionCard, styles.quickActionPrimary]} onPress={() => void onUpload()}>
+          <MaterialIcons name="upload-file" size={18} color="#111111" />
+          <Text style={styles.quickActionPrimaryText}>Quick Upload</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.quickActionCard} onPress={() => setFolderModalVisible(true)}>
+          <MaterialIcons name="inventory-2" size={18} color={Colors.primary} />
+          <Text style={styles.quickActionText}>Add Subject</Text>
+        </TouchableOpacity>
+      </View>
+
       <Animated.View entering={FadeInUp.delay(50).duration(260)} style={styles.searchBar}>
         <MaterialIcons name="search" size={20} color={Colors.outline} />
         <TextInput
@@ -312,7 +323,7 @@ export default function PDFsScreen() {
       ) : null}
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Folders</Text>
+        <Text style={styles.sectionTitle}>Subject Collectibles</Text>
         <TouchableOpacity onPress={() => setFolderModalVisible(true)}>
           <MaterialIcons name="create-new-folder" size={20} color={Colors.primary} />
         </TouchableOpacity>
@@ -321,23 +332,24 @@ export default function PDFsScreen() {
       <FlatList
         scrollEnabled={false}
         data={folderItems}
-        horizontal
-        showsHorizontalScrollIndicator={false}
+        numColumns={2}
         contentContainerStyle={styles.folderList}
         keyExtractor={(item) => (item.kind === 'new' ? 'new-folder-card' : item.folder.id)}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           if (item.kind === 'new') {
             return (
               <TouchableOpacity style={styles.newFolderCard} onPress={() => setFolderModalVisible(true)}>
                 <MaterialIcons name="add" size={24} color={Colors.primary} />
-                <Text style={styles.newFolderText}>New Folder</Text>
+                <Text style={styles.newFolderText}>Create Subject</Text>
               </TouchableOpacity>
             );
           }
 
           const folder = item.folder;
           const iconName = getFolderIcon(folder.folderType);
+          const folderCount = files.filter((file) => file.folderId === folder.id).length;
           return (
+            <Animated.View entering={FadeInUp.delay(80 + index * 35).duration(260)} style={styles.collectibleWrap}>
             <HardShadowBox shadowOffset={6} borderRadius={12}>
               <TouchableOpacity
                 style={styles.folderCard}
@@ -350,13 +362,18 @@ export default function PDFsScreen() {
                   ])
                 }
               >
+                <View style={styles.collectibleSparkle} />
                 <MaterialIcons name={iconName} size={24} color={Colors.primary} />
                 <Text numberOfLines={1} style={styles.folderName}>
                   {folder.name}
                 </Text>
-                <Text style={styles.folderMeta}>{folder.folderType.toUpperCase()}</Text>
+                <View style={styles.folderFooter}>
+                  <Text style={styles.folderMeta}>{folder.folderType.toUpperCase()}</Text>
+                  <StickerChip label={`${folderCount} items`} tone="yellow" />
+                </View>
               </TouchableOpacity>
             </HardShadowBox>
+            </Animated.View>
           );
         }}
         ListEmptyComponent={
@@ -367,7 +384,7 @@ export default function PDFsScreen() {
       />
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Documents</Text>
+        <Text style={styles.sectionTitle}>Vault Documents</Text>
       </View>
 
       <FlashList
@@ -376,7 +393,7 @@ export default function PDFsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.fileList}
         renderItem={({ item }) => (
-          <GlassCard intensity={20} style={styles.fileCard}>
+          <ComicPanelCard style={styles.fileCard} dotColor={Colors.primaryContainer} halftoneOpacity={0.08}>
             <TouchableOpacity style={styles.fileMain} onPress={() => void openFile(item.id)}>
               <MaterialIcons name="picture-as-pdf" size={24} color={Colors.error} />
               <View style={styles.fileTextWrap}>
@@ -403,7 +420,7 @@ export default function PDFsScreen() {
                 <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
               </TouchableOpacity>
             </View>
-          </GlassCard>
+          </ComicPanelCard>
         )}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
@@ -415,7 +432,7 @@ export default function PDFsScreen() {
       />
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Recent</Text>
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
       </View>
 
       <FlashList
@@ -426,13 +443,15 @@ export default function PDFsScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.recentList}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.recentCard} onPress={() => void openFile(item.id)}>
+          <ComicPanelCard style={styles.recentCard} dotColor={Colors.secondaryContainer} halftoneOpacity={0.06}>
+            <TouchableOpacity style={styles.recentCardButton} onPress={() => void openFile(item.id)}>
             <MaterialIcons name="description" size={20} color={Colors.primary} />
             <Text numberOfLines={1} style={styles.recentName}>
               {item.filename}
             </Text>
             <Text style={styles.recentMeta}>{formatBytes(item.sizeBytes)}</Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </ComicPanelCard>
         )}
         ListEmptyComponent={
           <View style={styles.emptyInline}>
@@ -564,6 +583,40 @@ const styles = StyleSheet.create({
   pageContent: {
     paddingBottom: 120,
   },
+  quickActionsRow: {
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.sm,
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  quickActionCard: {
+    flex: 1,
+    borderRadius: BorderRadius.md,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHigh,
+    paddingVertical: 12,
+    paddingHorizontal: Spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  quickActionPrimary: {
+    backgroundColor: Colors.primaryContainer,
+  },
+  quickActionText: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.button,
+    fontSize: Typography.size.xs,
+    textTransform: 'uppercase',
+  },
+  quickActionPrimaryText: {
+    color: '#111111',
+    fontFamily: Typography.fontFamily.button,
+    fontSize: Typography.size.xs,
+    textTransform: 'uppercase',
+  },
   searchInput: {
     flex: 1,
     marginLeft: Spacing.sm,
@@ -673,17 +726,19 @@ const styles = StyleSheet.create({
   folderList: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.sm,
+    gap: Spacing.md,
   },
+  collectibleWrap: { width: '48%' },
   newFolderCard: {
-    width: 118,
-    height: 96,
+    width: '48%',
+    minHeight: 112,
     borderRadius: BorderRadius.md,
     borderWidth: 3,
     borderColor: '#111111',
     backgroundColor: Colors.surfaceContainerHigh,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   newFolderText: {
     marginTop: 6,
@@ -693,15 +748,29 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   folderCard: {
-    width: 132,
-    height: 96,
+    width: '100%',
+    minHeight: 112,
     borderRadius: 12,
     backgroundColor: Colors.primaryContainer,
     borderWidth: 3,
     borderColor: '#110e05',
     padding: Spacing.sm,
-    marginRight: Spacing.md,
+    marginBottom: Spacing.sm,
     justifyContent: 'space-between',
+    overflow: 'hidden',
+  },
+  collectibleSparkle: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    borderRadius: 999,
+    backgroundColor: '#ffffff33',
+    top: -35,
+    right: -20,
+  },
+  folderFooter: {
+    gap: 6,
+    alignItems: 'flex-start',
   },
   folderName: {
     color: '#000000',
@@ -761,13 +830,13 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   recentCard: {
-    width: 190,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceLow,
+    width: 200,
     borderWidth: 3,
     borderColor: '#111111',
-    padding: Spacing.sm,
     marginRight: Spacing.md,
+  },
+  recentCardButton: {
+    gap: 4,
   },
   recentName: {
     marginTop: 4,

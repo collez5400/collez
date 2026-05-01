@@ -67,6 +67,7 @@ export default function VaultLayout() {
       }}
       tabBar={(props) => <VaultTabBar {...props} />}
     >
+      <TopTabs.Screen name="attendance" options={{ title: 'Attendance' }} />
       <TopTabs.Screen name="timetable" options={{ title: 'Timetable' }} />
       <TopTabs.Screen name="tasks" options={{ title: 'Tasks & Notes' }} />
       <TopTabs.Screen name="pdfs" options={{ title: 'PDFs' }} />

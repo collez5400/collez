@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal, TextInput } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist';
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { DayOfWeek, TimetableEntry } from '../../../src/models/timetable';
 import { useTimetableStore } from '../../../src/store/timetableStore';
 import { AddSubjectSheet } from '../../../src/components/timetable/AddSubjectSheet';
@@ -21,6 +22,44 @@ const DAYS = [
   { id: DayOfWeek.Friday, label: 'Fri' },
   { id: DayOfWeek.Saturday, label: 'Sat' },
 ];
+
+const toMinutes = (value: string) => {
+  const [hours, mins] = value.split(':').map(Number);
+  return hours * 60 + mins;
+};
+
+function PulseBadge({
+  label,
+  backgroundColor,
+  pulse,
+}: {
+  label: string;
+  backgroundColor: string;
+  pulse: boolean;
+}) {
+  const glow = useSharedValue(pulse ? 1 : 0.55);
+
+  useEffect(() => {
+    if (pulse) {
+      glow.value = withRepeat(withTiming(1, { duration: 850 }), -1, true);
+      return;
+    }
+    glow.value = withTiming(0.55, { duration: 160 });
+  }, [glow, pulse]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: glow.value,
+    transform: [{ scale: 0.96 + glow.value * 0.08 }],
+  }));
+
+  return (
+    <Animated.View style={animStyle}>
+      <View style={[styles.stateBadge, { backgroundColor }]}>
+        <Text style={styles.stateBadgeText}>{label}</Text>
+      </View>
+    </Animated.View>
+  );
+}
 
 export default function TimetableScreen() {
   const { entries, selectedDay, setSelectedDay, fetchEntries, addEntry, updateEntry, deleteEntry, reorderEntries, duplicateDay, resetSemester, generateWeekSlots } = useTimetableStore();
@@ -43,6 +82,10 @@ export default function TimetableScreen() {
 
   const dayEntries = entries[selectedDay] || [];
   const hasAnyEntries = useMemo(() => Object.values(entries).some((list) => list.length > 0), [entries]);
+  const currentMinutes = useMemo(() => {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }, [dayEntries.length]);
 
   const handleSave = async (entry: Partial<TimetableEntry>) => {
     if (editingEntry) {
@@ -85,6 +128,15 @@ export default function TimetableScreen() {
   };
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<TimetableEntry>) => {
+    const startMinutes = toMinutes(item.start_time);
+    const endMinutes = toMinutes(item.end_time);
+    const isPast = endMinutes < currentMinutes;
+    const isUpNext = startMinutes >= currentMinutes && startMinutes - currentMinutes <= 45;
+    const isNow = startMinutes <= currentMinutes && endMinutes >= currentMinutes;
+    const cardVariant = isNow ? styles.cardNow : isUpNext ? styles.cardUpNext : isPast ? styles.cardPast : styles.cardFuture;
+    const badgeLabel = isNow ? 'LIVE' : isUpNext ? 'UP NEXT' : isPast ? 'DONE' : 'TODAY';
+    const badgeTone = isNow || isUpNext ? Colors.primaryContainer : isPast ? Colors.surfaceContainerHighest : Colors.secondaryContainer;
+
     return (
       <TouchableOpacity
         style={[styles.cardWrap, { opacity: isActive ? 0.9 : 1 }]}
@@ -93,14 +145,17 @@ export default function TimetableScreen() {
         delayLongPress={200}
       >
         <ComicPanelCard
-          style={[styles.card, { backgroundColor: isActive ? Colors.surfaceHigh : Colors.surface, borderColor: `${item.color}55` }]}
+          style={[styles.card, cardVariant, { backgroundColor: isActive ? Colors.surfaceHigh : Colors.surface, borderColor: `${item.color}55` }]}
           padding={0}
           dotColor={item.color}
           halftoneOpacity={0.08}
         >
           <View style={[styles.colorStrip, { backgroundColor: item.color as string }]} />
           <View style={styles.cardContent}>
-            <Text style={styles.subject}>{item.subject}</Text>
+            <View style={styles.cardTitleRow}>
+              <Text style={styles.subject}>{item.subject}</Text>
+              <PulseBadge label={badgeLabel} backgroundColor={badgeTone} pulse={isNow || isUpNext} />
+            </View>
             <View style={styles.row}>
               <Text style={styles.time}>{item.start_time} - {item.end_time}</Text>
               {item.room && <Text style={styles.room}> • {item.room}</Text>}
@@ -132,6 +187,24 @@ export default function TimetableScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      <ComicPanelCard style={styles.heroPanel} dotColor={Colors.primaryContainer} halftoneOpacity={0.12}>
+        <Text style={styles.heroTitle}>CLASS MISSIONS</Text>
+        <Text style={styles.heroSubTitle}>Pick a day chip, track your beat, and tap any card to edit.</Text>
+        <View style={styles.heroButtons}>
+          <TouchableOpacity
+            style={[styles.heroButton, styles.heroButtonPrimary]}
+            onPress={() => { setEditingEntry(null); setSheetVisible(true); }}
+          >
+            <MaterialIcons name="add-circle-outline" size={16} color="#111111" />
+            <Text style={styles.heroButtonPrimaryText}>Add Subject</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.heroButton} onPress={() => setIsGeneratorOpen(true)}>
+            <MaterialIcons name="event-available" size={16} color={Colors.primary} />
+            <Text style={styles.heroButtonText}>Add Event Slot</Text>
+          </TouchableOpacity>
+        </View>
+      </ComicPanelCard>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.daysScroll}>
         {DAYS.map(day => (
@@ -239,7 +312,59 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 3, height: 3 },
     shadowRadius: 0,
   },
-  daysScroll: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, gap: Spacing.xs, maxHeight: 44 },
+  heroPanel: {
+    marginHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
+    borderWidth: 3,
+    borderColor: '#111111',
+    gap: Spacing.xs,
+  },
+  heroTitle: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.heading,
+    fontSize: Typography.size.md,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  heroSubTitle: {
+    color: Colors.onSurfaceVariant,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.sm,
+  },
+  heroButtons: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: 4,
+  },
+  heroButton: {
+    flex: 1,
+    borderRadius: BorderRadius.md,
+    borderWidth: 3,
+    borderColor: '#111111',
+    backgroundColor: Colors.surfaceContainerHighest,
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  heroButtonPrimary: { backgroundColor: Colors.primaryContainer },
+  heroButtonText: {
+    color: Colors.primary,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.xs,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  heroButtonPrimaryText: {
+    color: '#111111',
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.size.xs,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  daysScroll: { paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm, gap: Spacing.xs, maxHeight: 50 },
   dayPill: {
     paddingHorizontal: 20,
     paddingVertical: 8,
@@ -252,7 +377,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 3, height: 3 },
     shadowRadius: 0,
   },
-  dayPillActive: { backgroundColor: Colors.primaryContainer, borderColor: '#111111' },
+  dayPillActive: { backgroundColor: Colors.primaryContainer, borderColor: '#111111', shadowOffset: { width: 5, height: 5 } },
   dayLabel: { fontSize: 13, fontFamily: Typography.fontFamily.body, color: Colors.onSurfaceVariant, fontWeight: '600' },
   dayLabelActive: { color: Colors.onPrimary, fontFamily: Typography.fontFamily.button, textTransform: 'uppercase' },
   list: { padding: Spacing.md, paddingBottom: 100, gap: Spacing.md },
@@ -266,14 +391,34 @@ const styles = StyleSheet.create({
     borderColor: '#111111',
     alignItems: 'center',
   },
+  cardPast: { opacity: 0.8 },
+  cardUpNext: { backgroundColor: `${Colors.primaryContainer}22` },
+  cardNow: { backgroundColor: `${Colors.primaryContainer}3d` },
+  cardFuture: { backgroundColor: Colors.surface },
   colorStrip: { width: 6, height: '100%' },
   cardContent: { flex: 1, paddingHorizontal: Spacing.md },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.xs },
   subject: {
     fontSize: 20,
     fontFamily: Typography.fontFamily.heading,
     fontWeight: '700',
     color: Colors.primary,
     marginBottom: 4,
+    textTransform: 'uppercase',
+    flex: 1,
+  },
+  stateBadge: {
+    borderWidth: 2,
+    borderColor: '#111111',
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  stateBadgeText: {
+    color: '#111111',
+    fontSize: 10,
+    fontFamily: Typography.fontFamily.button,
+    fontWeight: '800',
     textTransform: 'uppercase',
   },
   row: { flexDirection: 'row', alignItems: 'center' },
